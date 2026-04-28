@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product</title>
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/media.css}">
+  <link rel="stylesheet" th:href="@{/css/misc.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+</head>
+<body>
+  <div id="navbar-root"></div>
+  
+<main class="page narrow">
+  <a class="back-link" th:href="@{/products}">← Back to Inventory</a>
+  <section class="page-header">
+    <h1 class="page-title">Edit Product</h1>
+    <p class="page-subtitle">Update product information and image.</p>
+  </section>
+  <form id="product-form" class="form-layout">
+    <section class="card pad">
+      <label class="label">Product Image</label>
+      <div class="image-picker">
+        <div class="image-preview" id="image-preview"><span class="muted">No image</span></div>
+        <div>
+          <div class="flex-gap-sm flex-wrap mb-1">
+            <button type="button" class="btn btn-secondary" id="upload-trigger">Upload Image</button>
+            <button type="button" class="btn btn-danger hidden" id="remove-image-btn">Remove</button>
+          </div>
+          <p class="help">PNG, JPG, WEBP — max 10MB</p>
+          <input type="file" id="image-input" accept="image/*" class="hidden" />
+        </div>
+      </div>
+    </section>
+
+    <details class="details-section" open>
+      <summary>Basic Info</summary>
+      <div class="details-body"><div class="form-grid">
+        <div><label class="label">Product Name *</label><input class="input" name="name" required /></div>
+        <div><label class="label">Brand *</label><input class="input" name="brand" required /></div>
+        <div><label class="label">SKU</label><input class="input" name="sku" /></div>
+        <div><label class="label">Barcode</label><input class="input" name="barcode" /></div>
+        <div><label class="label">Category *</label><select class="select" name="category" id="form-category" required></select></div>
+        <div><label class="label">Status</label><select class="select" name="status" id="form-status"></select></div>
+        <div class="col-span-2"><label class="label">Description</label><textarea class="textarea" name="description"></textarea></div>
+        <div class="col-span-2"><label class="label">Tags</label><input class="input" name="tags" placeholder="moisturizing, vegan, anti-aging" /></div>
+      </div></div>
+    </details>
+
+    <details class="details-section">
+      <summary>Pricing & Stock</summary>
+      <div class="details-body"><div class="form-grid">
+        <div><label class="label">Selling Price *</label><input class="input" type="number" step="0.01" name="price" required /></div>
+        <div><label class="label">Cost Price</label><input class="input" type="number" step="0.01" name="costPrice" /></div>
+        <div><label class="label">Stock Quantity *</label><input class="input" type="number" min="0" name="stockQuantity" required /></div>
+        <div><label class="label">Low Stock Threshold *</label><input class="input" type="number" min="0" name="lowStockThreshold" value="10" required /></div>
+        <div><label class="label">Unit</label><input class="input" name="unit" placeholder="pcs, ml, g" /></div>
+        <div><label class="label">Volume / Weight</label><input class="input" name="volume" placeholder="200ml, 50g" /></div>
+      </div></div>
+    </details>
+
+    <details class="details-section">
+      <summary>Product Details</summary>
+      <div class="details-body"><div class="form-grid">
+        <div><label class="label">Shade / Color</label><input class="input" name="shade" /></div>
+        <div><label class="label">Skin Type</label><input class="input" name="skinType" /></div>
+        <div class="col-span-2"><label class="label">Country of Origin</label><input class="input" name="countryOfOrigin" /></div>
+      </div></div>
+    </details>
+
+    <details class="details-section">
+      <summary>Ingredients & Usage</summary>
+      <div class="details-body"><div class="form-grid">
+        <div class="col-span-2"><label class="label">Ingredients</label><textarea class="textarea" name="ingredients"></textarea></div>
+        <div class="col-span-2"><label class="label">Usage Instructions</label><textarea class="textarea" name="usageInstructions"></textarea></div>
+      </div></div>
+    </details>
+
+    <details class="details-section" open>
+      <summary>Supplier / Vendor</summary>
+      <div class="details-body"><div class="form-grid">
+        <div class="col-span-2">
+          <label class="label">Supplier user id</label>
+          <input class="input" name="supplierId" type="number" min="1"
+                 title="user_id in users / supplier_profiles" />
+        </div>
+        <div><label class="label">Supplier Name</label><input class="input" name="supplierName" /></div>
+        <div><label class="label">Supplier Contact</label><input class="input" name="supplierContact" /></div>
+        <div><label class="label">Supplier Email</label><input class="input" type="email" name="supplierEmail" /></div>
+        <div><label class="label">Supplier Address</label><input class="input" name="supplierAddress" /></div>
+      </div></div>
+    </details>
+
+    <details class="details-section">
+      <summary>Dates & Origin</summary>
+      <div class="details-body"><div class="form-grid">
+        <div><label class="label">Manufacture Date</label><input class="input" type="date" name="manufactureDate" /></div>
+        <div><label class="label">Expiry Date</label><input class="input" type="date" name="expiryDate" /></div>
+      </div></div>
+    </details>
+
+    <div class="flex-gap-sm justify-end flex-wrap">
+      <a class="btn btn-secondary" th:href="@{/products}">Cancel</a>
+      <button class="btn btn-primary" type="submit" id="submit-btn">Save Product</button>
+    </div>
+  </form>
+</main>
+
+  <script type="module" th:src="@{/assets/js/pages/edit-product.js}"></script>
+</body>
+</html>

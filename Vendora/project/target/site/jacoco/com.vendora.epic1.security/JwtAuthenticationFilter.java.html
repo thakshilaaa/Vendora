@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.security</a> &gt; <span class="el_source">JwtAuthenticationFilter.java</span></div><h1>JwtAuthenticationFilter.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final CustomUserDetailsService userDetailsService;
+
+<span class="fc" id="L23">    public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {</span>
+<span class="fc" id="L24">        this.jwtService = jwtService;</span>
+<span class="fc" id="L25">        this.userDetailsService = userDetailsService;</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
+
+<span class="fc" id="L33">        String token = parseJwt(request);</span>
+<span class="pc bpc" id="L34" title="3 of 4 branches missed.">        if (token != null &amp;&amp; jwtService.validateToken(token)) {</span>
+<span class="nc" id="L35">            String username = jwtService.extractUsername(token);</span>
+<span class="nc" id="L36">            var userDetails = userDetailsService.loadUserByUsername(username);</span>
+
+<span class="nc" id="L38">            var authentication = new UsernamePasswordAuthenticationToken(</span>
+<span class="nc" id="L39">                    userDetails, null, userDetails.getAuthorities());</span>
+<span class="nc" id="L40">            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+
+<span class="nc" id="L42">            SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+        }
+
+<span class="fc" id="L45">        filterChain.doFilter(request, response);</span>
+<span class="fc" id="L46">    }</span>
+
+    private String parseJwt(HttpServletRequest request) {
+<span class="fc" id="L49">        String headerAuth = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L50" title="3 of 4 branches missed.">        if (StringUtils.hasText(headerAuth) &amp;&amp; headerAuth.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="nc" id="L51">            return headerAuth.substring(7);</span>
+        }
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (request.getCookies() != null) {</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            for (Cookie c : request.getCookies()) {</span>
+<span class="nc bnc" id="L55" title="All 4 branches missed.">                if (&quot;vendoraToken&quot;.equals(c.getName()) &amp;&amp; StringUtils.hasText(c.getValue())) {</span>
+<span class="nc" id="L56">                    return c.getValue();</span>
+                }
+            }
+        }
+<span class="fc" id="L60">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

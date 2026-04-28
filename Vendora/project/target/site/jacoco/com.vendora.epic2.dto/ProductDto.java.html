@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic2.dto</a> &gt; <span class="el_source">ProductDto.java</span></div><h1>ProductDto.java</h1><pre class="source lang-java linenums">package com.vendora.epic2.dto;
+
+import com.vendora.epic2.model.Product;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+<span class="nc" id="L10">public class ProductDto {</span>
+
+    /**
+     * Response DTO - used for list and detail views (image as Base64 string)
+     */
+    @Getter
+<span class="nc" id="L16">    @Setter</span>
+<span class="nc" id="L17">    @NoArgsConstructor</span>
+<span class="nc" id="L18">    @AllArgsConstructor</span>
+<span class="nc" id="L19">    @Builder</span>
+    public static class Response {
+<span class="nc" id="L21">        private Long id;</span>
+<span class="nc" id="L22">        private Long supplierId;</span>
+<span class="nc" id="L23">        private String name;</span>
+<span class="nc" id="L24">        private String brand;</span>
+<span class="nc" id="L25">        private String sku;</span>
+<span class="nc" id="L26">        private String barcode;</span>
+<span class="nc" id="L27">        private Product.Category category;</span>
+<span class="nc" id="L28">        private String description;</span>
+<span class="nc" id="L29">        private String ingredients;</span>
+<span class="nc" id="L30">        private String usageInstructions;</span>
+<span class="nc" id="L31">        private BigDecimal price;</span>
+<span class="nc" id="L32">        private BigDecimal costPrice;</span>
+<span class="nc" id="L33">        private Integer stockQuantity;</span>
+<span class="nc" id="L34">        private Integer lowStockThreshold;</span>
+<span class="nc" id="L35">        private boolean lowStock;</span>
+<span class="nc" id="L36">        private String unit;</span>
+<span class="nc" id="L37">        private String shade;</span>
+<span class="nc" id="L38">        private String skinType;</span>
+<span class="nc" id="L39">        private String volume;</span>
+<span class="nc" id="L40">        private String supplierName;</span>
+<span class="nc" id="L41">        private String supplierContact;</span>
+<span class="nc" id="L42">        private String supplierEmail;</span>
+<span class="nc" id="L43">        private String supplierAddress;</span>
+<span class="nc" id="L44">        private LocalDate manufactureDate;</span>
+<span class="nc" id="L45">        private LocalDate expiryDate;</span>
+<span class="nc" id="L46">        private String imageBase64;</span>
+<span class="nc" id="L47">        private String imageContentType;</span>
+<span class="nc" id="L48">        private Product.ProductStatus status;</span>
+<span class="nc" id="L49">        private String countryOfOrigin;</span>
+<span class="nc" id="L50">        private String tags;</span>
+<span class="nc" id="L51">        private LocalDateTime createdAt;</span>
+<span class="nc" id="L52">        private LocalDateTime updatedAt;</span>
+    }
+
+    /**
+     * Summary DTO for list view (no image blob - performance)
+     */
+    @Getter
+<span class="nc" id="L59">    @Setter</span>
+<span class="nc" id="L60">    @NoArgsConstructor</span>
+<span class="nc" id="L61">    @AllArgsConstructor</span>
+<span class="nc" id="L62">    @Builder</span>
+    public static class Summary {
+<span class="nc" id="L64">        private Long id;</span>
+<span class="nc" id="L65">        private Long supplierId;</span>
+<span class="nc" id="L66">        private String name;</span>
+<span class="nc" id="L67">        private String brand;</span>
+<span class="nc" id="L68">        private String sku;</span>
+<span class="nc" id="L69">        private String barcode;</span>
+<span class="nc" id="L70">        private Product.Category category;</span>
+<span class="nc" id="L71">        private BigDecimal price;</span>
+<span class="nc" id="L72">        private Integer stockQuantity;</span>
+<span class="nc" id="L73">        private Integer lowStockThreshold;</span>
+<span class="nc" id="L74">        private boolean lowStock;</span>
+<span class="nc" id="L75">        private String unit;</span>
+<span class="nc" id="L76">        private String shade;</span>
+<span class="nc" id="L77">        private Product.ProductStatus status;</span>
+<span class="nc" id="L78">        private String imageBase64;   // thumbnail</span>
+<span class="nc" id="L79">        private String imageContentType;</span>
+<span class="nc" id="L80">        private LocalDateTime createdAt;</span>
+    }
+
+    /**
+     * Stock update DTO
+     */
+    @Getter
+<span class="nc" id="L87">    @Setter</span>
+<span class="nc" id="L88">    @NoArgsConstructor</span>
+<span class="nc" id="L89">    @AllArgsConstructor</span>
+    public static class StockUpdate {
+<span class="nc" id="L91">        private Integer quantity;</span>
+<span class="nc" id="L92">        private String operation; // &quot;ADD&quot; | &quot;SUBTRACT&quot; | &quot;SET&quot;</span>
+    }
+
+    /**
+     * Dashboard stats DTO
+     */
+    @Getter
+<span class="nc" id="L99">    @Setter</span>
+<span class="nc" id="L100">    @NoArgsConstructor</span>
+<span class="nc" id="L101">    @AllArgsConstructor</span>
+<span class="nc" id="L102">    @Builder</span>
+    public static class DashboardStats {
+<span class="nc" id="L104">        private long totalProducts;</span>
+<span class="nc" id="L105">        private long activeProducts;</span>
+<span class="nc" id="L106">        private long lowStockCount;</span>
+<span class="nc" id="L107">        private long outOfStockCount;</span>
+<span class="nc" id="L108">        private long totalStockValue;</span>
+<span class="nc" id="L109">        private long categoryCount;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

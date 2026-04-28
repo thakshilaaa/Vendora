@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Payment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic4.model</a> &gt; <span class="el_source">Payment.java</span></div><h1>Payment.java</h1><pre class="source lang-java linenums">package com.vendora.epic4.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;payments&quot;)
+public class Payment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long paymentId;
+
+    @Column(name = &quot;order_id&quot;)
+    private Long orderId;
+
+    @Column(name = &quot;status&quot;)
+    private String status;
+
+    private String paymentMethod; // Online or COD
+    private Double amount;
+
+<span class="fc" id="L23">    private LocalDateTime paymentDate = LocalDateTime.now();</span>
+
+    private String transactionId;
+
+    // 1. Default Constructor
+<span class="fc" id="L28">    public Payment() {}</span>
+
+    // 2. Getters and Setters
+<span class="nc" id="L31">    public Long getPaymentId() { return paymentId; }</span>
+<span class="nc" id="L32">    public void setPaymentId(Long paymentId) { this.paymentId = paymentId; }</span>
+
+<span class="nc" id="L34">    public Long getOrderId() { return orderId; }</span>
+<span class="nc" id="L35">    public void setOrderId(Long orderId) { this.orderId = orderId; }</span>
+
+<span class="nc" id="L37">    public String getStatus() { return status; }</span>
+<span class="nc" id="L38">    public void setStatus(String status) { this.status = status; }</span>
+
+<span class="nc" id="L40">    public String getPaymentMethod() { return paymentMethod; }</span>
+<span class="nc" id="L41">    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }</span>
+
+<span class="nc" id="L43">    public Double getAmount() { return amount; }</span>
+<span class="nc" id="L44">    public void setAmount(Double amount) { this.amount = amount; }</span>
+
+<span class="nc" id="L46">    public LocalDateTime getPaymentDate() { return paymentDate; }</span>
+<span class="nc" id="L47">    public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }</span>
+
+<span class="nc" id="L49">    public String getTransactionId() { return transactionId; }</span>
+<span class="nc" id="L50">    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Order History - Online Beauty Store</title>
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/misc.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <style>
+        body { background: #fff5f8; }
+        .page { padding: 20px 0; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 30px; }
+        .page-header { margin-bottom: 30px; }
+        .page-title { color: #be185d; margin-bottom: 10px; }
+        .page-subtitle { color: #5f366b; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        .pay-paid { background: #dcfce7; color: #15803d; }
+        .pay-pending { background: #fef9c3; color: #a16207; }
+        .cancel-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .cancel-btn:hover { background: #dc2626; }
+        .back-btn { display: inline-block; margin-bottom: 24px; border-radius: 8px; padding: 10px 18px; background: #be185d; color: white; text-decoration: none; font-weight: bold; }
+        .back-btn:hover { opacity: 0.95; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #be185d; color: white; text-transform: uppercase; font-size: 13px; }
+        .status-cancelled { background: #fee2e2; color: #ef4444; }
+        .status-refund-requested { background: #ffedd5; color: #9a3412; }
+        .status-success { background: #dcfce7; color: #15803d; }
+        .status-pending { background: #fef9c3; color: #a16207; }
+    </style>
+</head>
+<body>
+<div class="page">
+  <div class="container card">
+    <a href="/order-payment" class="back-btn">← Back to Shopping</a>
+    <div class="page-header">
+      <h1 class="page-title">🛍️ My Order History</h1>
+      <p class="page-subtitle">Review your purchases, payment status and cancel pending orders.</p>
+    </div>
+    <table id="ordersTable">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Amount</th>
+            <th>Order Status</th>
+            <th>Payment Status</th> <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="orderList">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', fetchOrders);
+
+    async function fetchOrders() {
+        try {
+            const res = await fetch('/api/orders/mine', { credentials: 'include' });
+            if (res.status === 401 || res.status === 403) {
+                document.getElementById('orderList').innerHTML =
+                    '<tr><td colspan="6" style="padding: 24px;">Sign in to see your order history, or use <a href=\"/order-payment\">place an order</a> after logging in so orders are linked to your account.</td></tr>';
+                return;
+            }
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+
+            const orders = await res.json();
+            const list = document.getElementById('orderList');
+            list.innerHTML = "";
+
+            orders.forEach(order => {
+
+                const pStatus = order.paymentStatus || 'UNPAID';
+                const oStatus = order.status || 'PENDING';
+                const statusClass = getStatusClass(oStatus);
+
+                const row = `
+                        <tr>
+                            <td>#${order.id}</td>
+                            <td>${order.product}</td>
+                            <td>Rs.${order.amount.toFixed(2)}</td>
+                            <td><span class="status-badge ${statusClass}">${oStatus}</span></td>
+                            <td>
+                                <span class="status-badge ${pStatus === 'PAID' ? 'pay-paid' : 'pay-pending'}">
+                                    ${pStatus === 'PAID' ? '✅ Verified' : '⏳ Pending'}
+                                </span>
+                            </td>
+                            <td>
+                                ${(oStatus && oStatus.toLowerCase() === 'pending') ?
+                    `<button class="cancel-btn" onclick="cancelOrder(${order.id})">Cancel</button>` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                list.innerHTML += row;
+            });
+        } catch (e) {
+            console.error(e);
+            alert("Error: Please make sure Spring Boot is running!");
+        }
+    }
+
+    function getStatusClass(status) {
+        if (status === 'Cancelled') return 'status-cancelled';
+        if (status === 'Refund Requested') return 'status-refund-requested';
+        if (status === 'PAID' || status === 'Delivered') return 'status-success';
+        return 'status-pending';
+    }
+
+    async function cancelOrder(id) {
+        if (confirm("Are you sure you want to cancel this order?")) {
+            try {
+                const res = await fetch(`/api/orders/${id}/cancel`, {
+                    method: 'PUT',
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    alert("Order Cancelled Successfully!");
+                    fetchOrders();
+                } else {
+                    const msg = await res.text();
+                    alert("Fail: " + msg);
+                }
+            } catch (e) { alert("Server connection error!"); }
+        }
+    }
+</script>
+</body>
+</html>

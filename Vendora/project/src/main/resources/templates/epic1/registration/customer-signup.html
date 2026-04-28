@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | Customer Sign Up</title>
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body.form-bg {
+            background-image: url('/images/b2.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="form-bg">
+<div class="page-wrapper">
+<section class="form-container">
+    <h1 class="section-title">Customer Sign Up</h1>
+    <p class="text-center-desc">Join us to experience the best beauty products.</p>
+
+    <form id="signupForm" class="card" autocomplete="off">
+        <h3>Personal Information</h3>
+
+        <label for="firstName">First Name</label>
+        <input id="firstName" type="text" name="firstName" placeholder="John" required pattern="[a-zA-Z\s]+"
+               title="Name should contain only letters and spaces">
+
+        <label for="lastName">Last Name</label>
+        <input id="lastName" type="text" name="lastName" placeholder="Doe" required pattern="[a-zA-Z\s]+"
+               title="Name should contain only letters and spaces">
+
+        <label for="email">Email Address</label>
+        <input id="email" type="email" name="email" placeholder="john@example.com" required
+               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address">
+
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" name="phone" placeholder="0712345678" required maxlength="15"
+               pattern="^(\+94|0)(7[0-9]{8}|[12345689][0-9]{8})$"
+               title="Sri Lankan number, e.g. 0712345678 or +94712345678">
+
+        <label for="nic">NIC (National ID)</label>
+        <input id="nic" name="nic" type="text" required maxlength="12" placeholder="9XXXXXXXXV or 12 digits"
+               pattern="^([0-9]{9}[VvXx]|[0-9]{12})$"
+               title="Old: 9 digits + V/X; new: 12 digits">
+
+        <h3>Address (must match the database user record)</h3>
+        <label for="addressLine1">Address line 1</label>
+        <input id="addressLine1" name="addressLine1" type="text" required maxlength="255" placeholder="Street, building, unit">
+        <label for="addressLine2">Address line 2 (optional)</label>
+        <input id="addressLine2" name="addressLine2" type="text" maxlength="255" placeholder="Apartment, suite">
+        <label for="city">City</label>
+        <input id="city" name="city" type="text" required maxlength="100" placeholder="e.g. Colombo">
+        <label for="district">District</label>
+        <select id="district" name="district" required>
+            <option value="" disabled selected>Select district</option>
+            <option>COLOMBO</option><option>GAMPAHA</option><option>KALUTARA</option><option>KANDY</option>
+            <option>MATALE</option><option>NUWARA_ELIYA</option><option>GALLE</option><option>MATARA</option>
+            <option>HAMBANTOTA</option><option>JAFFNA</option><option>KILINOCHCHI</option><option>MANNAR</option>
+            <option>MULLAITIVU</option><option>VAVUNIYA</option><option>TRINCOMALEE</option><option>BATTICALOA</option>
+            <option>AMPARA</option><option>KURUNEGALA</option><option>PUTTALAM</option><option>ANURADHAPURA</option>
+            <option>POLONNARUWA</option><option>BADULLA</option><option>MONARAGALA</option><option>RATNAPURA</option>
+            <option>KEGALLE</option>
+        </select>
+        <label for="province">Province</label>
+        <select id="province" name="province" required>
+            <option value="" disabled selected>Select province</option>
+            <option>WESTERN</option><option>CENTRAL</option><option>SOUTHERN</option><option>NORTHERN</option>
+            <option>EASTERN</option><option>NORTH_WESTERN</option><option>NORTH_CENTRAL</option>
+            <option>UVA</option><option>SABARAGAMUWA</option>
+        </select>
+        <label for="postalCode">Postal code (optional)</label>
+        <input id="postalCode" name="postalCode" type="text" maxlength="10" placeholder="e.g. 00100">
+
+        <hr class="divider-light">
+        <h3>For Security</h3>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="Enter password" required minlength="8">
+
+        <label for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword" type="password" name="confirm_password" placeholder="Confirm password" required minlength="8">
+
+        <button type="submit" class="btn-primary">Register Account</button>
+
+        <div class="text-center-mt">
+            <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
+        </div>
+    </form>
+
+    <p id="errorMessage" class="error-message"></p>
+</section>
+
+    <footer class="footer">
+        <div class="footer-bottom">
+            <p>© 2026 Vendora | The Online Beauty Store</p>
+            <p><button><a th:href="@{/terms}">Terms & Conditions</a></button> | <button><a th:href="@{/privacy}">Privacy
+                Policy</a></button> | <button><a th:href="@{/cookie}">Cookie Policy</a></button> | Do Not Sell My
+                Personal Information | Vendora</p>
+            <p>If you are having problems using this website, please <button><a th:href="@{/service}">CLICK
+                HERE</a></button> for assistance.</p>
+        </div>
+    </footer>
+<script>
+    const form = document.getElementById("signupForm");
+    const statusEl = document.getElementById("errorMessage");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Combine first and last name into full name
+        if (data.firstName && data.lastName) {
+            data.fullName = (data.firstName + ' ' + data.lastName).trim();
+            delete data.firstName;
+            delete data.lastName;
+        }
+
+        statusEl.style.display = "none";
+
+        if (data.password !== data.confirm_password) {
+            showError("Passwords do not match.");
+            return;
+        }
+
+        delete data.confirm_password;
+
+        // Basic validation check
+        try {
+            const response = await fetch('/api/auth/register/customer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("pendingVerificationEmail", data.email);
+                if (data.phone) {
+                    localStorage.setItem("pendingVerificationPhone", data.phone);
+                } else {
+                    localStorage.removeItem("pendingVerificationPhone");
+                }
+                localStorage.setItem("pendingVerificationNext", "/customer-dashboard");
+                if (result.userCode) {
+                    localStorage.setItem("vendoraUserCode", result.userCode);
+                }
+                alert('Registration successful! Your User ID: ' + (result.userCode || 'check email') + '. Use it to sign in if you share an inbox. Redirecting to verification...');
+                window.location.href = `/verify-email?next=${encodeURIComponent('/customer-dashboard')}`;
+            } else {
+                showError(result.message || "Registration failed.");
+            }
+
+        } catch (err) {
+            showError("Network error. Please try again later.");
+        }
+    });
+
+    function showError(message) {
+        statusEl.textContent = message;
+        statusEl.style.display = "block";
+    }
+</script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/form.js}"></script>
+</div>
+</body>
+</html>
+

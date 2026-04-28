@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeliveryAgentController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic5.controller</a> &gt; <span class="el_source">DeliveryAgentController.java</span></div><h1>DeliveryAgentController.java</h1><pre class="source lang-java linenums">package com.vendora.epic5.controller;
+
+import com.vendora.epic1.service.UserService;
+import com.vendora.epic5.dto.DeliveryAssignmentDTO;
+import com.vendora.epic5.dto.DeliveryDTO;
+import com.vendora.epic5.dto.FailureLogRequestDTO;
+import com.vendora.epic5.service.DeliveryService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/deliveryagent&quot;)
+@CrossOrigin(origins = &quot;*&quot;)
+@PreAuthorize(&quot;isAuthenticated()&quot;)
+public class DeliveryAgentController {
+
+    private final DeliveryService deliveryService;
+    private final UserService userService;
+
+<span class="fc" id="L23">    public DeliveryAgentController(DeliveryService deliveryService, UserService userService) {</span>
+<span class="fc" id="L24">        this.deliveryService = deliveryService;</span>
+<span class="fc" id="L25">        this.userService = userService;</span>
+<span class="fc" id="L26">    }</span>
+
+    @GetMapping(&quot;/deliveries/{id}&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; getDeliveryForAgent(@PathVariable String id) {
+<span class="nc" id="L30">        Long me = userService.getCurrentUser().getId();</span>
+<span class="nc" id="L31">        return ResponseEntity.ok(deliveryService.getDeliveryForAgent(id, me));</span>
+    }
+
+    @GetMapping(&quot;/assignments/me&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryAssignmentDTO&gt;&gt; getMyAssignments() {
+<span class="nc" id="L36">        Long agentId = userService.getCurrentUser().getId();</span>
+<span class="nc" id="L37">        return ResponseEntity.ok(deliveryService.getAgentAssignments(agentId));</span>
+    }
+
+    @GetMapping(&quot;/assignments&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryAssignmentDTO&gt;&gt; getAssignments(@RequestParam Long agentId) {
+<span class="nc" id="L42">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L43">        return ResponseEntity.ok(deliveryService.getAgentAssignments(agentId));</span>
+    }
+
+    @PostMapping(&quot;/assignments/{id}/accept&quot;)
+    public ResponseEntity&lt;DeliveryAssignmentDTO&gt; accept(
+            @PathVariable String id,
+            @RequestParam Long agentId) {
+<span class="nc" id="L50">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L51">        return ResponseEntity.ok(deliveryService.acceptAssignment(id, agentId));</span>
+    }
+
+    @PostMapping(&quot;/assignments/{id}/reject&quot;)
+    public ResponseEntity&lt;DeliveryAssignmentDTO&gt; reject(
+            @PathVariable String id,
+            @RequestParam Long agentId,
+            @RequestParam String reason) {
+<span class="nc" id="L59">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L60">        return ResponseEntity.ok(deliveryService.rejectAssignment(id, agentId, reason));</span>
+    }
+
+    @PostMapping(&quot;/deliveries/{id}/pickup&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; pickup(
+            @PathVariable String id,
+            @RequestParam Long agentId) {
+<span class="nc" id="L67">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L68">        return ResponseEntity.ok(deliveryService.pickupDelivery(id, agentId));</span>
+    }
+
+    @PostMapping(&quot;/deliveries/{id}/complete&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; complete(
+            @PathVariable String id,
+            @RequestParam Long agentId) {
+<span class="nc" id="L75">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L76">        return ResponseEntity.ok(deliveryService.completeDelivery(id, agentId));</span>
+    }
+
+    @PostMapping(&quot;/deliveries/{id}/fail&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; fail(
+            @PathVariable String id,
+            @RequestBody FailureLogRequestDTO dto) {
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (dto.getLoggedBy() == null) {</span>
+<span class="nc" id="L84">            dto.setLoggedBy(userService.getCurrentUser().getId());</span>
+        } else {
+<span class="nc" id="L86">            requireAgentSelf(dto.getLoggedBy());</span>
+        }
+<span class="nc" id="L88">        return ResponseEntity.ok(deliveryService.failDelivery(id, dto));</span>
+    }
+
+    @PostMapping(&quot;/deliveries/{id}/pickup-return&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; pickupReturn(
+            @PathVariable String id,
+            @RequestParam Long agentId) {
+<span class="nc" id="L95">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L96">        return ResponseEntity.ok(deliveryService.pickupReturn(id, agentId));</span>
+    }
+
+    @PostMapping(&quot;/deliveries/{id}/complete-return&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; completeReturn(
+            @PathVariable String id,
+            @RequestParam Long agentId) {
+<span class="nc" id="L103">        requireAgentSelf(agentId);</span>
+<span class="nc" id="L104">        return ResponseEntity.ok(deliveryService.completeReturn(id, agentId));</span>
+    }
+
+    private void requireAgentSelf(Long agentId) {
+<span class="nc bnc" id="L108" title="All 4 branches missed.">        if (agentId == null || !userService.getCurrentUser().getId().equals(agentId)) {</span>
+<span class="nc" id="L109">            throw new AccessDeniedException(&quot;Not this agent's action&quot;);</span>
+        }
+<span class="nc" id="L111">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

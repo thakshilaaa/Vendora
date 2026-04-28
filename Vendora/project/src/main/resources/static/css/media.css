@@ -1,0 +1,114 @@
+/* === MEDIA.CSS - RESPONSIVE ADAPTATIONS & UTILITIES === */
+
+/* 2. TABLET ADAPTATIONS (Max-width: 992px) */
+@media (max-width: 992px) {
+    .container {
+        max-width: 95%;
+        padding: 0 15px;
+    }
+
+    /* Ecommerce Adjustments */
+    .checkout-layout {
+        grid-template-columns: 1fr; /* Stack sidebar on tablet */
+    }
+
+    .pricing-card.featured {
+        transform: scale(1); /* Remove scale effect for touch stability */
+        margin: 1rem 0;
+        box-shadow: var(--shadow-md); /* Consistent shadow without the scale */
+    }
+}
+
+/* 3. MOBILE ADAPTATIONS (Max-width: 768px) */
+@media (max-width: 768px) {
+    /* Hero & About Section Logic (Replaced Absolute with Flex) */
+    .about-text {
+        position: static;
+        max-width: 100%;
+        margin-top: 15px;
+        transform: none;
+        text-align: center;
+    }
+
+    .about-text h2 {
+        font-size: 1.5rem; /* Standardized for mobile headings */
+    }
+
+    .service-section {
+        width: 95%; /* Expanded for smaller screens */
+        padding: 20px 0;
+    }
+
+    /* Grid Adjustments */
+    .product-grid, .feedback-grid, .category-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* 4. SMALL MOBILE / SMARTPHONE (Max-width: 480px) */
+@media (max-width: 480px) {
+    .btn {
+        width: 100%; /* Full-width buttons for mobile usability */
+        padding: 0.7rem 1.2rem;
+    }
+
+    .form-actions {
+        flex-direction: column; /* Stack primary/secondary buttons vertically */
+    }
+
+    .product-card img {
+        height: 180px; /* Reduced height for tighter mobile grids */
+    }
+
+    /* Ensure actions are visible on touch devices */
+    .product-action-overlay {
+        position: static;
+        background: transparent;
+        padding: 0 1rem 1rem;
+        display: flex; /* Always show buttons on small phones */
+        opacity: 1;
+    }
+}
+
+/* 5. ACCESSIBILITY: REDUCED MOTION PREFERENCE */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-delay: -1ms !important;
+        animation-duration: 1ms !important;
+        transition-duration: 0s !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* 6. PRINT STYLES */
+@media print {
+    .no-print { display: none !important; }
+    body { font-size: 12pt; color: #000; background: #fff; }
+    a::after { content: " (" attr(href) ")"; font-size: 10pt; } /* Add visible URLs */
+}
+
+/* FEEDBACK RESPONSIVE */
+@media (max-width: 1000px) {
+    #feedbackGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    #feedbackGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .feedback-panel {
+        right: -100%;
+        width: 100%;
+        top: 0;
+        height: 100%;
+        border-radius: 0;
+    }
+
+    .feedback-panel.open {
+        right: 0;
+    }
+}

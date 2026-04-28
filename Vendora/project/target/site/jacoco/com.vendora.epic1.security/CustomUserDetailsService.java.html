@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomUserDetailsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.security</a> &gt; <span class="el_source">CustomUserDetailsService.java</span></div><h1>CustomUserDetailsService.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.security;
+
+import com.vendora.epic1.model.User;
+import com.vendora.epic1.model.User;
+import com.vendora.epic1.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+<span class="fc" id="L19">    public CustomUserDetailsService(UserRepository userRepository) {</span>
+<span class="fc" id="L20">        this.userRepository = userRepository;</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+<span class="nc bnc" id="L25" title="All 4 branches missed.">        if (username == null || username.isBlank()) {</span>
+<span class="nc" id="L26">            throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
+        }
+<span class="nc" id="L28">        String u = username.trim();</span>
+
+<span class="nc" id="L30">        Optional&lt;User&gt; byCode = userRepository.findByUserCodeIgnoreCase(u);</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (byCode.isPresent()) {</span>
+<span class="nc" id="L32">            return new CustomUserDetails(byCode.get());</span>
+        }
+<span class="nc" id="L34">        return loadByLegacyEmailSubject(u);</span>
+    }
+
+    /**
+     * Older JWTs used email as the subject. Support those only when exactly one user has that email.
+     */
+    private UserDetails loadByLegacyEmailSubject(String u) {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (!u.contains(&quot;@&quot;)) {</span>
+<span class="nc" id="L42">            throw new UsernameNotFoundException(&quot;User not found: &quot; + u);</span>
+        }
+<span class="nc" id="L44">        List&lt;User&gt; users = userRepository.findAllByEmailIgnoreCase(u);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (users.isEmpty()) {</span>
+<span class="nc" id="L46">            throw new UsernameNotFoundException(&quot;User not found: &quot; + u);</span>
+        }
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (users.size() &gt; 1) {</span>
+<span class="nc" id="L49">            throw new UsernameNotFoundException(</span>
+                    &quot;This email is shared by several accounts. Sign in again to obtain a new session (use your User ID U…).&quot;);
+        }
+<span class="nc" id="L52">        return new CustomUserDetails(users.get(0));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

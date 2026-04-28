@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic2.service</a> &gt; <span class="el_source">ProductService.java</span></div><h1>ProductService.java</h1><pre class="source lang-java linenums">package com.vendora.epic2.service;
+
+import com.vendora.epic2.dto.ProductDto;
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic2.model.Product;
+import com.vendora.epic2.repository.ProductRepository;
+import com.vendora.epic6.repository.SupplierRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
+@Transactional
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final SupplierRepository supplierRepository;
+
+    // ==================== CREATE ====================
+    public ProductDto.Response createProduct(
+            Long supplierId,
+            String name, String brand, String sku, String barcode,
+            String categoryStr, String description, String ingredients,
+            String usageInstructions, BigDecimal price, BigDecimal costPrice,
+            Integer stockQuantity, Integer lowStockThreshold, String unit,
+            String shade, String skinType, String volume,
+            String supplierName, String supplierContact, String supplierEmail, String supplierAddress,
+            String manufactureDateStr, String expiryDateStr,
+            String status, String countryOfOrigin, String tags,
+            MultipartFile image) throws IOException {
+
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (supplierId == null) {</span>
+<span class="nc" id="L42">            throw new IllegalArgumentException(&quot;supplierId is required&quot;);</span>
+        }
+
+        // Validate unique fields
+<span class="nc bnc" id="L46" title="All 6 branches missed.">        if (sku != null &amp;&amp; !sku.isBlank() &amp;&amp; productRepository.existsBySku(sku)) {</span>
+<span class="nc" id="L47">            throw new IllegalArgumentException(&quot;SKU already exists: &quot; + sku);</span>
+        }
+<span class="nc bnc" id="L49" title="All 6 branches missed.">        if (barcode != null &amp;&amp; !barcode.isBlank() &amp;&amp; productRepository.existsByBarcode(barcode)) {</span>
+<span class="nc" id="L50">            throw new IllegalArgumentException(&quot;Barcode already exists: &quot; + barcode);</span>
+        }
+
+<span class="nc" id="L53">        Product product = Product.builder()</span>
+<span class="nc" id="L54">            .supplierId(supplierId)</span>
+<span class="nc" id="L55">            .name(name)</span>
+<span class="nc" id="L56">            .brand(brand)</span>
+<span class="nc" id="L57">            .sku(sku)</span>
+<span class="nc" id="L58">            .barcode(barcode)</span>
+<span class="nc" id="L59">            .category(Product.Category.valueOf(categoryStr))</span>
+<span class="nc" id="L60">            .description(description)</span>
+<span class="nc" id="L61">            .ingredients(ingredients)</span>
+<span class="nc" id="L62">            .usageInstructions(usageInstructions)</span>
+<span class="nc" id="L63">            .price(price)</span>
+<span class="nc" id="L64">            .costPrice(costPrice)</span>
+<span class="nc" id="L65">            .stockQuantity(stockQuantity)</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            .lowStockThreshold(lowStockThreshold != null ? lowStockThreshold : 10)</span>
+<span class="nc" id="L67">            .unit(unit)</span>
+<span class="nc" id="L68">            .shade(shade)</span>
+<span class="nc" id="L69">            .skinType(skinType)</span>
+<span class="nc" id="L70">            .volume(volume)</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">            .manufactureDate(manufactureDateStr != null &amp;&amp; !manufactureDateStr.isBlank() ? LocalDate.parse(manufactureDateStr) : null)</span>
+<span class="nc bnc" id="L72" title="All 4 branches missed.">            .expiryDate(expiryDateStr != null &amp;&amp; !expiryDateStr.isBlank() ? LocalDate.parse(expiryDateStr) : null)</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            .status(status != null ? Product.ProductStatus.valueOf(status) : Product.ProductStatus.ACTIVE)</span>
+<span class="nc" id="L74">            .countryOfOrigin(countryOfOrigin)</span>
+<span class="nc" id="L75">            .tags(tags)</span>
+<span class="nc" id="L76">            .build();</span>
+
+<span class="nc" id="L78">        product.setSupplierName(supplierName);</span>
+<span class="nc" id="L79">        product.setSupplierContact(supplierContact);</span>
+<span class="nc" id="L80">        product.setSupplierEmail(supplierEmail);</span>
+<span class="nc" id="L81">        product.setSupplierAddress(supplierAddress);</span>
+<span class="nc" id="L82">        applyTransientSupplierFromProfile(product);</span>
+
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        if (image != null &amp;&amp; !image.isEmpty()) {</span>
+<span class="nc" id="L85">            product.setImage(image.getBytes());</span>
+<span class="nc" id="L86">            product.setImageContentType(image.getContentType());</span>
+        }
+
+<span class="nc" id="L89">        return toResponse(productRepository.save(product));</span>
+    }
+
+    // ==================== READ ALL ====================
+    @Transactional(readOnly = true)
+    public List&lt;ProductDto.Summary&gt; getAllProducts(String keyword, String category, String status) {
+        List&lt;Product&gt; products;
+
+<span class="nc bnc" id="L97" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L98">            products = productRepository.searchProducts(keyword.trim());</span>
+        } else {
+<span class="nc" id="L100">            products = productRepository.findAll();</span>
+        }
+
+<span class="nc" id="L103">        return products.stream()</span>
+<span class="nc bnc" id="L104" title="All 6 branches missed.">            .filter(p -&gt; category == null || category.isBlank() || p.getCategory().name().equalsIgnoreCase(category))</span>
+<span class="nc bnc" id="L105" title="All 6 branches missed.">            .filter(p -&gt; status == null || status.isBlank() || p.getStatus().name().equalsIgnoreCase(status))</span>
+<span class="nc" id="L106">            .map(p -&gt; { applyTransientSupplierFromProfile(p); return toSummary(p); })</span>
+<span class="nc" id="L107">            .collect(Collectors.toList());</span>
+    }
+
+    // ==================== READ ONE ====================
+    @Transactional(readOnly = true)
+    public ProductDto.Response getProductById(Long id) {
+<span class="nc" id="L113">        Product product = productRepository.findById(id)</span>
+<span class="nc" id="L114">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Product not found with id: &quot; + id));</span>
+<span class="nc" id="L115">        applyTransientSupplierFromProfile(product);</span>
+<span class="nc" id="L116">        return toResponse(product);</span>
+    }
+
+    // ==================== UPDATE ====================
+    public ProductDto.Response updateProduct(
+            Long id,
+            Long supplierId,
+            String name, String brand, String sku, String barcode,
+            String categoryStr, String description, String ingredients,
+            String usageInstructions, BigDecimal price, BigDecimal costPrice,
+            Integer stockQuantity, Integer lowStockThreshold, String unit,
+            String shade, String skinType, String volume,
+            String supplierName, String supplierContact, String supplierEmail, String supplierAddress,
+            String manufactureDateStr, String expiryDateStr,
+            String status, String countryOfOrigin, String tags,
+            MultipartFile image, boolean removeImage) throws IOException {
+
+<span class="nc" id="L133">        Product product = productRepository.findById(id)</span>
+<span class="nc" id="L134">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Product not found with id: &quot; + id));</span>
+
+<span class="nc bnc" id="L136" title="All 6 branches missed.">        if (sku != null &amp;&amp; !sku.isBlank() &amp;&amp; productRepository.existsBySkuAndIdNot(sku, id)) {</span>
+<span class="nc" id="L137">            throw new IllegalArgumentException(&quot;SKU already exists: &quot; + sku);</span>
+        }
+<span class="nc bnc" id="L139" title="All 6 branches missed.">        if (barcode != null &amp;&amp; !barcode.isBlank() &amp;&amp; productRepository.existsByBarcodeAndIdNot(barcode, id)) {</span>
+<span class="nc" id="L140">            throw new IllegalArgumentException(&quot;Barcode already exists: &quot; + barcode);</span>
+        }
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (supplierId != null) {</span>
+<span class="nc" id="L144">            product.setSupplierId(supplierId);</span>
+        }
+<span class="nc" id="L146">        product.setName(name);</span>
+<span class="nc" id="L147">        product.setBrand(brand);</span>
+<span class="nc" id="L148">        product.setSku(sku);</span>
+<span class="nc" id="L149">        product.setBarcode(barcode);</span>
+<span class="nc" id="L150">        product.setCategory(Product.Category.valueOf(categoryStr));</span>
+<span class="nc" id="L151">        product.setDescription(description);</span>
+<span class="nc" id="L152">        product.setIngredients(ingredients);</span>
+<span class="nc" id="L153">        product.setUsageInstructions(usageInstructions);</span>
+<span class="nc" id="L154">        product.setPrice(price);</span>
+<span class="nc" id="L155">        product.setCostPrice(costPrice);</span>
+<span class="nc" id="L156">        product.setStockQuantity(stockQuantity);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        product.setLowStockThreshold(lowStockThreshold != null ? lowStockThreshold : 10);</span>
+<span class="nc" id="L158">        product.setUnit(unit);</span>
+<span class="nc" id="L159">        product.setShade(shade);</span>
+<span class="nc" id="L160">        product.setSkinType(skinType);</span>
+<span class="nc" id="L161">        product.setVolume(volume);</span>
+<span class="nc" id="L162">        product.setSupplierName(supplierName);</span>
+<span class="nc" id="L163">        product.setSupplierContact(supplierContact);</span>
+<span class="nc" id="L164">        product.setSupplierEmail(supplierEmail);</span>
+<span class="nc" id="L165">        product.setSupplierAddress(supplierAddress);</span>
+<span class="nc bnc" id="L166" title="All 4 branches missed.">        product.setManufactureDate(manufactureDateStr != null &amp;&amp; !manufactureDateStr.isBlank() ? LocalDate.parse(manufactureDateStr) : null);</span>
+<span class="nc bnc" id="L167" title="All 4 branches missed.">        product.setExpiryDate(expiryDateStr != null &amp;&amp; !expiryDateStr.isBlank() ? LocalDate.parse(expiryDateStr) : null);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (status != null) product.setStatus(Product.ProductStatus.valueOf(status));</span>
+<span class="nc" id="L169">        product.setCountryOfOrigin(countryOfOrigin);</span>
+<span class="nc" id="L170">        product.setTags(tags);</span>
+<span class="nc" id="L171">        applyTransientSupplierFromProfile(product);</span>
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (removeImage) {</span>
+<span class="nc" id="L174">            product.setImage(null);</span>
+<span class="nc" id="L175">            product.setImageContentType(null);</span>
+<span class="nc bnc" id="L176" title="All 4 branches missed.">        } else if (image != null &amp;&amp; !image.isEmpty()) {</span>
+<span class="nc" id="L177">            product.setImage(image.getBytes());</span>
+<span class="nc" id="L178">            product.setImageContentType(image.getContentType());</span>
+        }
+
+<span class="nc" id="L181">        return toResponse(productRepository.save(product));</span>
+    }
+
+    // ==================== DELETE ====================
+    public void deleteProduct(Long id) {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (!productRepository.existsById(id)) {</span>
+<span class="nc" id="L187">            throw new ResourceNotFoundException(&quot;Product not found with id: &quot; + id);</span>
+        }
+<span class="nc" id="L189">        productRepository.deleteById(id);</span>
+<span class="nc" id="L190">    }</span>
+
+    // ==================== STOCK UPDATE ====================
+    public ProductDto.Response updateStock(Long id, ProductDto.StockUpdate stockUpdate) {
+<span class="nc" id="L194">        Product product = productRepository.findById(id)</span>
+<span class="nc" id="L195">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Product not found with id: &quot; + id));</span>
+
+<span class="nc" id="L197">        int qty = stockUpdate.getQuantity();</span>
+<span class="nc bnc" id="L198" title="All 4 branches missed.">        switch (stockUpdate.getOperation()) {</span>
+<span class="nc" id="L199">            case &quot;ADD&quot; -&gt; product.setStockQuantity(product.getStockQuantity() + qty);</span>
+            case &quot;SUBTRACT&quot; -&gt; {
+<span class="nc" id="L201">                int newQty = product.getStockQuantity() - qty;</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                if (newQty &lt; 0) throw new IllegalArgumentException(&quot;Stock cannot go below 0&quot;);</span>
+<span class="nc" id="L203">                product.setStockQuantity(newQty);</span>
+<span class="nc" id="L204">            }</span>
+            case &quot;SET&quot; -&gt; {
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                if (qty &lt; 0) throw new IllegalArgumentException(&quot;Stock cannot be negative&quot;);</span>
+<span class="nc" id="L207">                product.setStockQuantity(qty);</span>
+<span class="nc" id="L208">            }</span>
+<span class="nc" id="L209">            default -&gt; throw new IllegalArgumentException(&quot;Invalid operation: &quot; + stockUpdate.getOperation());</span>
+        }
+
+<span class="nc" id="L212">        applyTransientSupplierFromProfile(product);</span>
+<span class="nc" id="L213">        return toResponse(productRepository.save(product));</span>
+    }
+
+    // ==================== LOW STOCK ====================
+    @Transactional(readOnly = true)
+    public List&lt;ProductDto.Summary&gt; getLowStockProducts() {
+<span class="nc" id="L219">        return productRepository.findLowStockProducts()</span>
+<span class="nc" id="L220">            .stream()</span>
+<span class="nc" id="L221">            .map(p -&gt; { applyTransientSupplierFromProfile(p); return toSummary(p); })</span>
+<span class="nc" id="L222">            .collect(Collectors.toList());</span>
+    }
+
+    // ==================== DASHBOARD STATS ====================
+    @Transactional(readOnly = true)
+    public ProductDto.DashboardStats getDashboardStats() {
+<span class="nc" id="L228">        List&lt;Product&gt; all = productRepository.findAll();</span>
+<span class="nc" id="L229">        long totalProducts = all.size();</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        long activeProducts = all.stream().filter(p -&gt; p.getStatus() == Product.ProductStatus.ACTIVE).count();</span>
+<span class="nc" id="L231">        long lowStock = productRepository.countLowStockProducts();</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        long outOfStock = all.stream().filter(p -&gt; p.getStockQuantity() == 0).count();</span>
+<span class="nc" id="L233">        long totalValue = all.stream()</span>
+<span class="nc" id="L234">            .mapToLong(p -&gt; p.getPrice().multiply(BigDecimal.valueOf(p.getStockQuantity())).longValue())</span>
+<span class="nc" id="L235">            .sum();</span>
+<span class="nc" id="L236">        long categories = all.stream().map(Product::getCategory).distinct().count();</span>
+
+<span class="nc" id="L238">        return ProductDto.DashboardStats.builder()</span>
+<span class="nc" id="L239">            .totalProducts(totalProducts)</span>
+<span class="nc" id="L240">            .activeProducts(activeProducts)</span>
+<span class="nc" id="L241">            .lowStockCount(lowStock)</span>
+<span class="nc" id="L242">            .outOfStockCount(outOfStock)</span>
+<span class="nc" id="L243">            .totalStockValue(totalValue)</span>
+<span class="nc" id="L244">            .categoryCount(categories)</span>
+<span class="nc" id="L245">            .build();</span>
+    }
+
+    // ==================== MAPPERS ====================
+    private void applyTransientSupplierFromProfile(Product p) {
+<span class="nc" id="L250">        p.setSupplierName(null);</span>
+<span class="nc" id="L251">        p.setSupplierContact(null);</span>
+<span class="nc" id="L252">        p.setSupplierEmail(null);</span>
+<span class="nc" id="L253">        p.setSupplierAddress(null);</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        if (p.getSupplierId() == null) {</span>
+<span class="nc" id="L255">            return;</span>
+        }
+<span class="nc" id="L257">        supplierRepository.findByUser_Id(p.getSupplierId()).ifPresent(supplier -&gt; {</span>
+<span class="nc" id="L258">            p.setSupplierName(supplier.getCompanyName());</span>
+<span class="nc" id="L259">            p.setSupplierContact(supplier.getContactPerson());</span>
+<span class="nc" id="L260">            p.setSupplierEmail(supplier.getEmail());</span>
+<span class="nc" id="L261">            p.setSupplierAddress(supplier.getAddress());</span>
+<span class="nc" id="L262">        });</span>
+<span class="nc" id="L263">    }</span>
+
+    private ProductDto.Response toResponse(Product p) {
+<span class="nc" id="L266">        return ProductDto.Response.builder()</span>
+<span class="nc" id="L267">            .id(p.getId())</span>
+<span class="nc" id="L268">            .supplierId(p.getSupplierId())</span>
+<span class="nc" id="L269">            .name(p.getName())</span>
+<span class="nc" id="L270">            .brand(p.getBrand())</span>
+<span class="nc" id="L271">            .sku(p.getSku())</span>
+<span class="nc" id="L272">            .barcode(p.getBarcode())</span>
+<span class="nc" id="L273">            .category(p.getCategory())</span>
+<span class="nc" id="L274">            .description(p.getDescription())</span>
+<span class="nc" id="L275">            .ingredients(p.getIngredients())</span>
+<span class="nc" id="L276">            .usageInstructions(p.getUsageInstructions())</span>
+<span class="nc" id="L277">            .price(p.getPrice())</span>
+<span class="nc" id="L278">            .costPrice(p.getCostPrice())</span>
+<span class="nc" id="L279">            .stockQuantity(p.getStockQuantity())</span>
+<span class="nc" id="L280">            .lowStockThreshold(p.getLowStockThreshold())</span>
+<span class="nc" id="L281">            .lowStock(p.isLowStock())</span>
+<span class="nc" id="L282">            .unit(p.getUnit())</span>
+<span class="nc" id="L283">            .shade(p.getShade())</span>
+<span class="nc" id="L284">            .skinType(p.getSkinType())</span>
+<span class="nc" id="L285">            .volume(p.getVolume())</span>
+<span class="nc" id="L286">            .supplierName(p.getSupplierName())</span>
+<span class="nc" id="L287">            .supplierContact(p.getSupplierContact())</span>
+<span class="nc" id="L288">            .supplierEmail(p.getSupplierEmail())</span>
+<span class="nc" id="L289">            .supplierAddress(p.getSupplierAddress())</span>
+<span class="nc" id="L290">            .manufactureDate(p.getManufactureDate())</span>
+<span class="nc" id="L291">            .expiryDate(p.getExpiryDate())</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">            .imageBase64(p.getImage() != null ? Base64.getEncoder().encodeToString(p.getImage()) : null)</span>
+<span class="nc" id="L293">            .imageContentType(p.getImageContentType())</span>
+<span class="nc" id="L294">            .status(p.getStatus())</span>
+<span class="nc" id="L295">            .countryOfOrigin(p.getCountryOfOrigin())</span>
+<span class="nc" id="L296">            .tags(p.getTags())</span>
+<span class="nc" id="L297">            .createdAt(p.getCreatedAt())</span>
+<span class="nc" id="L298">            .updatedAt(p.getUpdatedAt())</span>
+<span class="nc" id="L299">            .build();</span>
+    }
+
+    private ProductDto.Summary toSummary(Product p) {
+<span class="nc" id="L303">        return ProductDto.Summary.builder()</span>
+<span class="nc" id="L304">            .id(p.getId())</span>
+<span class="nc" id="L305">            .supplierId(p.getSupplierId())</span>
+<span class="nc" id="L306">            .name(p.getName())</span>
+<span class="nc" id="L307">            .brand(p.getBrand())</span>
+<span class="nc" id="L308">            .sku(p.getSku())</span>
+<span class="nc" id="L309">            .barcode(p.getBarcode())</span>
+<span class="nc" id="L310">            .category(p.getCategory())</span>
+<span class="nc" id="L311">            .price(p.getPrice())</span>
+<span class="nc" id="L312">            .stockQuantity(p.getStockQuantity())</span>
+<span class="nc" id="L313">            .lowStockThreshold(p.getLowStockThreshold())</span>
+<span class="nc" id="L314">            .lowStock(p.isLowStock())</span>
+<span class="nc" id="L315">            .unit(p.getUnit())</span>
+<span class="nc" id="L316">            .shade(p.getShade())</span>
+<span class="nc" id="L317">            .status(p.getStatus())</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">            .imageBase64(p.getImage() != null ? Base64.getEncoder().encodeToString(p.getImage()) : null)</span>
+<span class="nc" id="L319">            .imageContentType(p.getImageContentType())</span>
+<span class="nc" id="L320">            .createdAt(p.getCreatedAt())</span>
+<span class="nc" id="L321">            .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

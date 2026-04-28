@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pending suppliers — Vendora Admin</title>
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/misc.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<header class="topbar">
+    <a th:href="@{/}" class="brand">Vendora Admin</a>
+    <nav>
+        <a th:href="@{/admin/suppliers/pending}">Pending</a>
+        <a th:href="@{/admin/suppliers}">All suppliers</a>
+        <a th:href="@{/logout}">Sign out</a>
+    </nav>
+</header>
+<main class="page">
+    <div class="container">
+        <section class="page-header">
+            <h1 class="page-title">Pending supplier applications</h1>
+        </section>
+
+        <div th:if="${toast}" class="alert-box alert-info mb-6">
+            <i class="fa-solid fa-circle-check"></i>
+            <span th:text="${toast}"></span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(suppliers)}" class="card text-center text-muted py-12">
+            <i class="fa-regular fa-circle-check fa-2x mb-3"></i>
+            <p>All caught up — no pending applications.</p>
+        </div>
+
+        <div class="grid-2" th:unless="${#lists.isEmpty(suppliers)}">
+            <article th:each="s : ${suppliers}" class="card">
+                <div class="flex-between mb-4">
+                    <div>
+                        <h3 class="page-title mb-1" th:text="${s.companyName}"></h3>
+                        <p class="text-muted" th:text="${s.contactPerson}"></p>
+                    </div>
+                    <span class="status-pill pending">Pending</span>
+                </div>
+                <ul class="list-unstyled text-muted mb-5 grid gap-sm">
+                    <li><i class="fa-regular fa-envelope"></i> <span th:text="${s.email}"></span></li>
+                    <li><i class="fa-solid fa-phone"></i> <span th:text="${s.phone}"></span></li>
+                    <li><i class="fa-solid fa-location-dot"></i> <span th:text="${s.address}"></span></li>
+                </ul>
+                <div class="flex-gap-sm">
+                    <form th:action="@{'/admin/suppliers/' + ${s.id} + '/approve'}" method="post" class="w-full">
+                        <button class="btn btn-primary w-full" type="submit">
+                            <i class="fa-solid fa-check"></i> Approve
+                        </button>
+                    </form>
+                    <form th:action="@{'/admin/suppliers/' + ${s.id} + '/reject'}" method="post" class="w-full" onsubmit="return confirm('Reject this supplier? This cannot be undone.')">
+                        <button class="btn btn-cancel w-full" type="submit">
+                            <i class="fa-solid fa-xmark"></i> Reject
+                        </button>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
+</body>
+</html>

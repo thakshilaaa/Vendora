@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendora | User Profile</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body.home-bg {
+      background-image: url('/images/b2.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+
+    input[readonly], textarea[readonly] {
+      background-color: #f9f9f9;
+      border-color: transparent;
+      cursor: default;
+      outline: none;
+    }
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .btn-danger {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body class="home-bg">
+<div class="page-wrapper">
+<section class="form-container">
+  <h1 class="section-title">User Profile</h1>
+
+  <form class="card" id="profileForm">
+    <div class="text-center mb-2-sm">
+      <img id="profilePreview" src="#" alt="Profile" class="profile-img-circle">
+      <input type="file" id="profile_image_url" name="profile_image_url" class="input-hidden" accept="image/*">
+    </div>
+
+    <label for="name">Full Name</label>
+    <input type="text" id="name" name="name" value="Fetching..." readonly required>
+
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" value="Fetching..." readonly required>
+
+    <label for="phone">Phone Number</label>
+    <input type="tel" id="phone" name="phone" value="Fetching..." readonly>
+
+    <label for="address">Address</label>
+    <textarea id="address" name="address" readonly rows="3">Fetching...</textarea>
+
+    <div class="form-helper-text">
+      <p><strong>Role:</strong> <span id="displayRole">CUSTOMER</span></p>
+      <p><strong>Status:</strong> <span id="displayStatus">ACTIVE</span></p>
+    </div>
+
+    <div id="viewModeActions" class="form-actions form-actions-mt">
+      <button type="button" class="btn-primary" onclick="enableEditMode()"><i class="fas fa-edit"></i> Edit Profile</button>
+      <button type="button" class="btn-secondary" onclick="location.href='/update-password'">Update Password</button>
+      <button type="button" class="btn-danger" id="logoutBtn">Logout</button>
+    </div>
+
+    <div id="editModeActions" class="form-actions form-actions-mt hidden">
+      <button type="submit" class="btn-primary">Confirm Changes</button>
+      <button type="button" class="btn-cancel" onclick="disableEditMode()">Cancel</button>
+    </div>
+
+    <p id="profileStatusMsg" class="form-status"></p>
+  </form>
+</section>
+
+<script>
+  const form = document.getElementById("profileForm");
+  const inputs = form.querySelectorAll('input:not([type="file"]), textarea');
+  const viewActions = document.getElementById("viewModeActions");
+  const editActions = document.getElementById("editModeActions");
+  const fileInput = document.getElementById("profile_image_url");
+
+  function enableEditMode() {
+    inputs.forEach(input => {
+      if(input.id !== 'email') input.readOnly = false;
+    });
+    fileInput.style.display = "block";
+    viewActions.style.display = "none";
+    editActions.style.display = "flex";
+  }
+
+  function disableEditMode() {
+    inputs.forEach(input => input.readOnly = true);
+    fileInput.style.display = "none";
+    viewActions.style.display = "flex";
+    editActions.style.display = "none";
+  }
+
+  function getAuthToken() {
+    return localStorage.getItem("token") || localStorage.getItem("vendoraToken");
+  }
+
+  function authHeaderJson() {
+    const t = getAuthToken();
+    const h = { "Content-Type": "application/json" };
+    if (t) h["Authorization"] = "Bearer " + t;
+    return h;
+  }
+
+  async function loadProfile() {
+    try {
+      const response = await fetch("/api/users/me", { headers: authHeaderJson() });
+      if (!response.ok) {
+        throw new Error("Unable to load profile");
+      }
+      const user = await response.json();
+      document.getElementById("name").value = user.fullName || user.name || "";
+      document.getElementById("email").value = user.email || "";
+      document.getElementById("phone").value = user.phoneNumber || "";
+      document.getElementById("address").value = "Not provided";
+      document.getElementById("displayRole").textContent = user.role || "CUSTOMER";
+      document.getElementById("displayStatus").textContent = user.status || "ACTIVE";
+    } catch (error) {
+      document.getElementById("profileStatusMsg").textContent = "Could not load profile data.";
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+      fullName: document.getElementById("name").value.trim(),
+      phoneNumber: document.getElementById("phone").value.trim()
+    };
+
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "PUT",
+        headers: authHeaderJson(),
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error("Update failed");
+      }
+      document.getElementById("profileStatusMsg").textContent = "Profile updated successfully.";
+    } catch (error) {
+      document.getElementById("profileStatusMsg").textContent = "Failed to update profile.";
+      return;
+    }
+    disableEditMode();
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    if(confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("vendoraToken");
+      localStorage.removeItem("token");
+      document.cookie = "vendoraToken=;path=/;max-age=0";
+      window.location.href = "/logout";
+    }
+  });
+
+  window.onload = () => {
+    loadProfile();
+  };
+</script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/form.js}"></script>
+</div>
+</body>
+</html>

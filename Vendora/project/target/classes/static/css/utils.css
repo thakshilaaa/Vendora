@@ -1,0 +1,850 @@
+/* === UTILS.CSS - HELPER & UTILITY CLASSES === */
+
+/* ROOT VARIABLES */
+:root {
+    --brand-color: #000000; /* Black */
+    --accent-color: #000000; /* Accent Black */
+    --rose-color: #EAACB3; /* Brand Rose */
+    --lavender-color: #000000; /* Lavender turned Black */
+    --soft-pink: #F6D5DA; /* Soft Pink */
+
+    --text-main: #333333;
+    --heading-color: #222222;
+    --bg-light: #f7f7f7;
+    --bg-dark: #1A1A1A;
+
+    --border-radius: 8px;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+    --transition: 0.3s ease;
+    --transition-smooth: cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+/* 1. BRAND COLOR UTILITIES */
+.text-brand  { color: #000000 !important; } /* Black Brand Text */
+.text-accent { color: #000000 !important; } /* Black Accent Text */
+.text-rose   { color: #EAACB3 !important; } /* Brand Rose */
+
+.bg-brand     { background-color: #000000 !important; color: #ffffff; }
+.bg-soft-pink { background-color: #F6D5DA !important; } /* Romantic Pink Background */
+.bg-lavender  { background-color: #000000 !important; }
+
+/* 2. SPACING UTILITIES */
+.m-0  { margin: 0 !important; }
+.mt-1 { margin-top: 1rem !important; }
+.mb-1 { margin-bottom: 1rem !important; }
+.mt-2 { margin-top: 2rem !important; }
+.mb-2 { margin-bottom: 2rem !important; }
+
+/* Standard Section Spacing */
+.section-margin     { margin: 40px 0 !important; }
+.container-padding  { padding: 40px 20px !important; }
+
+/* 3. FLEX & GRID SHORTCUTS */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.gap-sm { gap: 1rem; }
+
+/* 4. VISIBILITY & RESPONSIVE TOGGLES */
+.hidden { display: none !important; }
+
+@media (min-width: 769px) {
+    .hide-desktop { display: none !important; }
+}
+
+@media (max-width: 768px) {
+    .hide-mobile { display: none !important; }
+
+    .grid-2 {
+        grid-template-columns: 1fr; /* Automatically stack grids on mobile */
+    }
+}
+
+/* Screen Reader Only (Accessibility Requirement) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* 5. DECORATIVE HELPERS */
+.shadow-premium {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.rounded-standard {
+    border-radius: 8px !important; /* Matches --border-radius from base.css */
+}
+
+.img-cover {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+}
+
+/* 6. IMAGE SIZE UTILITIES */
+.img-max-w {
+    max-width: 800px;
+}
+
+.img-size-sm {
+    height: 60px;
+    width: auto;
+}
+
+/* 7. LIST STYLING UTILITIES */
+.list-unstyled {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+/* 8. ALERT & NOTIFICATION BOXES */
+.alert-box {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+    border-left: 4px solid;
+    border-radius: 4px;
+}
+
+.alert-warning {
+    background-color: #fff9e6;
+    border-left-color: #ffcc00;
+}
+
+.alert-info {
+    background-color: #e7f3ff;
+    border-left-color: #2a7be4;
+}
+
+/* 9. BUTTON SIZE UTILITIES */
+.btn-sm {
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+/* LOADING */
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 16px;
+    color: #000000;
+}
+
+/* FEEDBACK ROLE COLORS */
+.feedback-card[data-role="guest"] .feedback-role {
+    color: #757575;
+}
+
+.feedback-card[data-role="customer"] .feedback-role {
+    color: #2a7be4;
+}
+
+.feedback-card[data-role="supplier"] .feedback-role {
+    color: #28a745;
+}
+
+.feedback-card[data-role="delivery"] .feedback-role {
+    color: #ff9800;
+}
+
+.btn-pill {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 30px;
+}
+
+/* 10. FLEX UTILITIES */
+.flex-gap-sm {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.grid {
+    display: grid;
+}
+
+.full-span {
+    grid-column: 1 / -1;
+}
+
+.table-img {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.img-thumb {
+    max-width: 120px;
+    height: auto;
+    border-radius: 12px;
+}
+
+.filter-bar-wide {
+    grid-template-columns: 2fr 1fr auto;
+}
+
+.mb-4 {
+    margin-bottom: 2rem !important;
+}
+
+/* 11. CONTAINER WIDTH UTILITIES */
+.max-w-full {
+    max-width: 700px;
+    width: 100%;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.mb-3 { margin-bottom: 30px !important; }
+
+/* 12. DIVIDER/SEPARATOR STYLES */
+.divider-subtle {
+    margin: 20px 0;
+    opacity: 0.2;
+}
+
+.divider-light {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+/* 13. FORM-RELATED UTILITIES */
+.form-label-flex {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    cursor: pointer;
+}
+
+.checkbox-auto {
+    width: auto;
+    margin-top: 5px;
+}
+
+.text-small {
+    font-size: 0.9rem;
+}
+
+.text-black {
+    color: black;
+}
+
+.text-green {
+    color: #2d6a4f;
+}
+
+.text-error {
+    color: #d9534f;
+}
+
+.text-center-mt {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.text-center-desc {
+    text-align: center;
+    color: black;
+    margin-bottom: 20px;
+}
+
+/* 14. SIZING UTILITIES */
+.text-2xl {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* 15. UNIFIED THEME HELPERS */
+.page {
+    width: 100%;
+    padding: 40px 0;
+}
+
+.page.narrow {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--brand-color);
+    text-decoration: none;
+}
+
+.filter-bar {
+    display: grid;
+    grid-template-columns: 1fr minmax(180px, 220px) minmax(180px, 220px) auto;
+    gap: 16px;
+    align-items: end;
+}
+
+@media (max-width: 900px) {
+    .filter-bar {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.col-span-2 {
+    grid-column: 1 / -1;
+}
+
+.details-section summary {
+    cursor: pointer;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    font-weight: 700;
+}
+
+.details-section .details-body {
+    padding: 1rem 0 0;
+}
+
+.summary-row,
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.total-row {
+    padding-top: 0.75rem;
+    border-top: 1px solid #eee;
+    font-weight: 700;
+}
+
+.shipping-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.shipping-option.active {
+    border-color: var(--brand-color);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.quick-card {
+    display: block;
+    padding: 1.6rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #eee;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.quick-card:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+}
+
+.gradient-rose {
+    background: linear-gradient(135deg, #f5c2d8, #e879f9);
+    color: #000;
+}
+
+.footer-note {
+    color: #555;
+    font-size: 0.95rem;
+    margin-top: 1.5rem;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.topbar a,
+.topbar nav a {
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.topbar a:hover,
+.topbar nav a:hover {
+    color: var(--brand-color);
+}
+
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: #111;
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar-brand {
+    margin-bottom: 1rem;
+}
+
+.sidebar-brand .logo-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+    color: #fff;
+}
+
+.sidebar-brand .logo-sub {
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+
+.nav-section {
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: #aaa;
+    margin-top: 1rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    color: #ddd;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.panel {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.panel-title {
+    font-weight: 700;
+}
+
+.filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.tab {
+    padding: 0.55rem 0.9rem;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tab.active,
+.tab:hover {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.tbl-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-pill.pending {
+    background: #fff4e5;
+    color: #b45309;
+}
+
+.status-pill.approved {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-pill.rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.modal {
+    background: #fff;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-lg);
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1100;
+}
+
+.overlay.open {
+    display: flex;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: #000;
+}
+
+.text-white {
+    color: #fff !important;
+}
+
+.text-black {
+    color: #000 !important;
+}
+
+@media (max-width: 900px) {
+    .form-row,
+    .filter-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .page {
+        padding: 20px 0;
+    }
+}
+
+.flex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.container-padding-custom {
+    padding: 40px 5%;
+}
+
+/* 15. ERROR MESSAGE */
+.error-message {
+    color: #d9534f;
+    display: none;
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* 16. MORE UTILITY CLASSES */
+.hidden-custom {
+    display: none;
+    margin-top: 10px;
+}
+
+.mt-1 {
+    margin-top: 10px;
+}
+
+.flex-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+}
+
+.flex-row-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.link-small {
+    font-size: 0.9rem;
+}
+
+.text-center-large {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.text-center-sm {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.mt-4 {
+    margin-top: 40px;
+}
+
+.card-overflow {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.text-color-gold {
+    color: #d4a373;
+}
+
+/* 17. ICON AND IMAGE UTILITIES */
+.icon-large {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.profile-img-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #eee;
+}
+
+.input-hidden {
+    display: none;
+}
+
+/* 18. FORM UTILITIES */
+.label-block {
+    text-align: left;
+    display: block;
+}
+
+.text-input-center {
+    text-align: center;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+}
+
+.form-helper-text {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.form-link-btn {
+    background: none;
+    border: none;
+    color: #d4a373;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.form-status {
+    display: none;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* 19. ACTION BUTTONS AREA */
+.form-actions-mt {
+    margin-top: 20px;
+}
+
+.flex-gap-md { gap: 2rem; }
+
+/* 20. TEXT ALIGNMENT UTILITIES */
+.text-center {
+    text-align: center;
+}
+
+/* 21. CARD AND CONTAINER UTILITIES */
+.card-sm {
+    max-width: 400px;
+    padding: 40px;
+}
+
+.mb-2-sm {
+    margin-bottom: 20px;
+}
+
+.loader-center {
+    margin: 0 auto 20px;
+}
+
+.section-title-sm {
+    font-size: 1.8rem;
+}
+
+/* 22. FLEX UTILITIES FOR LAYOUT */
+.flex-between-gap {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.flex-col-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.divider-light-sm {
+    margin: 10px 0;
+    opacity: 0.2;
+}
+
+.border-left-color {
+    border-left: 5px solid;
+}
+
+.border-left-danger {
+    border-left-color: #ff4d4d;
+}
+
+.icon-stat {
+    color: #ff4d4d;
+}
+
+.task-card-yellow {
+    border-left-color: #ffc107;
+}
+
+.font-small-mb {
+    margin-top: 8px;
+    font-size: 0.9rem;
+}

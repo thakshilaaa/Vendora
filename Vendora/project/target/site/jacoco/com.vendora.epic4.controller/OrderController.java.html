@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic4.controller</a> &gt; <span class="el_source">OrderController.java</span></div><h1>OrderController.java</h1><pre class="source lang-java linenums">package com.vendora.epic4.controller;
+
+import com.vendora.epic1.exception.UnauthorizedException;
+import com.vendora.epic1.service.UserService;
+import com.vendora.epic4.model.Order;
+import com.vendora.epic4.model.Payment;
+import com.vendora.epic4.repository.OrderRepository;
+import com.vendora.epic4.repository.PaymentRepository;
+import com.vendora.epic4.service.OrderDeliverySyncService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping(&quot;/api/orders&quot;)
+@CrossOrigin(origins = &quot;*&quot;)
+public class OrderController {
+
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
+    private final UserService userService;
+    private final OrderDeliverySyncService orderDeliverySyncService;
+
+    public OrderController(OrderRepository orderRepository,
+                           PaymentRepository paymentRepository,
+                           UserService userService,
+<span class="fc" id="L34">                           OrderDeliverySyncService orderDeliverySyncService) {</span>
+<span class="fc" id="L35">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L36">        this.paymentRepository = paymentRepository;</span>
+<span class="fc" id="L37">        this.userService = userService;</span>
+<span class="fc" id="L38">        this.orderDeliverySyncService = orderDeliverySyncService;</span>
+<span class="fc" id="L39">    }</span>
+
+    @GetMapping
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public List&lt;Order&gt; getAllOrders() {
+<span class="nc" id="L44">        return orderRepository.findAll();</span>
+    }
+
+    @GetMapping(&quot;/mine&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public List&lt;Order&gt; getMyOrders() {
+<span class="nc" id="L50">        return orderRepository.findByUserIdOrderByIdDesc(userService.getCurrentUser().getId());</span>
+    }
+
+    @PostMapping(&quot;/add&quot;)
+    public Order addOrder(@RequestBody Order order) {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (order.getStatus() == null) {</span>
+<span class="nc" id="L56">            order.setStatus(&quot;PENDING&quot;);</span>
+        }
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (order.getPaymentStatus() == null) {</span>
+<span class="nc" id="L59">            order.setPaymentStatus(&quot;UNPAID&quot;);</span>
+        }
+        try {
+<span class="nc" id="L62">            order.setUserId(userService.getCurrentUser().getId());</span>
+<span class="nc" id="L63">        } catch (UnauthorizedException ignored) {</span>
+<span class="nc" id="L64">        }</span>
+<span class="nc" id="L65">        return orderRepository.save(order);</span>
+    }
+
+    @PutMapping(&quot;/{id}/cancel&quot;)
+    public ResponseEntity&lt;?&gt; cancelOrder(@PathVariable Long id) {
+<span class="nc" id="L70">        Optional&lt;Order&gt; orderOpt = orderRepository.findById(id);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (orderOpt.isEmpty()) {</span>
+<span class="nc" id="L72">            return ResponseEntity.notFound().build();</span>
+        }
+
+<span class="nc" id="L75">        Order order = orderOpt.get();</span>
+<span class="nc bnc" id="L76" title="All 4 branches missed.">        if (!isCurrentUserAdmin() &amp;&amp; order.getUserId() != null) {</span>
+            try {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                if (!order.getUserId().equals(userService.getCurrentUser().getId())) {</span>
+<span class="nc" id="L79">                    return ResponseEntity.status(403).body(&quot;Not your order&quot;);</span>
+                }
+<span class="nc" id="L81">            } catch (UnauthorizedException e) {</span>
+<span class="nc" id="L82">                return ResponseEntity.status(401).body(&quot;Sign in to cancel this order&quot;);</span>
+<span class="nc" id="L83">            }</span>
+        }
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (&quot;PAID&quot;.equalsIgnoreCase(order.getPaymentStatus())) {</span>
+<span class="nc" id="L87">            order.setStatus(&quot;Refund Requested&quot;);</span>
+<span class="nc" id="L88">            orderRepository.save(order);</span>
+<span class="nc" id="L89">            return ResponseEntity.ok(&quot;Refund Request Submitted.&quot;);</span>
+        }
+
+<span class="nc" id="L92">        order.setStatus(&quot;Cancelled&quot;);</span>
+<span class="nc" id="L93">        orderRepository.save(order);</span>
+<span class="nc" id="L94">        return ResponseEntity.ok(&quot;Order Cancelled.&quot;);</span>
+    }
+
+    @PutMapping(&quot;/{id}/status&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;Order&gt; updateStatus(@PathVariable Long id, @RequestBody String status) {
+<span class="nc" id="L100">        return orderRepository.findById(id).map(o -&gt; {</span>
+<span class="nc" id="L101">            String cleanStatus = status.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+<span class="nc" id="L102">            o.setStatus(cleanStatus);</span>
+<span class="nc" id="L103">            return ResponseEntity.ok(orderRepository.save(o));</span>
+<span class="nc" id="L104">        }).orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @PutMapping(&quot;/{id}/pay-confirm&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    @Transactional
+    public ResponseEntity&lt;?&gt; confirmPayment(@PathVariable Long id) {
+<span class="nc" id="L111">        return orderRepository.findById(id).map(order -&gt; {</span>
+<span class="nc" id="L112">            order.setPaymentStatus(&quot;PAID&quot;);</span>
+<span class="nc" id="L113">            orderRepository.save(order);</span>
+<span class="nc" id="L114">            List&lt;Payment&gt; payments = paymentRepository.findByOrderId(id);</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            if (payments != null) {</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                for (Payment p : payments) {</span>
+<span class="nc" id="L117">                    p.setStatus(&quot;PAID&quot;);</span>
+<span class="nc" id="L118">                    paymentRepository.save(p);</span>
+<span class="nc" id="L119">                }</span>
+            }
+<span class="nc" id="L121">            orderDeliverySyncService.tryCreateDeliveryForOrder(order);</span>
+<span class="nc" id="L122">            return ResponseEntity.ok(order);</span>
+<span class="nc" id="L123">        }).orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;Void&gt; deleteOrder(@PathVariable Long id) {
+<span class="nc" id="L129">        return orderRepository.findById(id).map(order -&gt; {</span>
+<span class="nc" id="L130">            orderRepository.delete(order);</span>
+<span class="nc" id="L131">            return ResponseEntity.ok().&lt;Void&gt;build();</span>
+<span class="nc" id="L132">        }).orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @GetMapping(&quot;/stats&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getOrderStats() {
+<span class="nc" id="L138">        Map&lt;String, Object&gt; stats = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L139">        long totalOrders = orderRepository.count();</span>
+<span class="nc" id="L140">        long pendingOrders = orderRepository.countByStatus(&quot;PENDING&quot;);</span>
+<span class="nc" id="L141">        Double revenue = orderRepository.getTotalRevenue();</span>
+<span class="nc" id="L142">        Double avgValue = orderRepository.getAverageOrderValue();</span>
+
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        stats.put(&quot;totalRevenue&quot;, revenue != null ? String.format(&quot;%.2f&quot;, revenue) : &quot;0.00&quot;);</span>
+<span class="nc" id="L145">        stats.put(&quot;totalOrders&quot;, totalOrders);</span>
+<span class="nc" id="L146">        stats.put(&quot;pendingOrders&quot;, pendingOrders);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        stats.put(&quot;avgOrderValue&quot;, avgValue != null ? String.format(&quot;%.2f&quot;, avgValue) : &quot;0.00&quot;);</span>
+<span class="nc" id="L148">        return ResponseEntity.ok(stats);</span>
+    }
+
+    private static boolean isCurrentUserAdmin() {
+<span class="nc" id="L152">        var a = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L153" title="All 6 branches missed.">        if (a == null || !a.isAuthenticated() || &quot;anonymousUser&quot;.equals(a.getPrincipal())) {</span>
+<span class="nc" id="L154">            return false;</span>
+        }
+<span class="nc" id="L156">        return a.getAuthorities().stream()</span>
+<span class="nc" id="L157">                .anyMatch(ga -&gt; &quot;ROLE_ADMIN&quot;.equals(ga.getAuthority()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

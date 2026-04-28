@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminDashboardController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.controller</a> &gt; <span class="el_source">AdminDashboardController.java</span></div><h1>AdminDashboardController.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.controller;
+
+import com.vendora.common.ApiResponse;
+import com.vendora.common.Constants;
+import com.vendora.common.PaginationResponse;
+import com.vendora.epic1.dto.user.UserDetailsResponse;
+import com.vendora.epic1.dto.user.UserSummaryResponse;
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic1.model.User;
+import com.vendora.epic1.model.enums.RoleType;
+import com.vendora.epic1.model.enums.UserStatus;
+import com.vendora.epic1.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
+@RestController
+@RequestMapping(Constants.ADMIN_BASE + &quot;/dashboard&quot;)
+<span class="fc" id="L24">@RequiredArgsConstructor</span>
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+public class AdminDashboardController {
+
+        private final UserRepository userRepository;
+
+        @GetMapping(&quot;/users&quot;)
+        public ResponseEntity&lt;ApiResponse&lt;PaginationResponse&lt;UserSummaryResponse&gt;&gt;&gt; getAllUsers(
+                        @RequestParam(defaultValue = Constants.DEFAULT_PAGE_NUMBER) int page,
+                        @RequestParam(defaultValue = Constants.DEFAULT_PAGE_SIZE) int size,
+                        @RequestParam(defaultValue = Constants.DEFAULT_SORT_BY) String sortBy,
+                        @RequestParam(defaultValue = Constants.DEFAULT_SORT_DIRECTION) String direction) {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">                Sort sort = direction.equalsIgnoreCase(&quot;desc&quot;)</span>
+<span class="nc" id="L37">                                ? Sort.by(sortBy).descending()</span>
+<span class="nc" id="L38">                                : Sort.by(sortBy).ascending();</span>
+
+<span class="nc" id="L40">                Pageable pageable = PageRequest.of(page, size, sort);</span>
+
+<span class="nc" id="L42">                Page&lt;UserSummaryResponse&gt; userPage = userRepository.findAll(pageable)</span>
+<span class="nc" id="L43">                                .map(this::mapToSummaryResponse);</span>
+
+<span class="nc" id="L45">                return ResponseEntity.ok(</span>
+<span class="nc" id="L46">                                ApiResponse.success(</span>
+                                                Constants.USER_LIST_RETRIEVED,
+<span class="nc" id="L48">                                                PaginationResponse.from(userPage)));</span>
+        }
+
+        @GetMapping(&quot;/users/{id}&quot;)
+        public ResponseEntity&lt;ApiResponse&lt;UserDetailsResponse&gt;&gt; getUserById(@PathVariable Long id) {
+<span class="nc" id="L53">                User user = userRepository.findById(id)</span>
+<span class="nc" id="L54">                                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User not found with id: &quot; + id));</span>
+
+<span class="nc" id="L56">                return ResponseEntity.ok(</span>
+<span class="nc" id="L57">                                ApiResponse.success(</span>
+                                                Constants.USER_DETAILS_RETRIEVED,
+<span class="nc" id="L59">                                                mapToDetailsResponse(user)));</span>
+        }
+
+        @GetMapping(&quot;/users/role/{role}&quot;)
+        public ResponseEntity&lt;ApiResponse&lt;List&lt;UserSummaryResponse&gt;&gt;&gt; getUsersByRole(@PathVariable RoleType role) {
+<span class="nc" id="L64">                List&lt;UserSummaryResponse&gt; users = userRepository.findAll()</span>
+<span class="nc" id="L65">                                .stream()</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                                .filter(u -&gt; u.getRole() == role)</span>
+<span class="nc" id="L67">                                .map(this::mapToSummaryResponse)</span>
+<span class="nc" id="L68">                                .toList();</span>
+
+<span class="nc" id="L70">                return ResponseEntity.ok(</span>
+<span class="nc" id="L71">                                ApiResponse.success(</span>
+                                                Constants.USER_LIST_RETRIEVED,
+                                                users));
+        }
+
+        @GetMapping(&quot;/users/status/{status}&quot;)
+        public ResponseEntity&lt;ApiResponse&lt;List&lt;UserSummaryResponse&gt;&gt;&gt; getUsersByStatus(
+                        @PathVariable UserStatus status) {
+<span class="nc" id="L79">                List&lt;UserSummaryResponse&gt; users = userRepository.findAll()</span>
+<span class="nc" id="L80">                                .stream()</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                                .filter(u -&gt; u.getStatus() == status)</span>
+<span class="nc" id="L82">                                .map(this::mapToSummaryResponse)</span>
+<span class="nc" id="L83">                                .toList();</span>
+
+<span class="nc" id="L85">                return ResponseEntity.ok(</span>
+<span class="nc" id="L86">                                ApiResponse.success(</span>
+                                                Constants.USER_LIST_RETRIEVED,
+                                                users));
+        }
+
+        private UserSummaryResponse mapToSummaryResponse(User user) {
+<span class="nc" id="L92">                String fullName = user.getFullName();</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                String[] nameParts = fullName != null ? fullName.trim().split(&quot;\\s+&quot;, 2) : new String[]{&quot;&quot;, &quot;&quot;};</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                String firstName = nameParts.length &gt; 0 ? nameParts[0] : &quot;&quot;;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                String lastName = nameParts.length &gt; 1 ? nameParts[1] : &quot;&quot;;</span>
+
+<span class="nc" id="L97">                return UserSummaryResponse.builder()</span>
+<span class="nc" id="L98">                                .id(user.getId())</span>
+<span class="nc" id="L99">                                .firstName(firstName)</span>
+<span class="nc" id="L100">                                .lastName(lastName)</span>
+<span class="nc" id="L101">                                .fullName(fullName)</span>
+<span class="nc" id="L102">                                .email(user.getEmail())</span>
+<span class="nc" id="L103">                                .phoneNumber(user.getPhone())</span>
+<span class="nc" id="L104">                                .role(user.getRole())</span>
+<span class="nc" id="L105">                                .status(user.getStatus())</span>
+<span class="nc" id="L106">                                .emailVerified(user.getEmailVerified())</span>
+<span class="nc" id="L107">                                .createdAt(user.getCreatedAt())</span>
+<span class="nc" id="L108">                                .updatedAt(user.getUpdatedAt())</span>
+<span class="nc" id="L109">                                .build();</span>
+        }
+
+        private UserDetailsResponse mapToDetailsResponse(User user) {
+<span class="nc" id="L113">                String fullName = user.getFullName();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                String[] nameParts = fullName != null ? fullName.trim().split(&quot;\\s+&quot;, 2) : new String[]{&quot;&quot;, &quot;&quot;};</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                String firstName = nameParts.length &gt; 0 ? nameParts[0] : &quot;&quot;;</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                String lastName = nameParts.length &gt; 1 ? nameParts[1] : &quot;&quot;;</span>
+
+<span class="nc" id="L118">                return UserDetailsResponse.builder()</span>
+<span class="nc" id="L119">                                .id(user.getId())</span>
+<span class="nc" id="L120">                                .firstName(firstName)</span>
+<span class="nc" id="L121">                                .lastName(lastName)</span>
+<span class="nc" id="L122">                                .fullName(fullName)</span>
+<span class="nc" id="L123">                                .email(user.getEmail())</span>
+<span class="nc" id="L124">                                .phoneNumber(user.getPhone())</span>
+<span class="nc" id="L125">                                .role(user.getRole())</span>
+<span class="nc" id="L126">                                .status(user.getStatus())</span>
+<span class="nc" id="L127">                                .emailVerified(user.getEmailVerified())</span>
+<span class="nc" id="L128">                                .accountNonLocked(true)</span>
+<span class="nc" id="L129">                                .accountNonExpired(true)</span>
+<span class="nc" id="L130">                                .credentialsNonExpired(true)</span>
+<span class="nc" id="L131">                                .createdAt(user.getCreatedAt())</span>
+<span class="nc" id="L132">                                .updatedAt(user.getUpdatedAt())</span>
+<span class="nc" id="L133">                                .lastLoginAt(null)</span>
+<span class="nc" id="L134">                                .build();</span>
+        }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

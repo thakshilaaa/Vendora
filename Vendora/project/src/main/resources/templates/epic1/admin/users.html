@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vendora | User Management</title>
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body.home-bg {
+            background-image: url('/images/b3.webp');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .user-page {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .user-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .user-filters button {
+            padding: 8px 14px;
+            border: none;
+            background: #f5f5f5;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .user-filters button.active {
+            background: #d4a373;
+            color: white;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 8px;
+        }
+
+        .table th, .table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body class="home-bg">
+<div class="user-page">
+    <div class="user-toolbar">
+        <div>
+            <h2 style="margin:0;">User Management</h2>
+            <p class="text-muted" style="margin:4px 0 0 0;" id="userCountHint">Loading…</p>
+        </div>
+        <a th:href="@{/admin-dashboard}" class="btn-outline btn-sm">Back to Dashboard</a>
+    </div>
+
+    <div class="user-filters" id="roleFilters" role="tablist">
+        <button type="button" class="active" data-filter="all">All users</button>
+        <button type="button" data-filter="customer">Customers</button>
+        <button type="button" data-filter="supplier">Suppliers</button>
+        <button type="button" data-filter="delivery">Delivery</button>
+    </div>
+
+    <p id="usersError" class="text-red" style="display:none; margin-top:12px;" role="alert"></p>
+
+    <section class="card card-overflow" style="margin-top:12px; padding:0;">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Email verified</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="userTableBody">
+            <tr><td colspan="9" class="text-center">Loading…</td></tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<script th:inline="javascript">
+    (function () {
+        const API_BASE = /*[[@{/api/admin/dashboard}]]*/ '/api/admin/dashboard';
+
+        function getToken() {
+            return localStorage.getItem('token') || localStorage.getItem('vendoraToken');
+        }
+
+        function authHeaders() {
+            const t = getToken();
+            if (!t) return {};
+            return { 'Authorization': 'Bearer ' + t };
+        }
+
+        const ROLE_PATH = {
+            all: null,
+            customer: 'ROLE_CUSTOMER',
+            supplier: 'ROLE_SUPPLIER',
+            delivery: 'ROLE_DELIVERY'
+        };
+
+        const errEl = document.getElementById('usersError');
+        const tbody = document.getElementById('userTableBody');
+        const countHint = document.getElementById('userCountHint');
+
+        function showError(msg) {
+            errEl.textContent = msg;
+            errEl.style.display = msg ? 'block' : 'none';
+        }
+
+        function fmtDate(s) {
+            if (!s) return '—';
+            try {
+                return new Date(s).toLocaleString();
+            } catch (e) {
+                return s;
+            }
+        }
+
+        function rowHtml(u) {
+            const ev = u.emailVerified ? 'Yes' : 'No';
+            const displayName = u.fullName || [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || '—';
+            return [
+                '<tr data-user-id="', u.id, '">',
+                '<td>', u.id, '</td>',
+                '<td>', String(displayName).replace(/</g, '&lt;'), '</td>',
+                '<td>', (u.email || '—').replace(/</g, '&lt;'), '</td>',
+                '<td>', (u.phoneNumber || '—').replace(/</g, '&lt;'), '</td>',
+                '<td>', (u.role || '—').replace(/</g, '&lt;'), '</td>',
+                '<td><span class="status-badge">', (u.status || '—').replace(/</g, '&lt;'), '</span></td>',
+                '<td>', ev, '</td>',
+                '<td>', fmtDate(u.createdAt), '</td>',
+                '<td><button type="button" class="btn-outline btn-sm view-user" data-id="', u.id, '">View</button></td>',
+                '</tr>'
+            ].join('');
+        }
+
+        async function loadUsers(filterKey) {
+            showError('');
+            const role = ROLE_PATH[filterKey];
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading…</td></tr>';
+            const token = getToken();
+            if (!token) {
+                showError('Not signed in. Open Admin Login and sign in first.');
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">Session required</td></tr>';
+                countHint.textContent = '';
+                return;
+            }
+            let url;
+            if (!role) {
+                url = API_BASE + '/users?page=0&size=500&sortBy=id&direction=asc';
+            } else {
+                url = API_BASE + '/users/role/' + encodeURIComponent(role);
+            }
+            try {
+                const res = await fetch(url, { headers: authHeaders() });
+                const json = await res.json().catch(() => ({}));
+                if (res.status === 401 || res.status === 403) {
+                    showError('Access denied. Sign in as an administrator.');
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Unauthorized</td></tr>';
+                    countHint.textContent = '';
+                    return;
+                }
+                if (!res.ok) {
+                    showError((json && json.message) || 'Failed to load users');
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Error</td></tr>';
+                    return;
+                }
+                const payload = json.data;
+                let list = [];
+                if (payload && Array.isArray(payload.content)) {
+                    list = payload.content;
+                    countHint.textContent = list.length + ' users (page 0, up to 500 shown)';
+                } else if (Array.isArray(payload)) {
+                    list = payload;
+                    countHint.textContent = list.length + ' users';
+                } else {
+                    countHint.textContent = '0 users';
+                }
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No users found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = list.map(rowHtml).join('');
+            } catch (e) {
+                showError('Network error. Try again.');
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">Error</td></tr>';
+            }
+        }
+
+        async function viewUser(id) {
+            const token = getToken();
+            if (!token) {
+                alert('Session expired. Log in again.');
+                return;
+            }
+            try {
+                const res = await fetch(API_BASE + '/users/' + id, { headers: authHeaders() });
+                const json = await res.json();
+                if (!res.ok) {
+                    alert((json && json.message) || 'Could not load user');
+                    return;
+                }
+                const d = json.data;
+                if (!d) {
+                    alert('No data');
+                    return;
+                }
+                const lines = [
+                    'ID: ' + d.id,
+                    'Name: ' + (d.fullName || d.firstName + ' ' + (d.lastName || '')),
+                    'Email: ' + d.email,
+                    'Phone: ' + (d.phoneNumber || '—'),
+                    'Role: ' + d.role,
+                    'Status: ' + d.status,
+                    'Email verified: ' + d.emailVerified,
+                    'Created: ' + fmtDate(d.createdAt)
+                ];
+                alert(lines.join('\n'));
+            } catch (e) {
+                alert('Request failed');
+            }
+        }
+
+        document.getElementById('roleFilters').addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-filter]');
+            if (!btn) return;
+            document.querySelectorAll('#roleFilters button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadUsers(btn.getAttribute('data-filter'));
+        });
+
+        document.getElementById('userTableBody').addEventListener('click', function (e) {
+            const b = e.target.closest('.view-user');
+            if (!b) return;
+            const id = b.getAttribute('data-id');
+            if (id) viewUser(id);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadUsers('all');
+        });
+    })();
+</script>
+</body>
+</html>

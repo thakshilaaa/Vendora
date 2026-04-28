@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminPartnershipServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.statics.service.impl</a> &gt; <span class="el_source">AdminPartnershipServiceImpl.java</span></div><h1>AdminPartnershipServiceImpl.java</h1><pre class="source lang-java linenums">package com.vendora.statics.service.impl;
+
+import com.vendora.epic1.exception.BadRequestException;
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic1.model.PasswordResetToken;
+import com.vendora.epic1.model.User;
+import com.vendora.epic1.model.enums.RoleType;
+import com.vendora.epic1.model.enums.UserStatus;
+import com.vendora.epic1.repository.PasswordResetTokenRepository;
+import com.vendora.epic1.repository.UserRepository;
+import com.vendora.epic1.service.EmailService;
+import com.vendora.statics.dto.partnership.PartnershipApplicationResponse;
+import com.vendora.statics.dto.partnership.ReviewPartnershipRequest;
+import com.vendora.statics.model.PartnershipApplication;
+import com.vendora.statics.model.enums.ApplicationStatus;
+import com.vendora.statics.model.enums.ApplicationType;
+import com.vendora.statics.repository.PartnershipApplicationRepository;
+import com.vendora.statics.service.AdminPartnershipService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class AdminPartnershipServiceImpl implements AdminPartnershipService {
+
+<span class="fc" id="L40">    private static final Logger log = LoggerFactory.getLogger(AdminPartnershipServiceImpl.class);</span>
+
+    private final PartnershipApplicationRepository partnershipApplicationRepository;
+    private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+    @Value(&quot;${app.base-url:http://localhost:8080}&quot;)
+    private String appBaseUrl;
+
+    public AdminPartnershipServiceImpl(
+            PartnershipApplicationRepository partnershipApplicationRepository,
+            UserRepository userRepository,
+            PasswordResetTokenRepository passwordResetTokenRepository,
+            PasswordEncoder passwordEncoder,
+            EmailService emailService
+<span class="fc" id="L57">    ) {</span>
+<span class="fc" id="L58">        this.partnershipApplicationRepository = partnershipApplicationRepository;</span>
+<span class="fc" id="L59">        this.userRepository = userRepository;</span>
+<span class="fc" id="L60">        this.passwordResetTokenRepository = passwordResetTokenRepository;</span>
+<span class="fc" id="L61">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L62">        this.emailService = emailService;</span>
+<span class="fc" id="L63">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;PartnershipApplicationResponse&gt; getAllApplications() {
+<span class="nc" id="L68">        return partnershipApplicationRepository.findAll().stream()</span>
+<span class="nc" id="L69">                .sorted(Comparator.comparing(PartnershipApplication::getSubmittedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())</span>
+<span class="nc" id="L70">                .map(PartnershipServiceImpl::toResponse)</span>
+<span class="nc" id="L71">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PartnershipApplicationResponse getApplicationById(Long applicationId) {
+<span class="nc" id="L77">        PartnershipApplication application = partnershipApplicationRepository.findById(applicationId)</span>
+<span class="nc" id="L78">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Partnership application not found&quot;));</span>
+<span class="nc" id="L79">        return PartnershipServiceImpl.toResponse(application);</span>
+    }
+
+    @Override
+    @Transactional
+    public PartnershipApplicationResponse reviewApplication(Long applicationId, ReviewPartnershipRequest request) {
+<span class="nc" id="L85">        PartnershipApplication application = partnershipApplicationRepository.findById(applicationId)</span>
+<span class="nc" id="L86">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Partnership application not found&quot;));</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (application.getStatus() != ApplicationStatus.PENDING) {</span>
+<span class="nc" id="L89">            throw new BadRequestException(&quot;Only pending applications can be reviewed.&quot;);</span>
+        }
+
+<span class="nc" id="L92">        ApplicationStatus newStatus = request.getStatus();</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (newStatus == ApplicationStatus.PENDING) {</span>
+<span class="nc" id="L94">            throw new BadRequestException(&quot;Choose APPROVED, REJECTED, or another final status.&quot;);</span>
+        }
+
+<span class="nc" id="L97">        application.setStatus(newStatus);</span>
+<span class="nc" id="L98">        application.setAdminRemarks(request.getAdminRemarks());</span>
+<span class="nc" id="L99">        application.setReviewedAt(LocalDateTime.now());</span>
+
+<span class="nc" id="L101">        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L102" title="All 6 branches missed.">        if (auth != null &amp;&amp; auth.isAuthenticated() &amp;&amp; !&quot;anonymousUser&quot;.equals(auth.getPrincipal())) {</span>
+<span class="nc" id="L103">            userRepository.findByUserCodeIgnoreCase(auth.getName()).ifPresent(application::setReviewedBy);</span>
+        }
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (newStatus == ApplicationStatus.APPROVED) {</span>
+<span class="nc" id="L107">            provisionPartnerAccount(application);</span>
+        }
+
+<span class="nc" id="L110">        PartnershipApplication saved = partnershipApplicationRepository.save(application);</span>
+<span class="nc" id="L111">        return PartnershipServiceImpl.toResponse(saved);</span>
+    }
+
+    private void provisionPartnerAccount(PartnershipApplication application) {
+<span class="nc" id="L115">        String email = application.getEmail().trim().toLowerCase();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        String appPhone = application.getPhoneNumber() != null ? application.getPhoneNumber().trim() : null;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        RoleType role = application.getApplicationType() == ApplicationType.SUPPLIER_PARTNERSHIP</span>
+<span class="nc" id="L118">                ? RoleType.ROLE_SUPPLIER</span>
+<span class="nc" id="L119">                : RoleType.ROLE_DELIVERY;</span>
+
+        User user;
+<span class="nc bnc" id="L122" title="All 4 branches missed.">        if (appPhone != null &amp;&amp; !appPhone.isBlank()) {</span>
+<span class="nc" id="L123">            user = userRepository.findByEmailIgnoreCaseAndPhone(email, appPhone)</span>
+<span class="nc" id="L124">                    .orElseGet(() -&gt; createPartnerUserEntity(application, role));</span>
+        } else {
+<span class="nc" id="L126">            user = userRepository.findAllByEmailIgnoreCase(email).stream()</span>
+<span class="nc" id="L127">                    .findFirst()</span>
+<span class="nc" id="L128">                    .orElseGet(() -&gt; createPartnerUserEntity(application, role));</span>
+        }
+<span class="nc bnc" id="L130" title="All 4 branches missed.">        if (user.getRole() != RoleType.ROLE_ADMIN &amp;&amp; user.getRole() != role) {</span>
+<span class="nc" id="L131">            user.setRole(role);</span>
+        }
+<span class="nc" id="L133">        user.setPhone(application.getPhoneNumber());</span>
+<span class="nc" id="L134">        user.setStatus(UserStatus.INACTIVE);</span>
+<span class="nc" id="L135">        user.setEmailVerified(true);</span>
+<span class="nc" id="L136">        user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));</span>
+<span class="nc" id="L137">        user = userRepository.save(user);</span>
+<span class="nc" id="L138">        application.setUser(user);</span>
+
+<span class="nc" id="L140">        passwordResetTokenRepository.deleteByUser(user);</span>
+<span class="nc" id="L141">        PasswordResetToken token = new PasswordResetToken(</span>
+<span class="nc" id="L142">                UUID.randomUUID().toString(),</span>
+                user,
+<span class="nc" id="L144">                Instant.now().plus(72, ChronoUnit.HOURS)</span>
+        );
+<span class="nc" id="L146">        passwordResetTokenRepository.save(token);</span>
+
+        try {
+<span class="nc" id="L149">            String completeUrl = appBaseUrl.replaceAll(&quot;/$&quot;, &quot;&quot;)</span>
+                    + &quot;/complete-registration?token=&quot;
+<span class="nc" id="L151">                    + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8)</span>
+                    + &quot;&amp;email=&quot;
+<span class="nc" id="L153">                    + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L154">            emailService.sendPartnershipApprovalEmail(user.getEmail(), completeUrl);</span>
+<span class="nc" id="L155">        } catch (Exception e) {</span>
+<span class="nc" id="L156">            log.warn(&quot;Could not send partner invitation email: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L157">        }</span>
+<span class="nc" id="L158">    }</span>
+
+    private User createPartnerUserEntity(PartnershipApplication application, RoleType role) {
+<span class="nc" id="L161">        User user = new User();</span>
+<span class="nc" id="L162">        user.setEmail(application.getEmail().trim().toLowerCase());</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        user.setFullName(application.getContactPersonName() != null ? application.getContactPersonName().trim() : &quot;Partner&quot;);</span>
+<span class="nc" id="L164">        user.setRole(role);</span>
+<span class="nc" id="L165">        user.setStatus(UserStatus.INACTIVE);</span>
+<span class="nc" id="L166">        user.setEmailVerified(true);</span>
+<span class="nc" id="L167">        user.setPhone(application.getPhoneNumber());</span>
+<span class="nc" id="L168">        user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));</span>
+<span class="nc" id="L169">        return userRepository.save(user);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

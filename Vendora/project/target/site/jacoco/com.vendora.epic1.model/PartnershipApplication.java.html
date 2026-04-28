@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PartnershipApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.model</a> &gt; <span class="el_source">PartnershipApplication.java</span></div><h1>PartnershipApplication.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.model;
+
+import com.vendora.epic1.model.enums.ApplicantType;
+import com.vendora.epic1.model.enums.PartnershipStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity(name = &quot;Epic1PartnershipApplication&quot;)
+@Table(name = &quot;partnership_applications&quot;)
+@Getter
+<span class="nc" id="L20">@Setter</span>
+public class PartnershipApplication {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ApplicantType applicantType;
+
+    @NotBlank
+    private String fullName;
+
+    private String contactPersonName;
+
+    @NotBlank
+    @Email
+    @Column(nullable = false)
+    private String email;
+
+<span class="nc" id="L41">    private String phoneNumber;</span>
+    private String nic;
+
+    // Address
+    private String addressLine1;
+    private String businessAddress;
+    private String province;
+    private String district;
+    private String city;
+    private String postalCode;
+
+    // Company / Supplier fields (nullable for delivery)
+    private String businessName;
+    private String businessRegNumber;
+    private String tinNumber;
+    private String productCategory;
+
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String productDetails;
+
+<span class="fc" id="L61">    @Enumerated(EnumType.STRING)</span>
+    @Column(nullable = false)
+    private PartnershipStatus status = PartnershipStatus.PENDING;
+
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String reviewNote;
+
+    private LocalDateTime reviewedAt;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+<span class="fc" id="L78">    public PartnershipApplication() {}</span>
+
+    // Getters &amp; Setters
+
+<span class="nc" id="L82">    public Long getId() { return id; }</span>
+
+<span class="nc" id="L84">    public ApplicantType getApplicantType() { return applicantType; }</span>
+<span class="nc" id="L85">    public void setApplicantType(ApplicantType applicantType) { this.applicantType = applicantType; }</span>
+
+<span class="nc" id="L87">    public String getFullName() { return fullName; }</span>
+<span class="nc" id="L88">    public void setFullName(String fullName) { this.fullName = fullName; }</span>
+<span class="nc" id="L89">    public String getContactPersonName() { return contactPersonName; }</span>
+<span class="nc" id="L90">    public void setContactPersonName(String contactPersonName) { this.contactPersonName = contactPersonName; }</span>
+
+<span class="nc" id="L92">    public String getEmail() { return email; }</span>
+<span class="nc" id="L93">    public void setEmail(String email) { this.email = email; }</span>
+
+<span class="nc" id="L95">    public String getPhone() { return phoneNumber; }</span>
+<span class="nc" id="L96">    public void setPhone(String phone) { this.phoneNumber = phone; }</span>
+
+<span class="nc" id="L98">    public String getNic() { return nic; }</span>
+<span class="nc" id="L99">    public void setNic(String nic) { this.nic = nic; }</span>
+
+<span class="nc" id="L101">    public String getAddressLine1() { return addressLine1; }</span>
+<span class="nc" id="L102">    public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }</span>
+
+<span class="nc" id="L104">    public String getBusinessAddress() { return businessAddress; }</span>
+<span class="nc" id="L105">    public void setBusinessAddress(String businessAddress) { this.businessAddress = businessAddress; }</span>
+
+<span class="nc" id="L107">    public String getProvince() { return province; }</span>
+<span class="nc" id="L108">    public void setProvince(String province) { this.province = province; }</span>
+
+<span class="nc" id="L110">    public String getDistrict() { return district; }</span>
+<span class="nc" id="L111">    public void setDistrict(String district) { this.district = district; }</span>
+
+<span class="nc" id="L113">    public String getCity() { return city; }</span>
+<span class="nc" id="L114">    public void setCity(String city) { this.city = city; }</span>
+
+<span class="nc" id="L116">    public String getPostalCode() { return postalCode; }</span>
+<span class="nc" id="L117">    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }</span>
+
+<span class="nc" id="L119">    public String getBusinessName() { return businessName; }</span>
+<span class="nc" id="L120">    public void setBusinessName(String businessName) { this.businessName = businessName; }</span>
+
+<span class="nc" id="L122">    public String getBusinessRegNumber() { return businessRegNumber; }</span>
+<span class="nc" id="L123">    public void setBusinessRegNumber(String businessRegNumber) { this.businessRegNumber = businessRegNumber; }</span>
+
+<span class="nc" id="L125">    public String getTinNumber() { return tinNumber; }</span>
+<span class="nc" id="L126">    public void setTinNumber(String tinNumber) { this.tinNumber = tinNumber; }</span>
+
+<span class="nc" id="L128">    public String getProductCategory() { return productCategory; }</span>
+<span class="nc" id="L129">    public void setProductCategory(String productCategory) { this.productCategory = productCategory; }</span>
+
+<span class="nc" id="L131">    public String getProductDetails() { return productDetails; }</span>
+<span class="nc" id="L132">    public void setProductDetails(String productDetails) { this.productDetails = productDetails; }</span>
+
+<span class="nc" id="L134">    public PartnershipStatus getStatus() { return status; }</span>
+<span class="nc" id="L135">    public void setStatus(PartnershipStatus status) { this.status = status; }</span>
+
+<span class="nc" id="L137">    public String getReviewNote() { return reviewNote; }</span>
+<span class="nc" id="L138">    public void setReviewNote(String reviewNote) { this.reviewNote = reviewNote; }</span>
+
+<span class="nc" id="L140">    public LocalDateTime getReviewedAt() { return reviewedAt; }</span>
+<span class="nc" id="L141">    public void setReviewedAt(LocalDateTime reviewedAt) { this.reviewedAt = reviewedAt; }</span>
+
+<span class="nc" id="L143">    public LocalDateTime getCreatedAt() { return createdAt; }</span>
+<span class="nc" id="L144">    public LocalDateTime getUpdatedAt() { return updatedAt; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

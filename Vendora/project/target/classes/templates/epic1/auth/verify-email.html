@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendora | Verify Email</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body.form-bg {
+      background-image: url('/images/b2.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+  </style>
+</head>
+
+<body class="form-bg">
+<div class="page-wrapper">
+
+  <section class="form-container">
+    <h1 class="section-title">Verify your email</h1>
+
+    <form class="card" id="verifyEmailForm">
+      <p id="verificationChannelText">We sent a secure link to your email. Open the link, or paste the token from the link below.</p>
+
+      <div class="field" id="tokenField">
+        <label for="tokenInput">Verification token (optional if you use the link from your email)</label>
+        <input type="text" id="tokenInput" class="input" autocomplete="off" spellcheck="false"
+               placeholder="Paste token from the verify link" style="word-break: break-all;" />
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn">Verify &amp; activate</button>
+
+      <div class="text-center-mt">
+        <p>
+          Didn&apos;t get the email?
+          <button type="button" class="btn-link" onclick="resendCode()">Resend</button>
+        </p>
+      </div>
+    </form>
+
+    <p id="verifyStatusMsg" class="form-status"></p>
+  </section>
+
+</div>
+
+<script>
+  const form = document.getElementById('verifyEmailForm');
+  const statusEl = document.getElementById('verifyStatusMsg');
+  const tokenInput = document.getElementById('tokenInput');
+  const params = new URLSearchParams(window.location.search);
+  const nextPath = params.get("next") || localStorage.getItem("pendingVerificationNext") || "/login";
+  const verifyEmail = localStorage.getItem("pendingVerificationEmail") || "";
+  const verifyPhone = localStorage.getItem("pendingVerificationPhone") || "";
+
+  /** t= token from email link (no email in URL — avoids tampering) */
+  const tParam = params.get("t");
+  if (tParam) {
+    tokenInput.value = tParam.trim();
+  }
+
+  async function postVerify(token) {
+    const response = await fetch('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token.trim() })
+    });
+    return response;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = tokenInput.value;
+    if (!token || !token.trim()) {
+      statusEl.textContent = "Enter the verification token or open the link from your email.";
+      statusEl.style.color = "red";
+      return;
+    }
+    statusEl.textContent = "Verifying...";
+    statusEl.style.color = "black";
+    try {
+      const response = await postVerify(token);
+      const result = await response.json().catch(() => ({}));
+      if (response.ok) {
+        statusEl.textContent = "Email verified. Redirecting...";
+        statusEl.style.color = "green";
+        localStorage.removeItem("pendingVerificationEmail");
+        localStorage.removeItem("pendingVerificationPhone");
+        localStorage.removeItem("pendingVerificationNext");
+        setTimeout(() => { window.location.href = nextPath; }, 1000);
+      } else {
+        statusEl.textContent = result.message || "Verification failed.";
+        statusEl.style.color = "red";
+      }
+    } catch (err) {
+      statusEl.textContent = "Network error. Try again.";
+      statusEl.style.color = "red";
+    }
+  });
+
+  (async function autoVerifyFromUrl() {
+    if (!tParam) return;
+    statusEl.textContent = "Verifying your link...";
+    statusEl.style.color = "black";
+    try {
+      const response = await postVerify(tParam);
+      const result = await response.json().catch(() => ({}));
+      if (response.ok) {
+        statusEl.textContent = "Email verified. Redirecting...";
+        statusEl.style.color = "green";
+        localStorage.removeItem("pendingVerificationEmail");
+        localStorage.removeItem("pendingVerificationPhone");
+        localStorage.removeItem("pendingVerificationNext");
+        setTimeout(() => { window.location.href = nextPath; }, 1000);
+      } else {
+        statusEl.textContent = result.message || "Invalid or expired link. Paste the full token or request a new email.";
+        statusEl.style.color = "red";
+      }
+    } catch (e) {
+      statusEl.textContent = "Could not verify automatically. Use the form below.";
+      statusEl.style.color = "red";
+    }
+  })();
+
+  async function resendCode() {
+    if (!verifyEmail) {
+      statusEl.textContent = "Resend needs your sign-up context. Return to sign up, or add your email in local storage from the same browser session.";
+      statusEl.style.color = "red";
+      return;
+    }
+    try {
+      const resendBody = { email: verifyEmail };
+      if (verifyPhone) resendBody.phone = verifyPhone;
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resendBody)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        statusEl.textContent = result.message || "Could not resend.";
+        statusEl.style.color = "red";
+        return;
+      }
+      statusEl.textContent = "A new verification email was sent. Check your inbox (valid 5 minutes).";
+      statusEl.style.color = "green";
+      tokenInput.value = "";
+    } catch (err) {
+      statusEl.textContent = "Network error.";
+      statusEl.style.color = "red";
+    }
+  }
+</script>
+
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/form.js}"></script>
+
+</body>
+</html>

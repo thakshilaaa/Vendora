@@ -1,0 +1,181 @@
+/* === CARDS.CSS - COMPONENT CONTAINERS === */
+
+/* 1. BASE CARD STRUCTURE */
+.card {
+    background-color: #ffffff;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: transform var(--transition), box-shadow var(--transition);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #f0f0f0;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 2. MEDIA & VISUALS */
+.card-image-wrapper {
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1/1;
+}
+
+.card-image-wrapper img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.card:hover .card-image-wrapper img {
+    transform: scale(1.08);
+}
+
+/* 3. BADGES & OVERLAYS */
+.card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: black; /* Brand Primary Purple */
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 10;
+}
+
+.badge-sale {
+    background-color: #000000;
+}
+
+/* 4. TYPOGRAPHY & CONTENT */
+.card-title {
+    font-family: 'Playfair Display', serif; /* Elegant heading font */
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: black;
+}
+
+.card-meta {
+    font-size: 0.85rem;
+    color: black;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f5f5f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 5. USER PROFILE VARIANT */
+.card-profile {
+    text-align: center;
+    padding-top: 2.5rem;
+}
+
+.profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+}
+
+/* 6. MOBILE RESPONSIVENESS */
+@media (max-width: 600px) {
+    .card {
+        padding: 1rem;
+    }
+    .card-image-wrapper {
+        margin: -1rem -1rem 1rem -1rem;
+    }
+    .card-image-wrapper img {
+        height: 180px;
+    }
+}
+
+/* FEEDBACK CARD */
+.feedback-card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: var(--transition);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 220px;
+}
+
+.feedback-card:hover {
+    transform: translateY(-4px);
+}
+
+.feedback-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.feedback-user-block h4 {
+    font-size: 15px;
+    margin: 0;
+    color: #222;
+}
+
+.feedback-date {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.feedback-role {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 2px;
+    text-transform: capitalize;
+}
+
+.feedback-rating {
+    font-size: 15px;
+    color: #f5a623;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.feedback-message {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.7;
+    word-break: break-word;
+}
+
+.empty-feedback {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff;
+    border-radius: 14px;
+    color: #777;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}

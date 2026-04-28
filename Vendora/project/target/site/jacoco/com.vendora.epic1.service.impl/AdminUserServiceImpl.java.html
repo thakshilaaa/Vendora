@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminUserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.service.impl</a> &gt; <span class="el_source">AdminUserServiceImpl.java</span></div><h1>AdminUserServiceImpl.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.service.impl;
+
+import com.vendora.epic1.dto.admin.UpdateUserRoleRequest;
+import com.vendora.epic1.dto.admin.UpdateUserStatusRequest;
+import com.vendora.epic1.dto.auth.MessageResponse;
+import com.vendora.epic1.dto.user.UserResponse;
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic1.model.User;
+import com.vendora.epic1.repository.UserRepository;
+import com.vendora.epic1.service.AdminUserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
+
+@Service
+<span class="fc" id="L19">@RequiredArgsConstructor</span>
+@Transactional(readOnly = true)
+public class AdminUserServiceImpl implements AdminUserService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public List&lt;UserResponse&gt; getAllUsers() {
+<span class="nc" id="L27">        return userRepository.findAll()</span>
+<span class="nc" id="L28">                .stream()</span>
+<span class="nc" id="L29">                .map(this::mapToUserResponse)</span>
+<span class="nc" id="L30">                .toList();</span>
+    }
+
+    @Override
+    public UserResponse getUserById(Long userId) {
+<span class="nc" id="L35">        User user = findUserById(userId);</span>
+<span class="nc" id="L36">        return mapToUserResponse(user);</span>
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse updateUserRole(Long userId, UpdateUserRoleRequest request) {
+<span class="nc" id="L42">        validateRoleRequest(request);</span>
+
+<span class="nc" id="L44">        User user = findUserById(userId);</span>
+<span class="nc" id="L45">        user.setRole(request.getRole());</span>
+<span class="nc" id="L46">        userRepository.save(user);</span>
+
+<span class="nc" id="L48">        return new MessageResponse(&quot;User role updated successfully&quot;);</span>
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse updateUserStatus(Long userId, UpdateUserStatusRequest request) {
+<span class="nc" id="L54">        validateStatusRequest(request);</span>
+
+<span class="nc" id="L56">        User user = findUserById(userId);</span>
+<span class="nc" id="L57">        user.setStatus(request.getStatus());</span>
+<span class="nc" id="L58">        userRepository.save(user);</span>
+
+<span class="nc" id="L60">        return new MessageResponse(&quot;User status updated successfully&quot;);</span>
+    }
+
+    private User findUserById(Long userId) {
+<span class="nc" id="L64">        return userRepository.findById(userId)</span>
+<span class="nc" id="L65">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User not found with id: &quot; + userId));</span>
+    }
+
+    private void validateRoleRequest(UpdateUserRoleRequest request) {
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        if (Objects.isNull(request) || Objects.isNull(request.getRole())) {</span>
+<span class="nc" id="L70">            throw new IllegalArgumentException(&quot;Role must not be null&quot;);</span>
+        }
+<span class="nc" id="L72">    }</span>
+
+    private void validateStatusRequest(UpdateUserStatusRequest request) {
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        if (Objects.isNull(request) || Objects.isNull(request.getStatus())) {</span>
+<span class="nc" id="L76">            throw new IllegalArgumentException(&quot;Status must not be null&quot;);</span>
+        }
+<span class="nc" id="L78">    }</span>
+
+    private UserResponse mapToUserResponse(User user) {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        String firstName = user.getFirstName() == null ? &quot;&quot; : user.getFirstName().trim();</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        String lastName = user.getLastName() == null ? &quot;&quot; : user.getLastName().trim();</span>
+
+<span class="nc" id="L84">        return UserResponse.builder()</span>
+<span class="nc" id="L85">                .id(user.getId())</span>
+<span class="nc" id="L86">                .fullName((firstName + &quot; &quot; + lastName).trim())</span>
+<span class="nc" id="L87">                .email(user.getEmail())</span>
+<span class="nc" id="L88">                .phoneNumber(user.getPhoneNumber())</span>
+<span class="nc" id="L89">                .role(user.getRole())</span>
+<span class="nc" id="L90">                .status(user.getStatus())</span>
+<span class="nc" id="L91">                .emailVerified(Boolean.TRUE.equals(user.getIsEmailVerified()))</span>
+<span class="nc" id="L92">                .createdAt(user.getCreatedAt())</span>
+<span class="nc" id="L93">                .updatedAt(user.getUpdatedAt())</span>
+<span class="nc" id="L94">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

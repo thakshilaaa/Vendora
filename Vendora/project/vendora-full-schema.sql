@@ -1,0 +1,8 @@
+-- The canonical full database script for this project is:
+--
+--   Vendora - Database.sql
+--
+-- Use that file for imports and documentation. This filename is kept as a
+-- convenience alias; duplicate content was merged into Vendora - Database.sql.
+--
+-- mysql -u root -p < "Vendora - Database.sql"

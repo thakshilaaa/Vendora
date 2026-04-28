@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | Dashboard - Customer</title>
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body.dashboard-bg {
+            background-image: url('/images/b1.jpg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="dashboard-bg">
+<div class="page-wrapper">
+    <header class="header-grid">
+        <div class="logo"><img th:src="@{/images/Vendora.png}" alt="Vendora Logo"></div>
+
+        <nav class="navbar" id="navbarLinks">
+            <div class="auth-links" id="authLinks">
+                <a th:href="@{/shop}">Shop</a>
+                <a th:href="@{/about}">About</a>
+                <a th:href="@{/service}">Support</a>
+                <a th:href="@{/login}">Login</a>
+                <a th:href="@{/customer-signup}">Sign Up</a>
+                <a th:href="@{/profile}">My Profile</a>
+            </div>
+
+            <div class="profile-menu" id="profileMenu">
+                <button class="profile-trigger" id="profileTrigger">
+                    <img src="https://yourdomain.com/images/user1.jpg" alt="Profile" id="profileImg">
+                    <span class="user-name" id="userName"></span>
+                </button>
+
+                <div class="dropdown hidden" id="dropdownMenu">
+                    <a th:href="@{/profile}">View Profile</a><br>
+                    <a th:href="@{/update-password}">Change Password</a><br>
+                    <a th:href="@{/logout}">Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="header-search">
+            <label for="searchInput" class="sr-only">Search products</label>
+            <input id="searchInput" type="text" placeholder="Search products..." class="search-input">
+            <button type="button" class="icon-btn" id="cartBtn" title="My Cart"><i class="fa-solid fa-cart-shopping"></i></button>
+            <div class="icon-btn"><i class="fa-solid fa-bell"></i></div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <video id="heroVideo" autoplay muted loop playsinline><source th:src="@{/images/main-banner.mp4}" type="video/mp4"></video>
+    </section>
+
+    <section class="container-padding-custom animate-fade-up">
+        <div class="section-header-flex">
+            <h2>Featured Products</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img th:src="@{/images/sp1.jpg}" alt="Blush">
+                    <div class="product-name">PIXI - Blush (19g)</div>
+                    <div class="product-price">Rs. 1,600</div>
+                    <a th:href="@{/product-view}" class="btn-primary">View</a>
+                </div>
+                <div class="product-card">
+                    <img th:src="@{/images/sp2.webp}" alt="Serum">
+                    <div class="product-name">ESPA - Optimal Skin Pro Serum</div>
+                    <div class="product-price">Rs. 1,500</div>
+                    <a th:href="@{/product-view}" class="btn-primary">View</a>
+                </div>
+                <div class="product-card">
+                    <img th:src="@{/images/sp3.avif}" alt="Men Deserve">
+                    <div class="product-name">Men Deserve Beauty Pack</div>
+                    <div class="product-price">Rs. 3,850</div>
+                    <a th:href="@{/product-view}" class="btn-primary">View</a>
+                </div>
+                <div class="product-card">
+                    <img th:src="@{/images/sp4.jpg}" alt="Serum">
+                    <div class="product-name">Beauty of Joeson - Deep Serum</div>
+                    <div class="product-price">Rs. 1,750</div>
+                    <a th:href="@{/product-view}" class="btn-primary">View</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h2>Don't know where to start?</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <img th:src="@{/images/skincare.jpg}" alt="Skincare">
+                    <div class="routine-content">
+                        <h3>Find my personal Skincare Routine</h3>
+                        <p>Discover the perfect skincare routine for your skin type.</p>
+                        <button type="submit" class="btn-primary"><a th:href="@{/routine(category='skincare')}">Get Started</a></button>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <img th:src="@{/images/bodycare.jpg}" alt="Bodycare">
+                    <div class="routine-content">
+                        <h3>Find my personal Bodycare</h3>
+                        <p>Discover the perfect bodycare routine for your skin type.</p>
+                        <button type="submit" class="btn-primary"><a th:href="@{/routine(category='bodycare')}">Get Started</a></button>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <img th:src="@{/images/haircare.jpg}" alt="Haircare">
+                    <div class="routine-content">
+                        <h3>Find my personal Haircare</h3>
+                        <p>Discover tips and products for healthy, beautiful hair.</p>
+                        <button type="submit" class="btn-primary"><a th:href="@{/routine(category='haircare')}">Get Started</a></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h2>Join Our Supplier & Delivery Network</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <img th:src="@{/images/supplier.jpg}" alt="Supplier">
+                    <div class="ser-content">
+                        <h3>I am a Supplier</h3>
+                        <button type="submit" class="btn-secondary"><a th:href="@{/supplier-register}">Join Now</a></button>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <img th:src="@{/images/delivery.jpg}" alt="Delivery">
+                    <div class="partner-content">
+                        <h3>I am a Delivery Personnel</h3>
+                        <button type="submit" class="btn-secondary"><a th:href="@{/delivery-register}">Join Now</a></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <div class="section-header-flex">
+                <h2>Real Feedback from Our Community</h2>
+            </div>
+            <div class="feedback-grid" id="feedbackGrid">
+                <!-- Feedback cards will be injected here via JS -->
+            </div>
+            <div class="partner-content">
+                <a th:href="@{/feedback}">See More</a>
+            </div>
+        </div>
+    </section><br>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-subscribe">
+                <h4>SUBSCRIBE</h4>
+                <p>Get beauty tips, product updates & exclusive offers straight to your inbox.</p>
+
+                <form id="subscribeForm" class="subscribe-input">
+                    <div>
+                        <label for="subscribeEmail" class="visually-hidden">Email Address</label>
+                        <input type="email" id="subscribeEmail" name="email" placeholder="Email" required>
+                    </div>
+                    <div>
+                        <label for="subscribePhone" class="subscribe-input">Phone Number</label>
+                        <input type="tel" id="subscribePhone" name="phone" placeholder="Contact" required>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn-subscribe">➤SUBSCRIBE</button>
+                        <p id="subscribeMessage" class="subscribe-message"></p>
+                    </div>
+                </form>
+
+                <div class="social-icons">
+                    <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://youtube.com" target="_blank" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4>PRODUCT NAVIGATOR</h4>
+                <a th:href="@{/shop}">Cosmetics</a>
+                <a th:href="@{/shop}">Skin Care</a>
+                <a th:href="@{/shop}">Hair Care</a>
+                <a th:href="@{/shop}">Body Care</a>
+                <a th:href="@{/shop}">Fragrance</a>
+                <a th:href="@{/shop}">Beauty Tools</a>
+            </div>
+
+            <div>
+                <h4>ABOUT US</h4>
+                <a th:href="@{/about}">Our Mission</a>
+                <a th:href="@{/service}">Contact Us</a>
+            </div>
+
+            <div>
+                <h4>ACCOUNT</h4>
+                <a th:href="@{/profile}">View Profile</a>
+                <a th:href="@{/service}">Support</a>
+                <a th:href="@{/order-history}">Track My Order</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Vendora | The Online Beauty Store</p>
+            <p><button><a th:href="@{/terms}">Terms & Conditions</a></button> | <button><a th:href="@{/privacy}">Privacy
+                Policy</a></button> | <button><a th:href="@{/cookie}">Cookie Policy</a></button> | Do Not Sell My
+                Personal Information | Vendora</p>
+            <p>If you are having problems using this website, please <button><a th:href="@{/service}">CLICK
+                HERE</a></button> for assistance.</p>
+        </div>
+    </footer>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/form.js}"></script>
+<script th:src="@{/js/feedback.js}"></script>
+<script th:src="@{/js/routine.js}"></script>
+<script>
+    document.getElementById("cartBtn")?.addEventListener("click", function () {
+        const hasSession = !!localStorage.getItem("token") || !!localStorage.getItem("vendoraToken");
+        if (!hasSession) {
+            alert("Please login first to view cart history.");
+            window.location.href = "/login";
+            return;
+        }
+        window.location.href = "/cart";
+    });
+</script>
+</div>
+</body>
+</html>

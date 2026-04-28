@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Online Beauty Store</title>
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/media.css}">
+  <link rel="stylesheet" th:href="@{/css/misc.css}">
+  <link rel="stylesheet" th:href="@{/css/tables.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    .hidden { display: none; }
+    .receipt-card { max-width: 600px; margin: 50px auto; padding: 30px; }
+    .receipt-title { text-align: center; color: #be185d; }
+    .receipt-divider { border: 1px solid #eee; margin: 20px 0; }
+    .receipt-actions { margin-top: 30px; display: flex; gap: 10px; }
+    .receipt-total { color: #be185d; }
+    .flex-1 { flex: 1; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <div class="container narrow">
+    <section class="page-header">
+      <h1 class="page-title">Checkout</h1>
+      <p class="page-subtitle">Fill in shipping and payment details to complete your order.</p>
+    </section>
+
+    <div class="checkout-layout">
+      <section class="card">
+        <div id="step-1">
+          <h2>Shipping Information</h2>
+          <div class="form-row">
+            <div class="field"><label>First Name *</label><input type="text" id="firstName" placeholder="First Name *"></div>
+            <div class="field"><label>Last Name *</label><input type="text" id="lastName" placeholder="Last Name *"></div>
+          </div>
+          <div class="field"><label>Email Address *</label><input type="email" id="email" placeholder="Email Address *"></div>
+          <div class="field"><label>Phone Number *</label><input type="text" id="phone" placeholder="Phone Number *"></div>
+          <div class="field"><label>Street Address *</label><input type="text" id="address" placeholder="Street Address *"></div>
+          <div class="form-row">
+            <div class="field"><label>City *</label><input type="text" id="city" placeholder="City *"></div>
+            <div class="field"><label>ZIP Code *</label><input type="text" id="zipCode" placeholder="ZIP Code *"></div>
+          </div>
+
+          <h2>Shipping Method</h2>
+          <div class="shipping-option active" onclick="selectShipping(500.00, 'Standard', this)">
+            <span>Standard Shipping</span>
+            <strong>Rs. 500</strong>
+          </div>
+          <div class="shipping-option" onclick="selectShipping(1200.00, 'Express', this)">
+            <span>Express Shipping</span>
+            <strong>Rs. 1200</strong>
+          </div>
+          <button class="btn btn-primary" onclick="goToStep(2)">Continue to Payment</button>
+        </div>
+
+        <div id="step-2" class="hidden">
+          <h2>Payment Method</h2>
+          <div class="field">
+            <label><input type="radio" name="payType" value="Online" checked onchange="togglePayView('Online')"> Online Payment (Card)</label>
+            <label><input type="radio" name="payType" value="COD" onchange="togglePayView('COD')"> Cash on Delivery (COD)</label>
+          </div>
+          <div id="card-fields">
+            <div class="field"><label>Card Number</label><input type="text" id="cardNum" placeholder="Card Number (16 digits)" maxlength="16" autocomplete="off"></div>
+            <div class="form-row">
+              <div class="field"><label>Expiry Date</label><input type="text" id="expDate" placeholder="MM / YY" maxlength="5" autocomplete="off"></div>
+              <div class="field"><label>CVV</label><input type="text" id="cvvCode" placeholder="CVV" maxlength="3" autocomplete="off"></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="handlePlaceOrder()">Place Order</button>
+          <button class="btn btn-secondary" type="button" onclick="goToStep(1)">← Back to Shipping</button>
+        </div>
+      </section>
+
+      <aside class="card">
+        <button class="btn btn-primary" onclick="window.location.href='/order-history'">🛍️ View My Orders</button>
+        <div class="mt-4">
+          <h2>Order Summary</h2>
+          <div class="summary-row"><span>Subtotal</span><span>Rs. 4500.00</span></div>
+          <div class="summary-row"><span>Shipping</span><span id="display-shipping">Rs. 500.00</span></div>
+          <div class="total-row"><span>Total</span><span id="display-total">Rs. 5000.00</span></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<script>
+  let subtotal = 4500.00;
+  let shippingCost = 500.00;
+  let shippingMethod = "Standard";
+
+  function selectShipping(cost, method, el) {
+    shippingCost = cost;
+    shippingMethod = method;
+    document.getElementById('display-shipping').innerText = `Rs. ${cost.toFixed(2)}`;
+    document.getElementById('display-total').innerText = `Rs. ${(subtotal + cost).toFixed(2)}`;
+    document.querySelectorAll('.shipping-option').forEach(opt => opt.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function goToStep(step) {
+    if (step === 2) {
+      const fName = document.getElementById('firstName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const addr = document.getElementById('address').value.trim();
+
+      if (!fName || !email || !addr) {
+        alert("Please fill in all shipping details.");
+        return;
+      }
+    }
+    document.getElementById('step-1').classList.toggle('hidden', step !== 1);
+    document.getElementById('step-2').classList.toggle('hidden', step !== 2);
+  }
+
+  function togglePayView(type) {
+    document.getElementById('card-fields').style.display = type === 'Online' ? 'block' : 'none';
+  }
+
+  async function handlePlaceOrder() {
+    const payType = document.querySelector('input[name="payType"]:checked').value;
+    if (payType === 'Online') {
+      const cardNum = document.getElementById('cardNum').value.trim();
+      const expDate = document.getElementById('expDate').value.trim();
+      const cvv = document.getElementById('cvvCode').value.trim();
+
+      if (cardNum.length !== 16 || isNaN(cardNum)) {
+        alert("Invalid card number. Please enter 16 digits.");
+        return;
+      }
+      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expDate)) {
+        alert("Invalid expiry date format (MM/YY).");
+        return;
+      }
+      if (cvv.length !== 3 || isNaN(cvv)) {
+        alert("Invalid CVV.");
+        return;
+      }
+    }
+
+    const amountValue = parseFloat(document.getElementById('display-total').innerText.replace('Rs. ', ''));
+    const orderData = {
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      address: document.getElementById('address').value,
+      city: document.getElementById('city').value,
+      zipCode: document.getElementById('zipCode').value,
+      product: "Sunset Eyes Palette",
+      amount: amountValue,
+      shippingMethod: shippingMethod,
+      paymentMethod: payType
+    };
+
+    try {
+      const orderRes = await fetch('/api/orders/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify(orderData)
+      });
+
+      if (orderRes.ok) {
+        const savedOrder = await orderRes.json();
+        const paymentData = {
+          orderId: savedOrder.id,
+          amount: orderData.amount,
+          paymentMethod: payType,
+          status: (payType === 'Online' ? 'SUCCESS' : 'PENDING')
+        };
+        const payRes = await fetch('/api/payments/process', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'include',
+          body: JSON.stringify(paymentData)
+        });
+
+        if (payRes.ok) {
+          showSuccessPage(orderData);
+        } else {
+          alert("Order placed, but payment logging failed.");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Connection error. Check that the app is running.");
+    }
+  }
+
+  function showSuccessPage(data) {
+    document.body.innerHTML = `
+      <div id="invoice" class="card receipt-card">
+        <div class="receipt-title">
+          <h1>🎉 Order Successful!</h1>
+          <p>Thank you, ${data.firstName}!</p>
+        </div>
+        <hr class="receipt-divider">
+        <h3>Order Details:</h3>
+        <p><strong>Product:</strong> ${data.product}</p>
+        <p><strong>Address:</strong> ${data.address}, ${data.city}</p>
+        <p><strong>Payment Mode:</strong> ${data.paymentMethod}</p>
+        <h2 class="receipt-total">Total Paid: Rs. ${data.amount.toFixed(2)}</h2>
+        <div id="action-buttons" class="receipt-actions">
+          <button onclick="downloadPDF()" class="btn btn-primary flex-1">Download Receipt</button>
+          <button onclick="window.location.reload()" class="btn btn-secondary flex-1">New Order</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById('invoice');
+    const buttons = document.getElementById('action-buttons');
+    buttons.style.display = 'none';
+    html2pdf().from(element).save('Vendora_Receipt.pdf').then(() => {
+      buttons.style.display = 'flex';
+    });
+  }
+</script>
+</body>
+</html>

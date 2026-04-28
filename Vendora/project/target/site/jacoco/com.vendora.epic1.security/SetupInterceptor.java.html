@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SetupInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.security</a> &gt; <span class="el_source">SetupInterceptor.java</span></div><h1>SetupInterceptor.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.security;
+
+import com.vendora.epic1.service.SystemSetupService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.List;
+
+@Component
+public class SetupInterceptor implements HandlerInterceptor {
+
+    private final SystemSetupService setupService;
+
+    // Paths that are always allowed even in setup mode
+<span class="fc" id="L17">    private static final List&lt;String&gt; ALLOWED_PATHS = List.of(</span>
+            &quot;/admin-signup&quot;,
+            &quot;/api/auth/register/admin&quot;,
+            &quot;/css/&quot;,
+            &quot;/js/&quot;,
+            &quot;/images/&quot;,
+            &quot;/assets/&quot;,
+            &quot;/html/&quot;,
+            &quot;/error&quot;,
+            &quot;/favicon.ico&quot;
+    );
+
+<span class="fc" id="L29">    public SetupInterceptor(SystemSetupService setupService) {</span>
+<span class="fc" id="L30">        this.setupService = setupService;</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (setupService.isLaunched()) {</span>
+<span class="nc" id="L36">            return true;</span>
+        }
+
+<span class="fc" id="L39">        String path = request.getRequestURI();</span>
+
+        // Check if path is in the allowed list
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        for (String allowedPath : ALLOWED_PATHS) {</span>
+<span class="pc bpc" id="L43" title="1 of 4 branches missed.">            if (path.startsWith(allowedPath) || path.equals(allowedPath)) {</span>
+<span class="fc" id="L44">                return true;</span>
+            }
+<span class="fc" id="L46">        }</span>
+
+        // If it's an API request, return 403
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (path.startsWith(&quot;/api/&quot;)) {</span>
+<span class="nc" id="L50">            response.setStatus(HttpServletResponse.SC_FORBIDDEN);</span>
+<span class="nc" id="L51">            response.setContentType(&quot;application/json&quot;);</span>
+<span class="nc" id="L52">            response.getWriter().write(&quot;{\&quot;success\&quot;:false,\&quot;message\&quot;:\&quot;Platform is in Setup Mode. Awaiting Admin Launch.\&quot;}&quot;);</span>
+<span class="nc" id="L53">            return false;</span>
+        }
+
+        // For all other web requests, redirect to the admin-signup page
+<span class="fc" id="L57">        response.sendRedirect(&quot;/admin-signup&quot;);</span>
+<span class="fc" id="L58">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

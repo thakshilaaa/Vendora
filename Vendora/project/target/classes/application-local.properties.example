@@ -1,0 +1,14 @@
+# Copy to: src/main/resources/application-local.properties
+# (Do not commit real passwords — application-local.properties is listed in .gitignore)
+
+# Real Gmail that has 2-Step Verification + App Password:
+# https://myaccount.google.com/apppasswords
+spring.mail.username=you@gmail.com
+spring.mail.password=xxxx xxxx xxxx xxxx
+
+# Or use environment variables instead (safer in CI):
+# MAIL_USERNAME=you@gmail.com
+# MAIL_PASSWORD=app-password-here
+
+# Optional: enable one-shot SMTP test: POST /api/dev/mail/test  body {"to":"you@gmail.com"}
+# app.mail.test-endpoint=true

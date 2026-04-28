@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CartController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic3.controller</a> &gt; <span class="el_source">CartController.java</span></div><h1>CartController.java</h1><pre class="source lang-java linenums">package com.vendora.epic3.controller;
+
+import com.vendora.epic3.dto.CartItemDto;
+import com.vendora.epic3.dto.CheckoutRequest;
+import com.vendora.epic3.model.LocationType;
+import com.vendora.epic3.service.CartService;
+import com.vendora.epic3.service.DeliveryChargeService;
+import com.vendora.epic4.model.Order;
+import com.vendora.epic1.exception.ForbiddenException;
+import com.vendora.epic1.exception.UnauthorizedException;
+import com.vendora.epic1.model.User;
+import com.vendora.epic4.service.OrderService;
+import com.vendora.epic1.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+/**
+ * Handles the cart page, AJAX cart updates, and the checkout flow.
+ */
+@Controller
+public class CartController {
+
+    private final CartService cartService;
+    private final DeliveryChargeService deliveryChargeService;
+    private final UserService userService;
+    private final OrderService orderService;
+
+    public CartController(CartService cartService,
+                          DeliveryChargeService deliveryChargeService,
+                          UserService userService,
+<span class="fc" id="L38">                          OrderService orderService) {</span>
+<span class="fc" id="L39">        this.cartService = cartService;</span>
+<span class="fc" id="L40">        this.deliveryChargeService = deliveryChargeService;</span>
+<span class="fc" id="L41">        this.userService = userService;</span>
+<span class="fc" id="L42">        this.orderService = orderService;</span>
+<span class="fc" id="L43">    }</span>
+
+    // ---------------------------- Cart page ----------------------------
+
+    @GetMapping(&quot;/cart&quot;)
+    public String viewCart(Model model) {
+<span class="nc" id="L49">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L50">        List&lt;CartItemDto&gt; items = cartService.listItems(user);</span>
+<span class="nc" id="L51">        BigDecimal subtotal = items.stream()</span>
+<span class="nc" id="L52">                .map(CartItemDto::getSubtotal)</span>
+<span class="nc" id="L53">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="nc" id="L55">        model.addAttribute(&quot;items&quot;, items);</span>
+<span class="nc" id="L56">        model.addAttribute(&quot;subtotal&quot;, subtotal);</span>
+<span class="nc" id="L57">        model.addAttribute(&quot;defaultDeliveryFee&quot;, new BigDecimal(&quot;500&quot;));</span>
+<span class="nc" id="L58">        return &quot;epic3/html/cart&quot;;</span>
+    }
+
+    /** REST endpoint used by cart.js to refresh the grid after AJAX changes. */
+    @GetMapping(&quot;/cart/api/items&quot;)
+    @ResponseBody
+    public List&lt;CartItemDto&gt; apiItems() {
+<span class="nc" id="L65">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L66">        return cartService.listItems(user);</span>
+    }
+
+    /** AJAX +/- quantity update. Returns the updated item DTO. */
+    @PostMapping(&quot;/cart/update&quot;)
+    @ResponseBody
+    public CartItemDto updateQuantity(@RequestParam Long itemId,
+                                      @RequestParam int quantity) {
+<span class="nc" id="L74">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L75">        return cartService.updateQuantity(user, itemId, quantity);</span>
+    }
+
+    @PostMapping(&quot;/cart/add&quot;)
+    public String addToCart(@RequestParam Long productId,
+                            @RequestParam(defaultValue = &quot;1&quot;) int quantity,
+                            RedirectAttributes ra) {
+<span class="nc" id="L82">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L83">        cartService.addToCart(user, productId, quantity);</span>
+<span class="nc" id="L84">        ra.addFlashAttribute(&quot;toast&quot;, &quot;Added to your cart&quot;);</span>
+<span class="nc" id="L85">        return &quot;redirect:/cart&quot;;</span>
+    }
+
+    @GetMapping(&quot;/cart/remove/{id}&quot;)
+    public String removeOne(@PathVariable Long id, RedirectAttributes ra) {
+<span class="nc" id="L90">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L91">        cartService.removeItem(user, id);</span>
+<span class="nc" id="L92">        ra.addFlashAttribute(&quot;toast&quot;, &quot;Item removed from your cart&quot;);</span>
+<span class="nc" id="L93">        return &quot;redirect:/cart&quot;;</span>
+    }
+
+    @PostMapping(&quot;/cart/remove-selected&quot;)
+    public String removeSelected(@RequestParam(name = &quot;itemIds&quot;, required = false) List&lt;Long&gt; itemIds,
+                                 RedirectAttributes ra) {
+<span class="nc" id="L99">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L100">        cartService.removeItems(user, itemIds);</span>
+<span class="nc" id="L101">        ra.addFlashAttribute(&quot;toast&quot;, &quot;Selected items removed&quot;);</span>
+<span class="nc" id="L102">        return &quot;redirect:/cart&quot;;</span>
+    }
+
+    // --------------------------- Checkout ---------------------------
+
+    @GetMapping(&quot;/checkout&quot;)
+    public String checkoutPage(@RequestParam(name = &quot;itemIds&quot;, required = false) List&lt;Long&gt; itemIds,
+                               Model model) {
+<span class="nc" id="L110">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L111">        List&lt;CartItemDto&gt; all = cartService.listItems(user);</span>
+<span class="nc" id="L112">        List&lt;CartItemDto&gt; selected = all.stream()</span>
+<span class="nc bnc" id="L113" title="All 4 branches missed.">                .filter(i -&gt; itemIds == null || itemIds.contains(i.getId()))</span>
+<span class="nc" id="L114">                .toList();</span>
+
+<span class="nc" id="L116">        BigDecimal subtotal = selected.stream()</span>
+<span class="nc" id="L117">                .map(CartItemDto::getSubtotal)</span>
+<span class="nc" id="L118">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+
+<span class="nc" id="L120">        CheckoutRequest form = new CheckoutRequest();</span>
+<span class="nc" id="L121">        form.setItemIds(selected.stream().map(CartItemDto::getId).toList());</span>
+<span class="nc" id="L122">        form.setLocationType(LocationType.SUBURB);</span>
+<span class="nc" id="L123">        form.setPaymentMethod(&quot;COD&quot;);</span>
+
+<span class="nc" id="L125">        model.addAttribute(&quot;items&quot;, selected);</span>
+<span class="nc" id="L126">        model.addAttribute(&quot;subtotal&quot;, subtotal);</span>
+<span class="nc" id="L127">        model.addAttribute(&quot;defaultFee&quot;, deliveryChargeService.calculate(LocationType.SUBURB));</span>
+<span class="nc" id="L128">        model.addAttribute(&quot;locations&quot;, LocationType.values());</span>
+<span class="nc" id="L129">        model.addAttribute(&quot;checkoutRequest&quot;, form);</span>
+<span class="nc" id="L130">        return &quot;epic3/html/checkout&quot;;</span>
+    }
+
+    @PostMapping(&quot;/checkout&quot;)
+    public String submitCheckout(@Valid @ModelAttribute(&quot;checkoutRequest&quot;) CheckoutRequest req,
+                                 BindingResult br,
+                                 Model model,
+                                 RedirectAttributes ra) {
+<span class="nc" id="L138">        User user = userService.getCurrentUser();</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (br.hasErrors()) {</span>
+            // Re-populate the page with the user's selection
+<span class="nc" id="L141">            List&lt;CartItemDto&gt; all = cartService.listItems(user);</span>
+<span class="nc" id="L142">            List&lt;CartItemDto&gt; selected = all.stream()</span>
+<span class="nc bnc" id="L143" title="All 4 branches missed.">                    .filter(i -&gt; req.getItemIds() != null &amp;&amp; req.getItemIds().contains(i.getId()))</span>
+<span class="nc" id="L144">                    .toList();</span>
+<span class="nc" id="L145">            BigDecimal subtotal = selected.stream()</span>
+<span class="nc" id="L146">                    .map(CartItemDto::getSubtotal)</span>
+<span class="nc" id="L147">                    .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="nc" id="L148">            model.addAttribute(&quot;items&quot;, selected);</span>
+<span class="nc" id="L149">            model.addAttribute(&quot;subtotal&quot;, subtotal);</span>
+<span class="nc" id="L150">            model.addAttribute(&quot;locations&quot;, LocationType.values());</span>
+<span class="nc" id="L151">            model.addAttribute(&quot;defaultFee&quot;, deliveryChargeService.calculate(</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                    req.getLocationType() != null ? req.getLocationType() : LocationType.SUBURB));</span>
+<span class="nc" id="L153">            model.addAttribute(&quot;checkoutRequest&quot;, req);</span>
+<span class="nc" id="L154">            return &quot;epic3/html/checkout&quot;;</span>
+        }
+
+        try {
+<span class="nc" id="L158">            Order order = orderService.checkout(req, user.getId());</span>
+<span class="nc" id="L159">            ra.addFlashAttribute(&quot;toast&quot;,</span>
+<span class="nc" id="L160">                    &quot;Order #&quot; + order.getId() + &quot; placed successfully!&quot;);</span>
+<span class="nc" id="L161">            return &quot;redirect:/orders/&quot; + order.getId();</span>
+<span class="nc" id="L162">        } catch (ForbiddenException e) {</span>
+<span class="nc" id="L163">            ra.addFlashAttribute(&quot;toast&quot;, e.getMessage());</span>
+<span class="nc" id="L164">            return &quot;redirect:/cart&quot;;</span>
+        }
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public String cartUnauthorized() {
+<span class="nc" id="L170">        return &quot;redirect:/login&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendora Dashboard</title>
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/media.css}">
+  <link rel="stylesheet" th:href="@{/css/misc.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+</head>
+<body>
+  <div id="navbar-root"></div>
+  
+<main class="page">
+  <section class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Overview of your cosmetic inventory</p>
+  </section>
+  <section id="stats-grid" class="summary-grid"></section>
+  <section class="split">
+    <div class="card pad">
+      <h2 class="section-title">Low Stock Alerts</h2>
+      <div id="dashboard-low-stock"></div>
+    </div>
+    <div>
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="quick-grid">
+        <a class="quick-card gradient-rose" th:href="@{/create-product}"><h3>Add Product</h3><p>Create a new cosmetic listing</p></a>
+        <a class="quick-card card" th:href="@{/products}"><h3>Browse Inventory</h3><p>View and manage all products</p></a>
+        <a class="quick-card card" th:href="@{/low-stock}"><h3>Stock Alerts</h3><p>Check items needing restock</p></a>
+      </div>
+      <p class="footer-note">Backend remains unchanged. This dashboard uses the same API routes as the original React frontend.</p>
+    </div>
+  </section>
+</main>
+
+  <script type="module" th:src="@{/assets/js/pages/dashboard.js}"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PartnershipController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.statics.controller</a> &gt; <span class="el_source">PartnershipController.java</span></div><h1>PartnershipController.java</h1><pre class="source lang-java linenums">package com.vendora.statics.controller;
+
+import com.vendora.common.ApiResponse;
+import com.vendora.statics.dto.partnership.DeliveryPartnershipRequest;
+import com.vendora.statics.dto.partnership.PartnershipApplicationResponse;
+import com.vendora.statics.dto.partnership.SupplierPartnershipRequest;
+import com.vendora.statics.service.PartnershipService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/api/v1/partnerships&quot;)
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
+public class PartnershipController {
+
+    private final PartnershipService partnershipService;
+
+    @PostMapping(&quot;/supplier&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PartnershipApplicationResponse&gt;&gt; applySupplierPartnership(
+            @Valid @RequestBody SupplierPartnershipRequest request
+    ) {
+<span class="nc" id="L25">        PartnershipApplicationResponse response = partnershipService.applySupplierPartnership(request);</span>
+<span class="nc" id="L26">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L27">                .body(ApiResponse.success(&quot;Supplier partnership application submitted successfully&quot;, response));</span>
+    }
+
+    @PostMapping(&quot;/delivery&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PartnershipApplicationResponse&gt;&gt; applyDeliveryPartnership(
+            @Valid @RequestBody DeliveryPartnershipRequest request
+    ) {
+<span class="nc" id="L34">        PartnershipApplicationResponse response = partnershipService.applyDeliveryPartnership(request);</span>
+<span class="nc" id="L35">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L36">                .body(ApiResponse.success(&quot;Delivery partnership application submitted successfully&quot;, response));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PartnershipApplicationResponse&gt;&gt; getApplicationById(
+            @PathVariable Long id
+    ) {
+<span class="nc" id="L43">        PartnershipApplicationResponse response = partnershipService.getApplicationById(id);</span>
+<span class="nc" id="L44">        return ResponseEntity.ok(ApiResponse.success(&quot;Partnership application retrieved successfully&quot;, response));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeliveryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic5.service</a> &gt; <span class="el_source">DeliveryService.java</span></div><h1>DeliveryService.java</h1><pre class="source lang-java linenums">package com.vendora.epic5.service;
+
+import com.vendora.epic5.dto.*;
+import com.vendora.epic5.model.*;
+import com.vendora.epic5.repository.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class DeliveryService {
+
+    private final DeliveryRepository deliveryRepository;
+    private final DeliveryAssignmentRepository assignmentRepository;
+    private final DeliveryStatusHistoryRepository historyRepository;
+    private final FailureLogRepository failureLogRepository;
+    private final ReturnRequestRepository returnRequestRepository;
+
+    public DeliveryService(DeliveryRepository deliveryRepository,
+                           DeliveryAssignmentRepository assignmentRepository,
+                           DeliveryStatusHistoryRepository historyRepository,
+                           FailureLogRepository failureLogRepository,
+<span class="fc" id="L29">                           ReturnRequestRepository returnRequestRepository) {</span>
+<span class="fc" id="L30">        this.deliveryRepository      = deliveryRepository;</span>
+<span class="fc" id="L31">        this.assignmentRepository    = assignmentRepository;</span>
+<span class="fc" id="L32">        this.historyRepository       = historyRepository;</span>
+<span class="fc" id="L33">        this.failureLogRepository    = failureLogRepository;</span>
+<span class="fc" id="L34">        this.returnRequestRepository = returnRequestRepository;</span>
+<span class="fc" id="L35">    }</span>
+
+    // ── INTEGRATION ───────────────────────────────────────────
+    // Called by the Order module when a payment succeeds
+
+    @Transactional
+    public DeliveryDTO createDeliveryFromOrder(OrderPaymentDTO dto) {
+<span class="nc" id="L42">        deliveryRepository.findByOrderId(dto.getOrderId()).ifPresent(existing -&gt; {</span>
+<span class="nc" id="L43">            throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+<span class="nc" id="L44">                &quot;Delivery already exists for order &quot; + dto.getOrderId());</span>
+        });
+
+<span class="nc" id="L47">        Delivery delivery = new Delivery();</span>
+<span class="nc" id="L48">        delivery.setOrderId(dto.getOrderId());</span>
+<span class="nc" id="L49">        delivery.setCustomerId(dto.getCustomerId());</span>
+<span class="nc" id="L50">        delivery.setCustomerDistrict(dto.getCustomerDistrict());</span>
+<span class="nc" id="L51">        delivery.setTrackingNumber(generateTrackingNumber(dto.getOrderId(), dto.getOrderCode()));</span>
+<span class="nc" id="L52">        delivery.setDeliveryAddress(dto.getDeliveryAddress());</span>
+<span class="nc" id="L53">        delivery.setNotes(dto.getNotes());</span>
+
+<span class="nc" id="L55">        Delivery saved = deliveryRepository.save(delivery);</span>
+<span class="nc" id="L56">        recordHistory(saved.getId(), DeliveryStatus.PENDING, null);</span>
+<span class="nc" id="L57">        return DeliveryDTO.from(saved);</span>
+    }
+
+    // ── ADMIN ─────────────────────────────────────────────────
+
+    @Transactional
+    public DeliveryDTO createDelivery(CreateDeliveryDTO dto) {
+<span class="nc" id="L64">        deliveryRepository.findByOrderId(dto.getOrderId()).ifPresent(existing -&gt; {</span>
+<span class="nc" id="L65">            throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+<span class="nc" id="L66">                &quot;Delivery already exists for order &quot; + dto.getOrderId());</span>
+        });
+
+<span class="nc" id="L69">        Delivery delivery = new Delivery();</span>
+<span class="nc" id="L70">        delivery.setOrderId(dto.getOrderId());</span>
+<span class="nc" id="L71">        delivery.setCustomerId(dto.getCustomerId());</span>
+<span class="nc" id="L72">        delivery.setCustomerDistrict(dto.getCustomerDistrict());</span>
+<span class="nc" id="L73">        delivery.setTrackingNumber(</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            dto.getTrackingNumber() != null ? dto.getTrackingNumber()</span>
+<span class="nc" id="L75">                : generateTrackingNumber(dto.getOrderId(), null)</span>
+        );
+<span class="nc" id="L77">        delivery.setDeliveryAddress(dto.getDeliveryAddress());</span>
+<span class="nc" id="L78">        delivery.setNotes(dto.getNotes());</span>
+<span class="nc" id="L79">        Delivery saved = deliveryRepository.save(delivery);</span>
+<span class="nc" id="L80">        recordHistory(saved.getId(), DeliveryStatus.PENDING, dto.getCreatedBy());</span>
+<span class="nc" id="L81">        return DeliveryDTO.from(saved);</span>
+    }
+
+    public List&lt;DeliveryDTO&gt; getAllDeliveries() {
+<span class="nc" id="L85">        return deliveryRepository.findAllByOrderByCreatedAtDesc()</span>
+<span class="nc" id="L86">                .stream().map(DeliveryDTO::from).collect(Collectors.toList());</span>
+    }
+
+    public DeliveryDTO getDelivery(String id) {
+<span class="nc" id="L90">        return DeliveryDTO.from(findDelivery(id));</span>
+    }
+
+    /** Agent UI: only deliveries this agent is assigned to (or currently holds) may be read. */
+    public DeliveryDTO getDeliveryForAgent(String deliveryId, Long agentId) {
+<span class="nc" id="L95">        Delivery d = findDelivery(deliveryId);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (agentId.equals(d.getAgentId())) {</span>
+<span class="nc" id="L97">            return DeliveryDTO.from(d);</span>
+        }
+<span class="nc" id="L99">        boolean linked = assignmentRepository.findByAgentIdOrderByAssignedAtDesc(agentId).stream()</span>
+<span class="nc" id="L100">                .anyMatch(a -&gt; deliveryId.equals(a.getDeliveryId()));</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (!linked) {</span>
+<span class="nc" id="L102">            throw new ResponseStatusException(HttpStatus.FORBIDDEN, &quot;Not authorized to view this delivery&quot;);</span>
+        }
+<span class="nc" id="L104">        return DeliveryDTO.from(d);</span>
+    }
+
+    public List&lt;DeliveryDTO&gt; getDeliveriesByStatus(DeliveryStatus status) {
+<span class="nc" id="L108">        return deliveryRepository.findByStatusOrderByCreatedAtDesc(status)</span>
+<span class="nc" id="L109">                .stream().map(DeliveryDTO::from).collect(Collectors.toList());</span>
+    }
+
+    /**
+     * Assigns a delivery agent to a delivery.
+     * Validates that the agent's service district matches the customer's delivery district.
+     */
+    @Transactional
+    public DeliveryAssignmentDTO assignAgent(String deliveryId, AssignAgentDTO dto) {
+<span class="nc" id="L118">        Delivery delivery = findDelivery(deliveryId);</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (delivery.getStatus() == DeliveryStatus.DELIVERED</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                || delivery.getStatus() == DeliveryStatus.RETURNED) {</span>
+<span class="nc" id="L122">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+<span class="nc" id="L123">                &quot;Cannot assign an agent to a delivery that is already &quot; + delivery.getStatus());</span>
+        }
+
+        // District validation — reject if districts don't match
+<span class="nc" id="L127">        String agentDistrict    = dto.getAgentServiceDistrict();</span>
+<span class="nc" id="L128">        String customerDistrict = delivery.getCustomerDistrict();</span>
+<span class="nc bnc" id="L129" title="All 4 branches missed.">        if (agentDistrict != null &amp;&amp; customerDistrict != null</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                &amp;&amp; !agentDistrict.equalsIgnoreCase(customerDistrict)) {</span>
+<span class="nc" id="L131">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+                &quot;Agent service district '&quot; + agentDistrict
+                + &quot;' does not match customer district '&quot; + customerDistrict + &quot;'&quot;);
+        }
+
+<span class="nc" id="L136">        delivery.setStatus(DeliveryStatus.ASSIGNED);</span>
+<span class="nc" id="L137">        delivery.setAgentId(dto.getAgentId());</span>
+<span class="nc" id="L138">        deliveryRepository.save(delivery);</span>
+
+<span class="nc" id="L140">        DeliveryAssignment assignment = new DeliveryAssignment();</span>
+<span class="nc" id="L141">        assignment.setDeliveryId(deliveryId);</span>
+<span class="nc" id="L142">        assignment.setAgentId(dto.getAgentId());</span>
+<span class="nc" id="L143">        DeliveryAssignment saved = assignmentRepository.save(assignment);</span>
+
+<span class="nc" id="L145">        recordHistory(deliveryId, DeliveryStatus.ASSIGNED, dto.getAssignedBy());</span>
+<span class="nc" id="L146">        return DeliveryAssignmentDTO.from(saved);</span>
+    }
+
+    public List&lt;DeliveryStatusHistoryDTO&gt; getStatusHistory(String deliveryId) {
+<span class="nc" id="L150">        return historyRepository.findByDeliveryIdOrderByChangedAtAsc(deliveryId)</span>
+<span class="nc" id="L151">                .stream().map(DeliveryStatusHistoryDTO::from).collect(Collectors.toList());</span>
+    }
+
+    public List&lt;ReturnRequestDTO&gt; getAllReturnRequests() {
+<span class="nc" id="L155">        return returnRequestRepository.findAllByOrderByRequestedAtDesc()</span>
+<span class="nc" id="L156">                .stream().map(ReturnRequestDTO::from).collect(Collectors.toList());</span>
+    }
+
+    @Transactional
+    public ReturnRequestDTO approveReturn(String returnId, Long agentId, Long adminId) {
+<span class="nc" id="L161">        ReturnRequest rr = findReturnRequest(returnId);</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        if (rr.getStatus() != ReturnRequestStatus.REQUESTED) {</span>
+<span class="nc" id="L163">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+<span class="nc" id="L164">                &quot;Only REQUESTED returns can be approved, current status: &quot; + rr.getStatus());</span>
+        }
+<span class="nc" id="L166">        rr.setAgentId(agentId);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        rr.setStatus(agentId != null ? ReturnRequestStatus.PICKUP_SCHEDULED : ReturnRequestStatus.APPROVED);</span>
+<span class="nc" id="L168">        return ReturnRequestDTO.from(returnRequestRepository.save(rr));</span>
+    }
+
+    @Transactional
+    public ReturnRequestDTO rejectReturn(String returnId) {
+<span class="nc" id="L173">        ReturnRequest rr = findReturnRequest(returnId);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (rr.getStatus() != ReturnRequestStatus.REQUESTED) {</span>
+<span class="nc" id="L175">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+<span class="nc" id="L176">                &quot;Only REQUESTED returns can be rejected, current status: &quot; + rr.getStatus());</span>
+        }
+<span class="nc" id="L178">        rr.setStatus(ReturnRequestStatus.REJECTED);</span>
+<span class="nc" id="L179">        return ReturnRequestDTO.from(returnRequestRepository.save(rr));</span>
+    }
+
+    // ── ADMIN — AGENT LOOKUP ─────────────────────────────────
+
+    /** All distinct agent IDs that have ever been assigned a delivery. */
+    public List&lt;Long&gt; getAllAgentIds() {
+<span class="nc" id="L186">        return assignmentRepository.findAllDistinctAgentIds();</span>
+    }
+
+    /** Distinct agent IDs that have handled deliveries in the given district. */
+    public List&lt;Long&gt; getAgentIdsByDistrict(String district) {
+<span class="nc" id="L191">        List&lt;String&gt; deliveryIds = deliveryRepository.findByCustomerDistrictIgnoreCase(district)</span>
+<span class="nc" id="L192">                .stream().map(Delivery::getId).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (deliveryIds.isEmpty()) return List.of();</span>
+<span class="nc" id="L194">        return assignmentRepository.findByDeliveryIdIn(deliveryIds)</span>
+<span class="nc" id="L195">                .stream().map(DeliveryAssignment::getAgentId)</span>
+<span class="nc" id="L196">                .distinct().sorted().collect(Collectors.toList());</span>
+    }
+
+    // ── AGENT ─────────────────────────────────────────────────
+
+    public List&lt;DeliveryAssignmentDTO&gt; getAgentAssignments(Long agentId) {
+<span class="nc" id="L202">        return assignmentRepository.findByAgentIdOrderByAssignedAtDesc(agentId)</span>
+<span class="nc" id="L203">                .stream().map(DeliveryAssignmentDTO::from).collect(Collectors.toList());</span>
+    }
+
+    @Transactional
+    public DeliveryAssignmentDTO acceptAssignment(String assignmentId, Long agentId) {
+<span class="nc" id="L208">        DeliveryAssignment assignment = findAssignment(assignmentId);</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (!assignment.getAgentId().equals(agentId)) {</span>
+<span class="nc" id="L210">            throw new ResponseStatusException(HttpStatus.FORBIDDEN,</span>
+                &quot;Agent is not assigned to this delivery&quot;);
+        }
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if (assignment.getStatus() != AssignmentStatus.PENDING) {</span>
+<span class="nc" id="L214">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+                &quot;Assignment is not in PENDING status&quot;);
+        }
+<span class="nc" id="L217">        assignment.setStatus(AssignmentStatus.ACCEPTED);</span>
+<span class="nc" id="L218">        assignment.setRespondedAt(LocalDateTime.now());</span>
+<span class="nc" id="L219">        return DeliveryAssignmentDTO.from(assignmentRepository.save(assignment));</span>
+    }
+
+    @Transactional
+    public DeliveryAssignmentDTO rejectAssignment(String assignmentId, Long agentId, String reason) {
+<span class="nc" id="L224">        DeliveryAssignment assignment = findAssignment(assignmentId);</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (!assignment.getAgentId().equals(agentId)) {</span>
+<span class="nc" id="L226">            throw new ResponseStatusException(HttpStatus.FORBIDDEN,</span>
+                &quot;Agent is not assigned to this delivery&quot;);
+        }
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (assignment.getStatus() != AssignmentStatus.PENDING) {</span>
+<span class="nc" id="L230">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+                &quot;Assignment is not in PENDING status&quot;);
+        }
+<span class="nc" id="L233">        assignment.setStatus(AssignmentStatus.REJECTED);</span>
+<span class="nc" id="L234">        assignment.setRejectionReason(reason);</span>
+<span class="nc" id="L235">        assignment.setRespondedAt(LocalDateTime.now());</span>
+<span class="nc" id="L236">        assignmentRepository.save(assignment);</span>
+
+<span class="nc" id="L238">        Delivery delivery = findDelivery(assignment.getDeliveryId());</span>
+<span class="nc" id="L239">        delivery.setStatus(DeliveryStatus.PENDING);</span>
+<span class="nc" id="L240">        delivery.setAgentId(null);</span>
+<span class="nc" id="L241">        deliveryRepository.save(delivery);</span>
+
+<span class="nc" id="L243">        recordHistory(delivery.getId(), DeliveryStatus.PENDING, agentId);</span>
+<span class="nc" id="L244">        return DeliveryAssignmentDTO.from(assignment);</span>
+    }
+
+    @Transactional
+    public DeliveryDTO pickupDelivery(String deliveryId, Long agentId) {
+<span class="nc" id="L249">        Delivery delivery = findDelivery(deliveryId);</span>
+<span class="nc" id="L250">        delivery.setStatus(DeliveryStatus.OUT_FOR_DELIVERY);</span>
+<span class="nc" id="L251">        delivery.setPickedUpAt(LocalDateTime.now());</span>
+<span class="nc" id="L252">        deliveryRepository.save(delivery);</span>
+<span class="nc" id="L253">        recordHistory(deliveryId, DeliveryStatus.OUT_FOR_DELIVERY, agentId);</span>
+<span class="nc" id="L254">        return DeliveryDTO.from(delivery);</span>
+    }
+
+    @Transactional
+    public DeliveryDTO completeDelivery(String deliveryId, Long agentId) {
+<span class="nc" id="L259">        Delivery delivery = findDelivery(deliveryId);</span>
+<span class="nc" id="L260">        delivery.setStatus(DeliveryStatus.DELIVERED);</span>
+<span class="nc" id="L261">        delivery.setDeliveredAt(LocalDateTime.now());</span>
+<span class="nc" id="L262">        deliveryRepository.save(delivery);</span>
+<span class="nc" id="L263">        recordHistory(deliveryId, DeliveryStatus.DELIVERED, agentId);</span>
+<span class="nc" id="L264">        return DeliveryDTO.from(delivery);</span>
+    }
+
+    @Transactional
+    public DeliveryDTO failDelivery(String deliveryId, FailureLogRequestDTO dto) {
+<span class="nc" id="L269">        Delivery delivery = findDelivery(deliveryId);</span>
+<span class="nc" id="L270">        delivery.setStatus(DeliveryStatus.FAILED);</span>
+<span class="nc" id="L271">        deliveryRepository.save(delivery);</span>
+
+<span class="nc" id="L273">        int attemptNumber = failureLogRepository.countByDeliveryId(deliveryId) + 1;</span>
+<span class="nc" id="L274">        FailureLog log = new FailureLog();</span>
+<span class="nc" id="L275">        log.setDeliveryId(deliveryId);</span>
+<span class="nc" id="L276">        log.setLoggedBy(dto.getLoggedBy());</span>
+<span class="nc" id="L277">        log.setReasonCode(dto.getReasonCode());</span>
+<span class="nc" id="L278">        log.setDescription(dto.getDescription());</span>
+<span class="nc" id="L279">        log.setAttemptNumber(attemptNumber);</span>
+<span class="nc" id="L280">        failureLogRepository.save(log);</span>
+
+<span class="nc" id="L282">        recordHistory(deliveryId, DeliveryStatus.FAILED, dto.getLoggedBy());</span>
+<span class="nc" id="L283">        return DeliveryDTO.from(delivery);</span>
+    }
+
+    @Transactional
+    public DeliveryDTO pickupReturn(String deliveryId, Long agentId) {
+<span class="nc" id="L288">        ReturnRequest rr = returnRequestRepository.findByDeliveryId(deliveryId)</span>
+<span class="nc" id="L289">                .stream()</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                .filter(r -&gt; r.getStatus() == ReturnRequestStatus.PICKUP_SCHEDULED)</span>
+<span class="nc" id="L291">                .findFirst()</span>
+<span class="nc" id="L292">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND,</span>
+                    &quot;No scheduled return for this delivery&quot;));
+<span class="nc" id="L294">        rr.setStatus(ReturnRequestStatus.PICKED_UP);</span>
+<span class="nc" id="L295">        returnRequestRepository.save(rr);</span>
+<span class="nc" id="L296">        return DeliveryDTO.from(findDelivery(deliveryId));</span>
+    }
+
+    @Transactional
+    public DeliveryDTO completeReturn(String deliveryId, Long agentId) {
+<span class="nc" id="L301">        ReturnRequest rr = returnRequestRepository.findByDeliveryId(deliveryId)</span>
+<span class="nc" id="L302">                .stream()</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">                .filter(r -&gt; r.getStatus() == ReturnRequestStatus.PICKED_UP)</span>
+<span class="nc" id="L304">                .findFirst()</span>
+<span class="nc" id="L305">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND,</span>
+                    &quot;No picked-up return for this delivery&quot;));
+<span class="nc" id="L307">        rr.setStatus(ReturnRequestStatus.COMPLETED);</span>
+<span class="nc" id="L308">        rr.setCompletedAt(LocalDateTime.now());</span>
+<span class="nc" id="L309">        returnRequestRepository.save(rr);</span>
+
+<span class="nc" id="L311">        Delivery delivery = findDelivery(deliveryId);</span>
+<span class="nc" id="L312">        delivery.setStatus(DeliveryStatus.RETURNED);</span>
+<span class="nc" id="L313">        deliveryRepository.save(delivery);</span>
+<span class="nc" id="L314">        recordHistory(deliveryId, DeliveryStatus.RETURNED, agentId);</span>
+<span class="nc" id="L315">        return DeliveryDTO.from(delivery);</span>
+    }
+
+    // ── CUSTOMER ─────────────────────────────────────────────
+
+    public List&lt;DeliveryDTO&gt; getCustomerDeliveries(Long customerId) {
+<span class="nc" id="L321">        return deliveryRepository.findByCustomerIdOrderByCreatedAtDesc(customerId)</span>
+<span class="nc" id="L322">                .stream().map(DeliveryDTO::from).collect(Collectors.toList());</span>
+    }
+
+    @Transactional
+    public ReturnRequestDTO createReturnRequest(String deliveryId, ReturnRequestCreateDTO dto) {
+<span class="nc" id="L327">        Delivery delivery = findDelivery(deliveryId);</span>
+
+<span class="nc bnc" id="L329" title="All 2 branches missed.">        if (delivery.getStatus() != DeliveryStatus.DELIVERED) {</span>
+<span class="nc" id="L330">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
+<span class="nc" id="L331">                &quot;Returns can only be requested for DELIVERED items, current status: &quot; + delivery.getStatus());</span>
+        }
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        if (!delivery.getCustomerId().equals(dto.getCustomerId())) {</span>
+<span class="nc" id="L334">            throw new ResponseStatusException(HttpStatus.FORBIDDEN,</span>
+                &quot;Delivery does not belong to this customer&quot;);
+        }
+
+<span class="nc" id="L338">        ReturnRequest rr = new ReturnRequest();</span>
+<span class="nc" id="L339">        rr.setDeliveryId(deliveryId);</span>
+<span class="nc" id="L340">        rr.setCustomerId(dto.getCustomerId());</span>
+<span class="nc" id="L341">        rr.setReasonCode(dto.getReasonCode());</span>
+<span class="nc" id="L342">        rr.setDescription(dto.getDescription());</span>
+<span class="nc" id="L343">        return ReturnRequestDTO.from(returnRequestRepository.save(rr));</span>
+    }
+
+    public List&lt;ReturnRequestDTO&gt; getCustomerReturnRequests(Long customerId) {
+<span class="nc" id="L347">        return returnRequestRepository.findByCustomerIdOrderByRequestedAtDesc(customerId)</span>
+<span class="nc" id="L348">                .stream().map(ReturnRequestDTO::from).collect(Collectors.toList());</span>
+    }
+
+    // ── HELPERS ───────────────────────────────────────────────
+
+    private Delivery findDelivery(String id) {
+<span class="nc" id="L354">        return deliveryRepository.findById(id)</span>
+<span class="nc" id="L355">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;Delivery not found&quot;));</span>
+    }
+
+    private DeliveryAssignment findAssignment(String id) {
+<span class="nc" id="L359">        return assignmentRepository.findById(id)</span>
+<span class="nc" id="L360">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;Assignment not found&quot;));</span>
+    }
+
+    private ReturnRequest findReturnRequest(String id) {
+<span class="nc" id="L364">        return returnRequestRepository.findById(id)</span>
+<span class="nc" id="L365">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;Return request not found&quot;));</span>
+    }
+
+    private void recordHistory(String deliveryId, DeliveryStatus status, Long changedBy) {
+<span class="nc" id="L369">        DeliveryStatusHistory history = new DeliveryStatusHistory();</span>
+<span class="nc" id="L370">        history.setDeliveryId(deliveryId);</span>
+<span class="nc" id="L371">        history.setStatus(status);</span>
+<span class="nc" id="L372">        history.setChangedBy(changedBy);</span>
+<span class="nc" id="L373">        historyRepository.save(history);</span>
+<span class="nc" id="L374">    }</span>
+
+    /** Generates a unique tracking number: VND-{orderId}-{6-char UUID suffix} */
+    private String generateTrackingNumber(Long orderId, String orderCode) {
+<span class="nc bnc" id="L378" title="All 4 branches missed.">        String base = (orderCode != null &amp;&amp; !orderCode.isBlank())</span>
+<span class="nc" id="L379">            ? orderCode</span>
+<span class="nc" id="L380">            : String.format(&quot;%08d&quot;, orderId);</span>
+<span class="nc" id="L381">        return &quot;VND-&quot; + base + &quot;-&quot; + UUID.randomUUID().toString().substring(0, 6).toUpperCase();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

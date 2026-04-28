@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora · Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/misc.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" th:href="@{/css/epic5.css}">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-brand">Vendora</div>
+    <div class="topbar-right">
+        <span class="topbar-role">Delivery Agent</span>
+        <button class="btn-logout" onclick="logout()">Sign out</button>
+    </div>
+</header>
+
+<div class="container">
+    <div class="page-title">My Deliveries</div>
+    <div class="page-sub">Track and update your assigned deliveries</div>
+
+    <div class="stats">
+        <div class="stat-card hl"><div class="stat-label">Total Assigned</div><div class="stat-value" id="st-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Pending Accept</div><div class="stat-value" id="st-assigned">—</div></div>
+        <div class="stat-card"><div class="stat-label">In Transit</div><div class="stat-value" id="st-transit">—</div></div>
+        <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" id="st-done">—</div></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="filterCards('ALL', this)">All</button>
+        <button class="tab" onclick="filterCards('NEW', this)">New</button>
+        <button class="tab" onclick="filterCards('ASSIGNED', this)">Accepted</button>
+        <button class="tab" onclick="filterCards('OUT_FOR_DELIVERY', this)">In Transit</button>
+        <button class="tab" onclick="filterCards('DELIVERED', this)">Delivered</button>
+        <button class="tab" onclick="filterCards('FAILED', this)">Failed</button>
+    </div>
+
+    <div class="card-grid" id="cardGrid"></div>
+</div>
+
+<!-- Note Modal -->
+<div class="overlay" id="noteModal">
+    <div class="modal">
+        <div class="modal-head">
+            <span class="modal-title" id="noteTitle">Add Note</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <!-- Shown for reject -->
+        <div class="field" id="modalRejectField">
+            <label>Rejection Reason</label>
+            <input id="noteInput" placeholder="Describe the reason…">
+        </div>
+        <!-- Shown for fail -->
+        <div id="modalFailFields" style="display:none;">
+            <div class="field" style="margin-bottom:.75rem;">
+                <label>Failure Reason</label>
+                <select id="failReasonCode" style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);background:var(--rose-50);outline:none;">
+                    <option value="CUSTOMER_NOT_HOME">Customer not home</option>
+                    <option value="WRONG_ADDRESS">Wrong address</option>
+                    <option value="ACCESS_DENIED">Access denied</option>
+                    <option value="DAMAGED">Package damaged</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Additional Details (optional)</label>
+                <input id="failDescription" placeholder="Any extra details…">
+            </div>
+        </div>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem;">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn-primary" id="noteConfirmBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = '';
+    const token = localStorage.getItem('token') || localStorage.getItem('vendoraToken');
+    let agentId = localStorage.getItem('vnd_agent_id');
+
+    if (!token) window.location.href = '/login';
+
+    const authH = () => ({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+    });
+
+    let allItems = [];
+    let pendingAction = null;
+
+    function logout() { localStorage.clear(); window.location.href = '/login'; }
+
+    async function apiFetch(path, method = 'GET', body = null) {
+        const opts = { method, headers: authH(), credentials: 'include' };
+        if (body) opts.body = JSON.stringify(body);
+        const r = await fetch(API + path, opts);
+        if (!r.ok) {
+            let msg = 'Request failed';
+            try { const j = await r.json(); msg = j.message || msg; } catch {}
+            throw new Error(msg);
+        }
+        if (r.status === 204) return null;
+        return r.json();
+    }
+
+    function toast(msg, type = '') {
+        const el = document.getElementById('toast');
+        el.textContent = msg; el.className = 'toast show ' + type;
+        setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    async function ensureAgentId() {
+        if (agentId) return;
+        const r = await fetch('/api/users/me', { headers: authH(), credentials: 'include' });
+        if (!r.ok) { window.location.href = '/login'; return; }
+        const p = await r.json();
+        agentId = String(p.id);
+        localStorage.setItem('vnd_agent_id', agentId);
+    }
+
+    async function load() {
+        try {
+            await ensureAgentId();
+            const assignments = await apiFetch('/deliveryagent/assignments/me');
+            allItems = await Promise.all(assignments.map(async (a) => {
+                try {
+                    const delivery = await apiFetch(`/deliveryagent/deliveries/${a.deliveryId}`);
+                    return { assignment: a, delivery };
+                } catch {
+                    return { assignment: a, delivery: null };
+                }
+            }));
+            renderStats();
+            renderCards(allItems);
+        } catch (e) { toast('Failed to load deliveries', 'error'); }
+    }
+
+    function renderStats() {
+        document.getElementById('st-total').textContent    = allItems.length;
+        document.getElementById('st-assigned').textContent = allItems.filter(i => i.assignment.status === 'PENDING').length;
+        document.getElementById('st-transit').textContent  = allItems.filter(i => i.delivery?.status === 'OUT_FOR_DELIVERY').length;
+        document.getElementById('st-done').textContent     = allItems.filter(i => i.delivery?.status === 'DELIVERED').length;
+    }
+
+    function filterCards(key, btn) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        const filtered = key === 'ALL' ? allItems : allItems.filter(i => {
+            if (key === 'NEW') return i.assignment.status === 'PENDING';
+            return i.delivery?.status === key;
+        });
+        renderCards(filtered);
+    }
+
+    function renderCards(list) {
+        const grid = document.getElementById('cardGrid');
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📭</div>No deliveries here</div>`;
+            return;
+        }
+        grid.innerHTML = list.map(i => card(i)).join('');
+    }
+
+    const TRACK_STEPS = [
+        { label: 'Order\nPlaced',     statuses: ['PENDING'] },
+        { label: 'Agent\nAssigned',   statuses: ['ASSIGNED'] },
+        { label: 'Out for\nDelivery', statuses: ['OUT_FOR_DELIVERY'] },
+        { label: 'Delivered',         statuses: ['DELIVERED', 'FAILED'] },
+    ];
+
+    function card(item) {
+        const { assignment, delivery } = item;
+
+        if (!delivery) return `
+        <div class="delivery-card">
+          <div class="card-head">
+            <div><div class="card-code">Assignment</div><div class="card-id">${assignment.id.substring(0,8)}…</div></div>
+            <span class="badge badge-pending">Delivery unavailable</span>
+          </div>
+          <div class="card-actions">${agentActions(item)}</div>
+        </div>`;
+
+        const curIdx    = TRACK_STEPS.findIndex(s => s.statuses.includes(delivery.status));
+        const trackHtml = `
+      <div class="track-bar">
+        ${TRACK_STEPS.map((s, i) => {
+            const done = curIdx === -1 ? false : i < curIdx;
+            const cur  = i === curIdx;
+            const cls  = done ? 'done' : (cur ? 'cur' : '');
+            const icon = done ? '✓' : (cur ? '●' : (i + 1));
+            return `
+            ${i > 0 ? `<div class="track-line ${done ? 'done' : ''}"></div>` : ''}
+            <div class="track-step">
+              <div class="track-dot ${cls}">${icon}</div>
+              <div class="track-lbl ${cls}">${s.label.replace('\n','<br>')}</div>
+            </div>`;
+        }).join('')}
+      </div>`;
+
+        const note = delivery.notes ? `<div class="card-note">📝 ${delivery.notes}</div>` : '';
+
+        return `
+    <div class="delivery-card">
+      <div class="card-head">
+        <div>
+          <div class="card-code">${delivery.trackingNumber}</div>
+          <div class="card-id">Order #${delivery.orderId} · ${assignmentLabel(assignment.status)}</div>
+        </div>
+        ${deliveryBadge(delivery.status)}
+      </div>
+      ${trackHtml}
+      <div class="card-row"><span class="card-icon">📍</span><span class="card-label">Address</span><span class="card-val">${delivery.deliveryAddress}</span></div>
+      <div class="card-row"><span class="card-icon">#</span><span class="card-label">Tracking</span><span class="card-val">${delivery.trackingNumber}</span></div>
+      ${note}
+      <div class="card-actions">${agentActions(item)}</div>
+    </div>`;
+    }
+
+    function agentActions(item) {
+        const { assignment, delivery } = item;
+        const btns = [];
+
+        if (assignment.status === 'PENDING') {
+            btns.push(`<button class="btn btn-success" onclick="acceptAssignment('${assignment.id}')">Accept</button>`);
+            btns.push(`<button class="btn btn-danger"  onclick="openRejectModal('${assignment.id}')">Reject</button>`);
+        }
+
+        if (assignment.status === 'ACCEPTED' && delivery) {
+            if (delivery.status === 'ASSIGNED')
+                btns.push(`<button class="btn btn-rose" onclick="pickupDelivery('${delivery.id}')">Mark Picked Up</button>`);
+            if (delivery.status === 'OUT_FOR_DELIVERY') {
+                btns.push(`<button class="btn btn-success" onclick="deliverDelivery('${delivery.id}')">Mark Delivered</button>`);
+                btns.push(`<button class="btn btn-danger"  onclick="openFailModal('${delivery.id}')">Mark Failed</button>`);
+            }
+            if (delivery.status === 'DELIVERED') {
+                btns.push(`<button class="btn btn-outline" onclick="pickupReturn('${delivery.id}')">Pickup Return</button>`);
+                btns.push(`<button class="btn btn-success" onclick="completeReturn('${delivery.id}')">Complete Return</button>`);
+            }
+        }
+
+        return btns.join('');
+    }
+
+    // ── Assignment actions ────────────────────────────────────────────────────
+
+    async function acceptAssignment(assignmentId) {
+        try {
+            await apiFetch(`/deliveryagent/assignments/${assignmentId}/accept?agentId=${agentId}`, 'POST');
+            toast('Assignment accepted!', 'success');
+            load();
+        } catch (e) { toast('Failed to accept', 'error'); }
+    }
+
+    function openRejectModal(assignmentId) {
+        pendingAction = { type: 'reject', id: assignmentId };
+        document.getElementById('noteTitle').textContent          = 'Reject Delivery';
+        document.getElementById('noteInput').value                = '';
+        document.getElementById('modalRejectField').style.display = '';
+        document.getElementById('modalFailFields').style.display  = 'none';
+        document.getElementById('noteConfirmBtn').onclick         = confirmAction;
+        document.getElementById('noteModal').classList.add('open');
+    }
+
+    // ── Delivery actions ──────────────────────────────────────────────────────
+
+    async function pickupDelivery(deliveryId) {
+        try {
+            await apiFetch(`/deliveryagent/deliveries/${deliveryId}/pickup?agentId=${agentId}`, 'POST');
+            toast('Marked as picked up!', 'success');
+            load();
+        } catch (e) { toast('Failed to update', 'error'); }
+    }
+
+    async function deliverDelivery(deliveryId) {
+        try {
+            await apiFetch(`/deliveryagent/deliveries/${deliveryId}/complete?agentId=${agentId}`, 'POST');
+            toast('Marked as delivered!', 'success');
+            load();
+        } catch (e) { toast('Failed to update', 'error'); }
+    }
+
+    async function pickupReturn(deliveryId) {
+        try {
+            await apiFetch(`/deliveryagent/deliveries/${deliveryId}/pickup-return?agentId=${agentId}`, 'POST');
+            toast('Return picked up!', 'success');
+            load();
+        } catch (e) { toast('Failed to update', 'error'); }
+    }
+
+    async function completeReturn(deliveryId) {
+        try {
+            await apiFetch(`/deliveryagent/deliveries/${deliveryId}/complete-return?agentId=${agentId}`, 'POST');
+            toast('Return completed!', 'success');
+            load();
+        } catch (e) { toast('Failed to update', 'error'); }
+    }
+
+    function openFailModal(deliveryId) {
+        pendingAction = { type: 'fail', id: deliveryId };
+        document.getElementById('noteTitle').textContent          = 'Mark as Failed';
+        document.getElementById('failReasonCode').selectedIndex   = 0;
+        document.getElementById('failDescription').value          = '';
+        document.getElementById('modalRejectField').style.display = 'none';
+        document.getElementById('modalFailFields').style.display  = '';
+        document.getElementById('noteConfirmBtn').onclick         = confirmAction;
+        document.getElementById('noteModal').classList.add('open');
+    }
+
+    // ── Modal confirm ─────────────────────────────────────────────────────────
+
+    async function confirmAction() {
+        closeModal();
+        try {
+            if (pendingAction.type === 'reject') {
+                const reason = document.getElementById('noteInput').value.trim();
+                if (!reason) { toast('Please enter a reason', 'error'); return; }
+                await apiFetch(`/deliveryagent/assignments/${pendingAction.id}/reject?agentId=${agentId}&reason=${encodeURIComponent(reason)}`, 'POST');
+                toast('Assignment rejected', 'success');
+            } else if (pendingAction.type === 'fail') {
+                const reasonCode  = document.getElementById('failReasonCode').value;
+                const description = document.getElementById('failDescription').value.trim() || null;
+                await apiFetch(`/deliveryagent/deliveries/${pendingAction.id}/fail`, 'POST', {
+                    loggedBy:  Number(agentId),
+                    reasonCode,
+                    description
+                });
+                toast('Delivery marked as failed', 'success');
+            }
+            load();
+        } catch (e) { toast('Action failed', 'error'); }
+    }
+
+    function closeModal() { document.getElementById('noteModal').classList.remove('open'); }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function deliveryBadge(status) {
+        const labels = {
+            PENDING:          'Pending',
+            ASSIGNED:         'Ready to Pickup',
+            OUT_FOR_DELIVERY: 'Out for Delivery',
+            DELIVERED:        'Delivered',
+            FAILED:           'Failed',
+            RETURNED:         'Returned'
+        };
+        return `<span class="badge badge-${status.toLowerCase()}">${labels[status] || status}</span>`;
+    }
+
+    function assignmentLabel(status) {
+        return { PENDING: 'Awaiting response', ACCEPTED: 'Accepted', REJECTED: 'Rejected' }[status] || status;
+    }
+
+    load();
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | Our Service</title>
+
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/cards.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/typography.css">
+    <link rel="stylesheet" href="../css/utils.css">
+    <link rel="stylesheet" href="../css/footer.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="home-bg">
+<div class="page-wrapper">
+
+    <main class="container">
+        <header class="cookie-header">
+            <div class="container">
+                <h1>Our Services</h1>
+                <p>Discover everything you can do on Vendora</p>
+            </div>
+        </header>
+        <section class="service-section hidden" id="accountServices">
+            <h2><i class="fas fa-lock-open"></i> Account Management</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <ul class="service-links">
+                        <li><a href="/profile"><i class="fas fa-user"></i> View Profile</a></li>
+                        <li><a href="/profile"><i class="fas fa-edit"></i> Edit Profile</a></li>
+                        <li><a href="/update-password"><i class="fas fa-key"></i> Change Password</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-section">
+            <h2>🌍 General Services</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <i class="fas fa-question-circle fa-2x"></i>
+                    <h4>FAQs</h4>
+                    <p>Get answers to commonly asked questions.</p>
+                    <a href="/faq" class="btn-primary btn-compact">Read FAQ</a>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-info-circle fa-2x"></i>
+                    <h4>About Vendora</h4>
+                    <p>Learn more about our mission and promises.</p>
+                    <a href="/about" class="btn-primary btn-compact">Learn More</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-section">
+            <h2>💳 Payment Services</h2>
+            <div class="service-grid">
+                <div class="service-card" >
+                    <h4><i class="fas fa-credit-card"></i> Card Payments</h4>
+                    <img src="../images/OP.jpg" alt="Online Payment">
+                </div>
+                <div class="service-card">
+                    <h4><i class="fas fa-money-bill-wave"></i> Cash on Delivery</h4>
+                    <img src="../images/COD.jpg" alt="Cash On Delivery">
+                </div>
+            </div>
+        </section>
+
+        <section class="service-section">
+            <h2>📧 Contact & Support</h2>
+            <div class="service-grid service-grid--full-width">
+                <div class="card support-box">
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:vendorabeautystore@gmail.com">vendorabeautystore@gmail.com</a></p>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+94701420487">+94 70 142 0487</a></p>
+                    <p><i class="fas fa-map-marker-alt"></i> 96/A, Bandaragama Road, Waskaduwa, Sri Lanka</p>
+                </div>
+            </div>
+
+            <div class="card support-box">
+                <h3>Send a Message</h3>
+                <div class="note-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span><strong>Important:</strong> This service requires you to be logged in to access.</span>
+                </div>
+
+                <div class="text-box text-box--warning">
+                    <p><strong>Note:</strong> If your message is related to your package, please attach the following files manually when sending your email:</p>
+                    <p><i class="fas fa-receipt"></i> Image of the Receipt</p>
+                    <p><i class="fas fa-box-open"></i> Image of the Product</p>
+                </div>
+
+                <div class="text-box text-box--info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>When you click <strong>Send Now</strong>, your email app will open so you can send your message directly.</span>
+                </div>
+
+                <a class="send-mail-btn btn-primary" href="mailto:vendorabeautystore@gmail.com?subject=Customer Support Message - Vendora">
+                    <i class="fas fa-paper-plane"></i> SEND NOW
+                </a>
+
+                <div id="formResponse" class="success-msg"></div>
+            </div>
+        </section>
+
+        <section class="service-section hidden" id="customerServices">
+            <h2>🛍️ Customer Services</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <i class="fas fa-truck fa-2x"></i>
+                    <h4>Track My Order</h4>
+                    <button class="secondary">Track</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-times-circle fa-2x"></i>
+                    <h4>Cancel Orders</h4>
+                    <button class="secondary">Cancel</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-box fa-2x"></i>
+                    <h4>Order History</h4>
+                    <button class="secondary">View</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-shopping-cart fa-2x"></i>
+                    <h4>View Cart</h4>
+                    <button class="secondary">Open Cart</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-section hidden" id="supplierServices">
+            <h2>🏭 Supplier Services</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <i class="fas fa-boxes fa-2x"></i>
+                    <h4>View Stock</h4>
+                    <button class="secondary">View</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-plus fa-2x"></i>
+                    <h4>Add Product</h4>
+                    <button class="secondary">Add</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-edit fa-2x"></i>
+                    <h4>Update Product</h4>
+                    <button class="secondary">Update</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-section hidden" id="deliveryServices">
+            <h2>🚚 Delivery Services</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <i class="fas fa-list fa-2x"></i>
+                    <h4>My Deliveries</h4>
+                    <button class="secondary">View</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                    <h4>Update Status</h4>
+                    <button class="secondary">Update</button>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-tasks fa-2x"></i>
+                    <h4>Task Manager</h4>
+                    <button class="secondary">Manage</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-bottom">
+            <p>© 2026 Vendora | The Online Beauty Store</p>
+            <p><button><a href="terms.html">Terms & Conditions</a></button> | <button><a href="privacy.html">Privacy
+                Policy</a></button> | <button><a href="cookie.html">Cookie Policy</a></button> | Do Not Sell My
+                Personal Information | Vendora</p>
+            <p>If you are having problems using this website, please <button><a href="service.html">CLICK
+                HERE</a></button> for assistance.</p>
+        </div>
+    </footer>
+    <script src="../js/main.js"></script>
+</div>
+</body>
+</html>

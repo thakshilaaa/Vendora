@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendora Catalog</title>
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/media.css}">
+  <link rel="stylesheet" th:href="@{/css/misc.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+</head>
+<body>
+  <div id="navbar-root"></div>
+  
+<main class="page">
+  <section class="page-header">
+    <h1 class="page-title">Product Catalog</h1>
+    <p class="page-subtitle">Customer-facing catalog rebuilt with plain HTML, CSS, and JavaScript.</p>
+  </section>
+  <section class="card pad">
+    <form id="user-products-filter-form" class="filter-bar filter-bar-wide">
+      <input class="input" type="text" name="keyword" placeholder="Search products..." />
+      <select class="select" name="category" id="user-filter-category"></select>
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <div id="user-products-summary" class="muted mb-1"></div>
+    <div id="user-products-grid" class="product-grid"></div>
+  </section>
+</main>
+
+  <script type="module" th:src="@{/assets/js/pages/user-products.js}"></script>
+</body>
+</html>

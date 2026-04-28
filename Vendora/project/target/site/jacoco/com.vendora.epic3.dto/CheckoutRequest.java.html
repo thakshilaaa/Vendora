@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CheckoutRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic3.dto</a> &gt; <span class="el_source">CheckoutRequest.java</span></div><h1>CheckoutRequest.java</h1><pre class="source lang-java linenums">package com.vendora.epic3.dto;
+
+import com.vendora.epic3.model.LocationType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+<span class="nc" id="L9">public class CheckoutRequest {</span>
+    private List&lt;Long&gt; itemIds;
+    @NotNull(message = &quot;Choose a delivery area&quot;)
+    private LocationType locationType;
+    @NotBlank(message = &quot;Delivery address is required&quot;)
+    private String address;
+    private String paymentMethod;
+
+<span class="nc" id="L17">    public List&lt;Long&gt; getItemIds() { return itemIds; }</span>
+<span class="nc" id="L18">    public void setItemIds(List&lt;Long&gt; itemIds) { this.itemIds = itemIds; }</span>
+<span class="nc" id="L19">    public LocationType getLocationType() { return locationType; }</span>
+<span class="nc" id="L20">    public void setLocationType(LocationType locationType) { this.locationType = locationType; }</span>
+<span class="nc" id="L21">    public String getAddress() { return address; }</span>
+<span class="nc" id="L22">    public void setAddress(String address) { this.address = address; }</span>
+<span class="nc" id="L23">    public String getPaymentMethod() { return paymentMethod; }</span>
+<span class="nc" id="L24">    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

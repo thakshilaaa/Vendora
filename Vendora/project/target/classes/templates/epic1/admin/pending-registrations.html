@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendora | Pending Registrations</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/tables.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body.home-bg {
+      background-image: url('/images/b3.webp');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .badge-supplier { background-color: #e3f2fd; color: #1976d2; }
+    .badge-delivery { background-color: #f3e5f5; color: #7b1fa2; }
+    .action-btns { display: flex; gap: 10px; }
+  </style>
+</head>
+
+<body class="home-bg">
+<div class="page-wrapper">
+  <main class="container container-padding-custom animate-fade-up">
+    <header class="flex-between">
+      <div>
+        <h1>Pending Registrations</h1>
+        <p>Review and approve new Supplier and Delivery Personnel applications.</p>
+      </div>
+      <a th:href="@{/admin-dashboard}" class="btn-outline btn-sm">Back to Dashboard</a>
+    </header>
+
+    <section class="card card-overflow mt-4">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Email</th>
+            <th>City</th>
+            <th>District</th>
+            <th>Applied Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="applicationsTableBody">
+          <!-- Populated via JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', fetchApplications);
+
+  async function fetchApplications() {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Admin session not found. Please login again.');
+      }
+      const response = await fetch('/api/partnership/pending', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch applications');
+      
+      const applications = await response.json();
+      const tbody = document.getElementById('applicationsTableBody');
+      tbody.innerHTML = '';
+
+      if (applications.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No pending applications found.</td></tr>';
+        return;
+      }
+
+      applications.forEach(app => {
+        const tr = document.createElement('tr');
+        const badgeClass = app.applicantType === 'SUPPLIER' ? 'badge-supplier' : 'badge-delivery';
+        
+        tr.innerHTML = `
+          <td>${app.fullName}</td>
+          <td><span class="badge ${badgeClass}">${app.applicantType}</span></td>
+          <td>${app.email}</td>
+          <td>${app.city || '-'}</td>
+          <td>${app.district || '-'}</td>
+          <td>${new Date(app.createdAt).toLocaleDateString()}</td>
+          <td><span class="status-pending">${app.status}</span></td>
+          <td class="action-btns">
+            <button class="btn-primary btn-xs" onclick="approveUser(${app.id}, '${app.fullName}', '${app.applicantType}')">Approve</button>
+            <button class="btn-cancel btn-xs" onclick="rejectUser(${app.id}, '${app.fullName}', '${app.applicantType}')">Reject</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (error) {
+      console.error(error);
+      const tbody = document.getElementById('applicationsTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red">Error loading applications.</td></tr>';
+    }
+  }
+
+  async function approveUser(id, name, role) {
+    if(!confirm(`Are you sure you want to approve ${name} as a ${role}?`)) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Admin session not found. Please login again.');
+        window.location.href = '/admin-login';
+        return;
+      }
+      const response = await fetch('/api/partnership/approve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ applicationId: id })
+      });
+      
+      const result = await response.json();
+      if (response.ok) {
+        alert(`Success! An automated email has been sent to ${name} with a link to set their password and finalize their ${role} account.`);
+        fetchApplications(); // Reload list
+      } else {
+        alert(result.message || 'Failed to approve application.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred.');
+    }
+  }
+
+  async function rejectUser(id, name, role) {
+    if(!confirm(`Are you sure you want to reject ${name} as a ${role}?`)) return;
+    
+    const note = prompt('Optional: Enter a reason for rejection (will be included in email):', '');
+    if (note === null) return; // User cancelled prompt
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Admin session not found. Please login again.');
+        window.location.href = '/admin-login';
+        return;
+      }
+      const response = await fetch('/api/partnership/reject', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ applicationId: id, note: note })
+      });
+      
+      const result = await response.json();
+      if (response.ok) {
+        alert(`Application for ${name} has been rejected. A notification email has been sent.`);
+        fetchApplications(); // Reload list
+      } else {
+        alert(result.message || 'Failed to reject application.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred.');
+    }
+  }
+</script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/partnership.js}"></script>
+</div>
+</body>
+</html>

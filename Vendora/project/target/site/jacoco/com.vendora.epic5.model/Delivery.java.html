@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Delivery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic5.model</a> &gt; <span class="el_source">Delivery.java</span></div><h1>Delivery.java</h1><pre class="source lang-java linenums">package com.vendora.epic5.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+<span class="nc bnc" id="L8" title="All 102 branches missed.">@Data</span>
+@Entity
+@Table(name = &quot;deliveries&quot;)
+public class Delivery {
+
+<span class="nc" id="L13">    @Id</span>
+    @Column(columnDefinition = &quot;CHAR(36)&quot;, updatable = false, nullable = false)
+<span class="nc" id="L15">    private String id = UUID.randomUUID().toString();</span>
+
+    /** FK → orders.order_id (BIGINT) */
+    @Column(name = &quot;order_id&quot;, nullable = false)
+<span class="nc" id="L19">    private Long orderId;</span>
+
+    /** FK → users.user_id (BIGINT) */
+    @Column(name = &quot;customer_id&quot;, nullable = false)
+<span class="nc" id="L23">    private Long customerId;</span>
+
+    /** Cached from users.district at creation — used for district-based agent assignment */
+    @Column(name = &quot;customer_district&quot;, length = 50, nullable = false)
+<span class="nc" id="L27">    private String customerDistrict;</span>
+
+    /** FK → users.user_id (BIGINT) — set when an agent is assigned */
+    @Column(name = &quot;agent_id&quot;)
+<span class="nc" id="L31">    private Long agentId;</span>
+
+    @Column(name = &quot;tracking_number&quot;, length = 50, nullable = false, unique = true)
+<span class="nc" id="L34">    private String trackingNumber;</span>
+
+<span class="nc" id="L36">    @Enumerated(EnumType.STRING)</span>
+    @Column(nullable = false)
+<span class="nc" id="L38">    private DeliveryStatus status = DeliveryStatus.PENDING;</span>
+
+    @Column(name = &quot;delivery_address&quot;, columnDefinition = &quot;TEXT&quot;, nullable = false)
+<span class="nc" id="L41">    private String deliveryAddress;</span>
+
+    @Column(columnDefinition = &quot;TEXT&quot;)
+<span class="nc" id="L44">    private String notes;</span>
+
+<span class="nc" id="L46">    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)</span>
+<span class="nc" id="L47">    private LocalDateTime createdAt = LocalDateTime.now();</span>
+
+    @Column(name = &quot;picked_up_at&quot;)
+<span class="nc" id="L50">    private LocalDateTime pickedUpAt;</span>
+
+    @Column(name = &quot;delivered_at&quot;)
+<span class="nc" id="L53">    private LocalDateTime deliveredAt;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

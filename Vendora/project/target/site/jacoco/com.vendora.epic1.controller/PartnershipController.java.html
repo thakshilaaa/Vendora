@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PartnershipController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.controller</a> &gt; <span class="el_source">PartnershipController.java</span></div><h1>PartnershipController.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.controller;
+
+import com.vendora.epic1.dto.auth.AuthResponse;
+import com.vendora.epic1.dto.auth.MessageResponse;
+import com.vendora.epic1.dto.partnership.ApprovePartnerRequest;
+import com.vendora.epic1.dto.partnership.PartnershipApplicationRequest;
+import com.vendora.epic1.dto.partnership.PartnershipApplicationResponse;
+import com.vendora.epic1.dto.partnership.RejectPartnerRequest;
+import com.vendora.epic1.service.PartnershipService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController(&quot;epic1PartnershipController&quot;)
+@RequestMapping(&quot;/api/partnership&quot;)
+public class PartnershipController {
+
+    private final PartnershipService partnershipService;
+
+<span class="fc" id="L22">    public PartnershipController(PartnershipService partnershipService) {</span>
+<span class="fc" id="L23">        this.partnershipService = partnershipService;</span>
+<span class="fc" id="L24">    }</span>
+
+    @PostMapping(&quot;/apply&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; submitApplication(@RequestBody PartnershipApplicationRequest request) {
+        // Files are ignored for now as requested
+<span class="nc" id="L29">        return ResponseEntity.ok(partnershipService.submitApplication(request));</span>
+    }
+
+    @GetMapping(&quot;/pending&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;List&lt;PartnershipApplicationResponse&gt;&gt; getPendingApplications() {
+<span class="nc" id="L35">        return ResponseEntity.ok(partnershipService.getPendingApplications());</span>
+    }
+
+    @PostMapping(&quot;/approve&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;MessageResponse&gt; approveApplication(@RequestBody ApprovePartnerRequest request) {
+<span class="nc" id="L41">        return ResponseEntity.ok(partnershipService.approveApplication(request.getApplicationId()));</span>
+    }
+
+    @PostMapping(&quot;/reject&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;MessageResponse&gt; rejectApplication(@RequestBody RejectPartnerRequest request) {
+<span class="nc" id="L47">        return ResponseEntity.ok(partnershipService.rejectApplication(request));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

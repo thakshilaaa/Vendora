@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PartnershipApplicationResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.dto.partnership</a> &gt; <span class="el_source">PartnershipApplicationResponse.java</span></div><h1>PartnershipApplicationResponse.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.dto.partnership;
+
+import com.vendora.epic1.model.enums.ApplicantType;
+import com.vendora.epic1.model.enums.PartnershipStatus;
+
+import java.time.LocalDateTime;
+
+<span class="nc" id="L8">public class PartnershipApplicationResponse {</span>
+
+    private Long id;
+    private ApplicantType applicantType;
+    private String fullName;
+    private String email;
+    private String phone;
+    private String city;
+    private String district;
+    private String businessName;
+    private PartnershipStatus status;
+    private LocalDateTime createdAt;
+    private String reviewNote;
+
+<span class="nc" id="L22">    public Long getId() { return id; }</span>
+<span class="nc" id="L23">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="nc" id="L25">    public ApplicantType getApplicantType() { return applicantType; }</span>
+<span class="nc" id="L26">    public void setApplicantType(ApplicantType applicantType) { this.applicantType = applicantType; }</span>
+
+<span class="nc" id="L28">    public String getFullName() { return fullName; }</span>
+<span class="nc" id="L29">    public void setFullName(String fullName) { this.fullName = fullName; }</span>
+
+<span class="nc" id="L31">    public String getEmail() { return email; }</span>
+<span class="nc" id="L32">    public void setEmail(String email) { this.email = email; }</span>
+
+<span class="nc" id="L34">    public String getPhone() { return phone; }</span>
+<span class="nc" id="L35">    public void setPhone(String phone) { this.phone = phone; }</span>
+
+<span class="nc" id="L37">    public String getCity() { return city; }</span>
+<span class="nc" id="L38">    public void setCity(String city) { this.city = city; }</span>
+
+<span class="nc" id="L40">    public String getDistrict() { return district; }</span>
+<span class="nc" id="L41">    public void setDistrict(String district) { this.district = district; }</span>
+
+<span class="nc" id="L43">    public String getBusinessName() { return businessName; }</span>
+<span class="nc" id="L44">    public void setBusinessName(String businessName) { this.businessName = businessName; }</span>
+
+<span class="nc" id="L46">    public PartnershipStatus getStatus() { return status; }</span>
+<span class="nc" id="L47">    public void setStatus(PartnershipStatus status) { this.status = status; }</span>
+
+<span class="nc" id="L49">    public LocalDateTime getCreatedAt() { return createdAt; }</span>
+<span class="nc" id="L50">    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }</span>
+
+<span class="nc" id="L52">    public String getReviewNote() { return reviewNote; }</span>
+<span class="nc" id="L53">    public void setReviewNote(String reviewNote) { this.reviewNote = reviewNote; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

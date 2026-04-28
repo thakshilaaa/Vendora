@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Supplier — ' + ${supplier.companyName}">Supplier dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/misc.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<header class="topbar">
+    <a th:href="@{/}" class="brand">Vendora</a>
+    <nav>
+        <a th:href="@{/supplier/dashboard}">Dashboard</a>
+        <a th:href="@{/logout}">Sign out</a>
+    </nav>
+</header>
+<main class="page">
+    <div class="container">
+        <section class="page-header">
+            <div>
+                <h1 class="page-title" th:text="${supplier.companyName}"></h1>
+                <p class="page-subtitle">Welcome back. Manage your products and incoming orders.</p>
+            </div>
+            <a th:href="@{/supplier/product/new}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add product</a>
+        </section>
+
+        <div class="grid-2 mb-10">
+            <div class="card">
+                <p class="text-small uppercase text-muted">Total products</p>
+                <p class="text-2xl font-weight-bold" th:text="${productCount}">0</p>
+            </div>
+            <div class="card">
+                <p class="text-small uppercase text-muted">Pending orders</p>
+                <p class="text-2xl font-weight-bold" th:text="${pendingOrders}">0</p>
+            </div>
+        </div>
+
+        <section class="card">
+            <div class="page-header mb-1">
+                <div>
+                    <h2 class="page-title">My products</h2>
+                </div>
+            </div>
+            <div th:if="${toast}" class="alert-box alert-info mb-6">
+                <i class="fa-solid fa-circle-check"></i>
+                <span th:text="${toast}"></span>
+            </div>
+            <div th:if="${#lists.isEmpty(products)}" class="text-center text-muted py-12">
+                <i class="fa-regular fa-image fa-2x mb-3"></i>
+                <p>No products yet — add your first beauty product.</p>
+            </div>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(products)}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${products}">
+                            <td>
+                                <img th:if="${p.image != null and p.image.length > 0}"
+                                     th:src="@{/supplier/product/{pid}/image(pid=${p.id})}"
+                                     class="img-cover table-img" alt=""/>
+                                <span th:unless="${p.image != null and p.image.length > 0}" class="text-muted">—</span>
+                            </td>
+                            <td th:text="${p.name}"></td>
+                            <td th:text="${p.category}"></td>
+                            <td>Rs. <span th:text="${#numbers.formatDecimal(p.price,1,'COMMA',2,'POINT')}"></span></td>
+                            <td th:text="${p.stockQuantity}"></td>
+                            <td>
+                                <a th:href="@{'/supplier/product/edit/' + ${p.id}}" class="btn btn-secondary btn-sm">Edit</a>
+                                <a th:href="@{'/supplier/product/delete/' + ${p.id}}" onclick="return confirm('Delete this product?')" class="btn btn-cancel btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic4.controller</a> &gt; <span class="el_source">AdminController.java</span></div><h1>AdminController.java</h1><pre class="source lang-java linenums">package com.vendora.epic4.controller;
+
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic4.model.Order;
+import com.vendora.epic4.model.Payment;
+import com.vendora.epic4.repository.OrderRepository;
+import com.vendora.epic4.repository.PaymentRepository;
+import com.vendora.epic4.service.OrderDeliverySyncService;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController(&quot;epic4AdminController&quot;)
+@RequestMapping(&quot;/api/admin&quot;)
+@CrossOrigin(origins = &quot;*&quot;)
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+<span class="fc" id="L32">public class AdminController {</span>
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private OrderDeliverySyncService orderDeliverySyncService;
+
+    @GetMapping(&quot;/stats&quot;)
+    public Map&lt;String, Object&gt; getDashboardStats() {
+<span class="nc" id="L45">        Map&lt;String, Object&gt; stats = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L46">        Double totalRevenue = orderRepository.getTotalRevenue();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        double revenue = (totalRevenue != null) ? totalRevenue : 0.0;</span>
+<span class="nc" id="L48">        long totalOrders = orderRepository.count();</span>
+<span class="nc" id="L49">        long pendingOrders = orderRepository.countByStatus(&quot;PENDING&quot;);</span>
+<span class="nc" id="L50">        Double averageValue = orderRepository.getAverageOrderValue();</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        double avgValue = (averageValue != null) ? averageValue : 0.0;</span>
+
+<span class="nc" id="L53">        stats.put(&quot;totalRevenue&quot;, String.format(&quot;%.2f&quot;, revenue));</span>
+<span class="nc" id="L54">        stats.put(&quot;totalOrders&quot;, totalOrders);</span>
+<span class="nc" id="L55">        stats.put(&quot;pendingOrders&quot;, pendingOrders);</span>
+<span class="nc" id="L56">        stats.put(&quot;avgOrderValue&quot;, String.format(&quot;%.2f&quot;, avgValue));</span>
+<span class="nc" id="L57">        return stats;</span>
+    }
+
+    @GetMapping(&quot;/download-receipt/{orderId}&quot;)
+    public ResponseEntity&lt;byte[]&gt; downloadReceipt(@PathVariable Long orderId) {
+<span class="nc" id="L62">        Order order = orderRepository.findById(orderId)</span>
+<span class="nc" id="L63">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Order not found&quot;));</span>
+
+<span class="nc" id="L65">        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {</span>
+<span class="nc" id="L66">            PdfWriter writer = new PdfWriter(out);</span>
+<span class="nc" id="L67">            PdfDocument pdf = new PdfDocument(writer);</span>
+<span class="nc" id="L68">            Document document = new Document(pdf);</span>
+
+
+<span class="nc" id="L71">            Table labelContainer = new Table(UnitValue.createPercentArray(new float[]{100}))</span>
+<span class="nc" id="L72">                    .setWidth(UnitValue.createPointValue(350f))</span>
+<span class="nc" id="L73">                    .setBorder(new com.itextpdf.layout.borders.SolidBorder(2));</span>
+
+            // Header - Company Name with Background
+<span class="nc" id="L76">            Cell header = new Cell().add(new Paragraph(&quot;VENDORA BEAUTY STORE&quot;)</span>
+<span class="nc" id="L77">                            .setBold().setFontSize(16).setFontColor(com.itextpdf.kernel.colors.ColorConstants.WHITE))</span>
+<span class="nc" id="L78">                    .setBackgroundColor(com.itextpdf.kernel.colors.ColorConstants.BLACK)</span>
+<span class="nc" id="L79">                    .setTextAlignment(TextAlignment.CENTER).setPadding(5);</span>
+<span class="nc" id="L80">            labelContainer.addCell(header);</span>
+
+            // Shipping Details Section
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            String customerPhone = (order.getPhone() != null) ? order.getPhone() : &quot;N/A&quot;;</span>
+<span class="nc" id="L84">            String shippingDetails = &quot;SHIP TO:\n&quot; +</span>
+<span class="nc" id="L85">                    order.getFirstName().toUpperCase() + &quot; &quot; + order.getLastName().toUpperCase() + &quot;\n&quot; +</span>
+                    &quot;Anuradhapura / Colombo, Sri Lanka\n&quot; +
+                    &quot;Contact: &quot; + customerPhone;
+
+<span class="nc" id="L89">            labelContainer.addCell(new Cell().add(new Paragraph(shippingDetails)</span>
+<span class="nc" id="L90">                    .setPadding(10).setFontSize(11).setMultipliedLeading(1.2f)));</span>
+
+            // Order Summary Section
+<span class="nc" id="L93">            String orderInfo = &quot;ORDER ID: #&quot; + order.getId() + &quot; | PRODUCT: &quot; + order.getProduct();</span>
+<span class="nc" id="L94">            labelContainer.addCell(new Cell().add(new Paragraph(orderInfo).setFontSize(10).setItalic().setPaddingLeft(10)));</span>
+
+            // Payment Highlight (Very Professional look)
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            String method = order.getPaymentMethod() != null ? order.getPaymentMethod() : &quot;N/A&quot;;</span>
+<span class="nc" id="L98">            String paymentInfo = &quot;PAYMENT: &quot; + method.toUpperCase() +</span>
+<span class="nc" id="L99">                    &quot;\nAMOUNT: RS. &quot; + String.format(&quot;%.2f&quot;, order.getAmount());</span>
+
+<span class="nc" id="L101">            Cell paymentCell = new Cell().add(new Paragraph(paymentInfo).setBold().setFontSize(14).setPadding(10));</span>
+
+
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            if (&quot;COD&quot;.equalsIgnoreCase(method)) {</span>
+<span class="nc" id="L105">                paymentCell.setFontColor(com.itextpdf.kernel.colors.ColorConstants.RED);</span>
+<span class="nc" id="L106">                paymentCell.setBackgroundColor(com.itextpdf.kernel.colors.ColorConstants.LIGHT_GRAY);</span>
+            }
+<span class="nc" id="L108">            labelContainer.addCell(paymentCell);</span>
+
+<span class="nc" id="L110">            document.add(labelContainer);</span>
+
+            // Footer (Small Text)
+<span class="nc" id="L113">            document.add(new Paragraph(&quot;\nScan for track: #VNDR-&quot; + order.getId())</span>
+<span class="nc" id="L114">                    .setFontSize(8).setTextAlignment(TextAlignment.CENTER));</span>
+
+<span class="nc" id="L116">            document.close();</span>
+
+<span class="nc" id="L118">            byte[] pdfBytes = out.toByteArray();</span>
+<span class="nc" id="L119">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L120">            headers.setContentType(MediaType.APPLICATION_PDF);</span>
+<span class="nc" id="L121">            headers.setContentDisposition(ContentDisposition.attachment().filename(&quot;Shipping_Label_&quot; + orderId + &quot;.pdf&quot;).build());</span>
+
+<span class="nc" id="L123">            return new ResponseEntity&lt;&gt;(pdfBytes, headers, HttpStatus.OK);</span>
+
+<span class="nc" id="L125">        } catch (Exception e) {</span>
+<span class="nc" id="L126">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+        }
+    }
+    @PutMapping(&quot;/{id}/pay-confirm&quot;)
+    @Transactional
+    public ResponseEntity&lt;?&gt; confirmPayment(@PathVariable Long id) {
+<span class="nc" id="L132">        return orderRepository.findById(id).map(order -&gt; {</span>
+<span class="nc" id="L133">            order.setPaymentStatus(&quot;PAID&quot;);</span>
+<span class="nc" id="L134">            orderRepository.save(order);</span>
+<span class="nc" id="L135">            List&lt;Payment&gt; payments = paymentRepository.findByOrderId(id);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (payments != null) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                for (Payment p : payments) {</span>
+<span class="nc" id="L138">                    p.setStatus(&quot;PAID&quot;);</span>
+<span class="nc" id="L139">                    paymentRepository.save(p);</span>
+<span class="nc" id="L140">                }</span>
+            }
+<span class="nc" id="L142">            orderDeliverySyncService.tryCreateDeliveryForOrder(order);</span>
+<span class="nc" id="L143">            return ResponseEntity.ok(&quot;Payment Verified Successfully!&quot;);</span>
+<span class="nc" id="L144">        }).orElse(ResponseEntity.notFound().build());</span>
+    }
+    @PutMapping(&quot;/refund-order/{orderId}&quot;)
+    public ResponseEntity&lt;?&gt; refundOrder(@PathVariable Long orderId) {
+<span class="nc" id="L148">        return orderRepository.findById(orderId).map(order -&gt; {</span>
+            // ඕඩර් එකේ සාමාන්‍ය Status එක Refunded කරයි
+<span class="nc" id="L150">            order.setStatus(&quot;Refunded&quot;);</span>
+
+            // පේමන්ට් එකේ Status එකත් REFUNDED කරයි (මෙන්න මේකයි වැදගත්)
+<span class="nc" id="L153">            order.setPaymentStatus(&quot;REFUNDED&quot;);</span>
+
+<span class="nc" id="L155">            orderRepository.save(order);</span>
+<span class="nc" id="L156">            return ResponseEntity.ok(&quot;Order and Payment Refunded Successfully!&quot;);</span>
+<span class="nc" id="L157">        }).orElse(ResponseEntity.notFound().build());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

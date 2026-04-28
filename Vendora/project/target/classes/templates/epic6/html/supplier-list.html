@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All suppliers — Vendora Admin</title>
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/misc.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<header class="topbar">
+    <a th:href="@{/}" class="brand">Vendora Admin</a>
+    <nav>
+        <a th:href="@{/admin/suppliers/pending}">Pending</a>
+        <a th:href="@{/admin/suppliers}">All suppliers</a>
+        <a th:href="@{/logout}">Sign out</a>
+    </nav>
+</header>
+<main class="page">
+    <div class="container">
+        <section class="page-header">
+            <h1 class="page-title">All suppliers</h1>
+        </section>
+
+        <div th:if="${toast}" class="alert-box alert-info mb-6">
+            <i class="fa-solid fa-circle-check"></i>
+            <span th:text="${toast}"></span>
+        </div>
+
+        <section class="card">
+            <form method="get" th:action="@{/admin/suppliers}" class="filter-bar mb-6">
+                <input name="q" th:value="${q}" type="search" placeholder="Search by name or email…" />
+                <select name="status">
+                    <option value="">All statuses</option>
+                    <option th:each="st : ${statuses}" th:value="${st.name()}" th:text="${st.name()}" th:selected="${selectedStatus != null and selectedStatus.name() == st.name()}"></option>
+                </select>
+                <button class="btn btn-primary" type="submit">
+                    <i class="fa-solid fa-magnifying-glass"></i> Filter
+                </button>
+            </form>
+
+            <div th:if="${#lists.isEmpty(suppliers)}" class="text-center text-muted py-12">
+                No suppliers match your filters.
+            </div>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(suppliers)}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${suppliers}">
+                            <td th:text="${s.companyName}"></td>
+                            <td th:text="${s.contactPerson}"></td>
+                            <td th:text="${s.email}"></td>
+                            <td th:text="${s.phone}"></td>
+                            <td>
+                                <span class="status-pill" th:classappend="${s.status.name() == 'PENDING'} ? ' pending' : ${s.status.name() == 'APPROVED'} ? ' approved' : ' rejected'" th:text="${s.status}"></span>
+                            </td>
+                            <td>
+                                <a th:href="@{'/admin/suppliers/' + ${s.id} + '/delete'}" onclick="return confirm('Delete this supplier and all their products?')" class="btn btn-cancel btn-sm">
+                                    <i class="fa-regular fa-trash-can"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

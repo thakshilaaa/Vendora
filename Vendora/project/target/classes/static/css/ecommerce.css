@@ -1,0 +1,151 @@
+/* === ECOMMERCE.CSS - CONVERSION-FOCUSED COMPONENTS === */
+
+/* 1. PRODUCT CARDS & GRIDS */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 2rem;
+}
+
+.product-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.product-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+}
+
+.product-image-container {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.product-image-container img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image-container img {
+    transform: scale(1.1);
+}
+
+/* 2. PRODUCT DETAILS & BADGES */
+.product-name {
+    margin: 15px 10px 5px;
+    font-size: 1rem;
+    font-family: 'Playfair Display', serif;
+    color: #000000;
+}
+
+.product-price {
+    margin: 6px 0 15px;
+    color: #000000;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Sale/New Badges - Vendora Color Palette */
+.product-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.badge-sale { background-color: #EAACB3; } /* Soft Rose */
+.badge-new { background-color: #000000; }
+
+/* 3. MINI-CART DROPDOWN */
+.mini-cart {
+    width: 320px;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+}
+
+.cart-item {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-item-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.cart-item-price {
+    font-size: 0.85rem;
+    color: #000000;
+    font-weight: 700;
+}
+
+/* 4. PRICING TABLES & FEATURED PACKAGES */
+.pricing-card.featured {
+    border: 2px solid #000000;
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.featured-label {
+    background: #000000;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.pricing-features li::before {
+    content: '✓';
+    color: #000000;
+    font-weight: 900;
+    margin-right: 8px;
+}
+
+/* 5. RESPONSIVE CHECKOUT */
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 3rem;
+}
+
+@media (max-width: 992px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-image-container img {
+        height: 180px;
+    }
+    .pricing-card.featured {
+        transform: scale(1); /* Avoid overlap on small mobile screens */
+    }
+}

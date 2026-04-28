@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic5.controller</a> &gt; <span class="el_source">CustomerController.java</span></div><h1>CustomerController.java</h1><pre class="source lang-java linenums">package com.vendora.epic5.controller;
+
+import com.vendora.epic1.service.UserService;
+import com.vendora.epic5.dto.*;
+import com.vendora.epic5.service.DeliveryService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController(&quot;epic5CustomerController&quot;)
+@RequestMapping(&quot;/customer&quot;)
+@CrossOrigin(origins = &quot;*&quot;)
+public class CustomerController {
+
+    private final DeliveryService deliveryService;
+    private final UserService userService;
+
+<span class="fc" id="L19">    public CustomerController(DeliveryService deliveryService, UserService userService) {</span>
+<span class="fc" id="L20">        this.deliveryService = deliveryService;</span>
+<span class="fc" id="L21">        this.userService = userService;</span>
+<span class="fc" id="L22">    }</span>
+
+    @GetMapping(&quot;/deliveries/me&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryDTO&gt;&gt; getMyDeliveriesForCurrentUser() {
+<span class="nc" id="L27">        return ResponseEntity.ok(</span>
+<span class="nc" id="L28">                deliveryService.getCustomerDeliveries(userService.getCurrentUser().getId()));</span>
+    }
+
+    @GetMapping(&quot;/deliveries&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryDTO&gt;&gt; getMyDeliveries(@RequestParam Long customerId) {
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (!userService.getCurrentUser().getId().equals(customerId)) {</span>
+<span class="nc" id="L35">            return ResponseEntity.status(403).build();</span>
+        }
+<span class="nc" id="L37">        return ResponseEntity.ok(deliveryService.getCustomerDeliveries(customerId));</span>
+    }
+
+    @GetMapping(&quot;/deliveries/{id}/history&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryStatusHistoryDTO&gt;&gt; getHistory(@PathVariable String id) {
+<span class="nc" id="L43">        return ResponseEntity.ok(deliveryService.getStatusHistory(id));</span>
+    }
+
+    @PostMapping(&quot;/deliveries/{id}/return-requests&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;ReturnRequestDTO&gt; requestReturn(
+            @PathVariable String id,
+            @RequestBody ReturnRequestCreateDTO dto) {
+<span class="nc" id="L51">        return ResponseEntity.ok(deliveryService.createReturnRequest(id, dto));</span>
+    }
+
+    @GetMapping(&quot;/return-requests&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;List&lt;ReturnRequestDTO&gt;&gt; getMyReturnRequests(@RequestParam Long customerId) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (!userService.getCurrentUser().getId().equals(customerId)) {</span>
+<span class="nc" id="L58">            return ResponseEntity.status(403).build();</span>
+        }
+<span class="nc" id="L60">        return ResponseEntity.ok(deliveryService.getCustomerReturnRequests(customerId));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

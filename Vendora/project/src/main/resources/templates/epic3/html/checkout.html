@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout — Vendora</title>
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/}">Vendora</a>
+    <nav><a th:href="@{/cart}"><i class="fa-solid fa-arrow-left"></i> Back to cart</a></nav>
+</header>
+
+<main class="checkout-wrapper">
+
+    <form th:action="@{/checkout}" th:object="${checkoutRequest}" method="post" class="checkout-form">
+        <h1>Checkout</h1>
+
+        <input type="hidden" th:each="id : *{itemIds}" name="itemIds" th:value="${id}">
+
+        <div class="field">
+            <label for="address">Delivery address</label>
+            <textarea id="address" th:field="*{address}" rows="3"
+                      placeholder="House no, street, city"></textarea>
+            <small class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></small>
+        </div>
+
+        <div class="field">
+            <label>Location type</label>
+            <div class="radio-grid">
+                <label th:each="loc : ${locations}" class="radio-card">
+                    <input type="radio" th:field="*{locationType}" th:value="${loc.name()}">
+                    <div>
+                        <strong th:text="${loc.label}"></strong>
+                        <span>Rs. <span th:text="${loc.fee}"></span></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Payment method</label>
+            <div class="radio-grid">
+                <label class="radio-card">
+                    <input type="radio" th:field="*{paymentMethod}" value="COD">
+                    <div><strong>Cash on Delivery</strong><span>Pay when it arrives</span></div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" th:field="*{paymentMethod}" value="ONLINE">
+                    <div><strong>Online payment</strong><span>Card / wallet</span></div>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn primary big">
+            <i class="fa-solid fa-lock"></i> Place order
+        </button>
+    </form>
+
+    <aside class="summary">
+        <h3>Order summary</h3>
+        <ul class="checkout-items">
+            <li th:each="i : ${items}">
+                <img th:src="${i.imageUrl}" th:alt="${i.name}">
+                <div>
+                    <strong th:text="${i.name}"></strong>
+                    <span th:text="'Qty: ' + ${i.quantity}"></span>
+                </div>
+                <span>Rs. <span th:text="${#numbers.formatDecimal(i.subtotal,1,'COMMA',2,'POINT')}"></span></span>
+            </li>
+        </ul>
+        <div class="line"><span>Subtotal</span><strong>Rs. <span th:text="${#numbers.formatDecimal(subtotal,1,'COMMA',2,'POINT')}"></span></strong></div>
+        <div class="line"><span>Delivery</span><strong>Rs. <span th:text="${#numbers.formatDecimal(defaultFee,1,'COMMA',2,'POINT')}"></span></strong></div>
+        <div class="line total"><span>Total</span><strong>Rs. <span th:text="${#numbers.formatDecimal(subtotal.add(defaultFee),1,'COMMA',2,'POINT')}"></span></strong></div>
+    </aside>
+</main>
+</body>
+</html>

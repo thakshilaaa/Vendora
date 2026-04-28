@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | User Login</title>
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body.form-bg {
+            background-image: url('/images/b2.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="form-bg">
+<div class="page-wrapper">
+<section class="form-container">
+    <h1 class="section-title">User Login</h1>
+    <p class="text-center-desc">Welcome back to Vendora Beauty Store</p>
+
+    <form class="card" id="loginForm">
+        <label for="email">Email or User ID</label>
+        <input id="email" type="text" name="email" autocomplete="username"
+               placeholder="name@email.com or U1234ABC"
+               required
+               title="Use your email, or your User ID (U + 7 characters) if several accounts share the same email">
+
+        <label for="loginPhone" class="font-small">Phone (if same email is used for more than one account)</label>
+        <input id="loginPhone" type="tel" name="phone" autocomplete="tel"
+               placeholder="Optional — required only when the email is shared"
+               class="mb-sm">
+
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password"
+               placeholder="Enter your password"
+               required>
+
+        <div class="flex-row-between">
+            <a th:href="@{/forget-password}" class="link-small">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <p id="errorMessage" class="error-message"></p>
+
+    <div class="text-center-large">
+        <p>New customer? <a th:href="@{/customer-signup}">Create an account</a></p>
+        <p class="font-small-mb"><a th:href="@{/supplier-register}">Apply as Supplier</a> | <a th:href="@{/delivery-register}">Apply as Delivery</a></p>
+        <p>A new partner? Please use the complete-registration link sent to your email.</p>
+    </div>
+</section>
+
+<script>
+    const form = document.getElementById("loginForm");
+    const statusEl = document.getElementById("errorMessage");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("loginPhone").value.trim();
+        const password = document.getElementById("password").value;
+
+        statusEl.style.display = "none";
+        statusEl.textContent = "";
+
+        const payload = { usernameOrEmail: email, password };
+        if (phone) payload.phone = phone;
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                showError(result.message || "Login failed.");
+                return;
+            }
+
+            if (result.accessToken) {
+                localStorage.setItem("token", result.accessToken);
+                localStorage.setItem("vendoraToken", result.accessToken);
+                document.cookie = "vendoraToken=" + encodeURIComponent(result.accessToken)
+                    + ";path=/;SameSite=Lax;max-age=" + (60 * 60 * 24);
+            }
+            if (result.userId != null) {
+                localStorage.setItem("vnd_user_id", String(result.userId));
+                const r = result.role;
+                if (r === "ROLE_CUSTOMER" || r === "ROLE_DELIVERY" || r === "ROLE_ADMIN") {
+                    if (r === "ROLE_CUSTOMER") localStorage.setItem("vnd_customer_id", String(result.userId));
+                    if (r === "ROLE_DELIVERY") localStorage.setItem("vnd_agent_id", String(result.userId));
+                    if (r === "ROLE_ADMIN") localStorage.setItem("vnd_admin_id", String(result.userId));
+                }
+            }
+            if (result.userCode) {
+                localStorage.setItem("vendoraUserCode", result.userCode);
+            }
+            localStorage.setItem("vendoraUserEmail", email);
+
+            const target = result.dashboardPath || "/customer-dashboard";
+            window.location.href = target;
+        } catch (err) {
+            showError("Network error. Please try again later.");
+        }
+    });
+
+    function showError(message) {
+        statusEl.textContent = message;
+        statusEl.style.display = "block";
+    }
+</script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/form.js}"></script>
+</div>
+</body>
+</html>

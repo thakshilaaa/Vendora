@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Detail</title>
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/media.css}">
+  <link rel="stylesheet" th:href="@{/css/misc.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+</head>
+<body>
+  <div id="navbar-root"></div>
+  
+<main class="page narrow">
+  <a class="back-link" th:href="@{/products}">← Back to Inventory</a>
+  <div id="detail-root"></div>
+</main>
+<div id="stock-modal" class="modal-backdrop"></div>
+<div id="delete-modal" class="modal-backdrop"></div>
+
+  <script type="module" th:src="@{/assets/js/pages/product-detail.js}"></script>
+</body>
+</html>

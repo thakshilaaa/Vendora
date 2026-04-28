@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MockEmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic6.service</a> &gt; <span class="el_source">MockEmailService.java</span></div><h1>MockEmailService.java</h1><pre class="source lang-java linenums">package com.vendora.epic6.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+
+/**
+ * Default development-mode email service.
+ * Logs the email contents instead of sending so we don't need SMTP creds.
+ *
+ * To switch to real email, add `vendora.email.real=true` and provide a
+ * different EmailService bean.
+ */
+@Service
+@ConditionalOnProperty(name = &quot;vendora.email.real&quot;, havingValue = &quot;false&quot;, matchIfMissing = true)
+<span class="fc" id="L17">public class MockEmailService implements EmailService {</span>
+
+<span class="fc" id="L19">    private static final Logger log = LoggerFactory.getLogger(MockEmailService.class);</span>
+
+    @Override
+    public void sendApprovalEmail(String toEmail, String companyName, String tempPassword) {
+<span class="nc" id="L23">        log.info(&quot;[MOCK EMAIL] -&gt; {}&quot;, toEmail);</span>
+<span class="nc" id="L24">        log.info(&quot;Subject: Welcome to Vendora, {} — your account is approved!&quot;, companyName);</span>
+<span class="nc" id="L25">        log.info(&quot;Body: You can now sign in at /login.&quot;);</span>
+<span class="nc" id="L26">        log.info(&quot;      Email: {}&quot;, toEmail);</span>
+<span class="nc" id="L27">        log.info(&quot;      Temporary password: {}&quot;, tempPassword);</span>
+<span class="nc" id="L28">        log.info(&quot;      Please change your password on first login.&quot;);</span>
+<span class="nc" id="L29">    }</span>
+
+    @Override
+    public void sendRejectionEmail(String toEmail, String companyName) {
+<span class="nc" id="L33">        log.info(&quot;[MOCK EMAIL] -&gt; {}&quot;, toEmail);</span>
+<span class="nc" id="L34">        log.info(&quot;Subject: Vendora supplier application update&quot;);</span>
+<span class="nc" id="L35">        log.info(&quot;Body: Hello {} — unfortunately we are unable to approve your application at this time.&quot;,</span>
+                companyName);
+<span class="nc" id="L37">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

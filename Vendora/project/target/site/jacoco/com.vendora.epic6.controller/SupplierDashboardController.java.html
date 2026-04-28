@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SupplierDashboardController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic6.controller</a> &gt; <span class="el_source">SupplierDashboardController.java</span></div><h1>SupplierDashboardController.java</h1><pre class="source lang-java linenums">package com.vendora.epic6.controller;
+
+import com.vendora.epic2.model.Product;
+import com.vendora.epic1.model.User;
+import com.vendora.epic4.repository.OrderRepository;
+import com.vendora.epic2.repository.ProductRepository;
+import com.vendora.epic1.service.UserService;
+import com.vendora.epic6.dto.ProductForm;
+import com.vendora.epic6.model.Supplier;
+import com.vendora.epic6.service.SupplierService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+@Controller
+@RequestMapping(&quot;/supplier&quot;)
+@PreAuthorize(&quot;hasRole('SUPPLIER')&quot;)
+public class SupplierDashboardController {
+
+    private final SupplierService supplierService;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final UserService userService;
+
+    public SupplierDashboardController(SupplierService supplierService,
+                                       ProductRepository productRepository,
+                                       OrderRepository orderRepository,
+<span class="fc" id="L37">                                       UserService userService) {</span>
+<span class="fc" id="L38">        this.supplierService = supplierService;</span>
+<span class="fc" id="L39">        this.productRepository = productRepository;</span>
+<span class="fc" id="L40">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L41">        this.userService = userService;</span>
+<span class="fc" id="L42">    }</span>
+
+    // -------- Dashboard --------
+    @GetMapping(&quot;/dashboard&quot;)
+    public String dashboard(Model model) {
+<span class="nc" id="L47">        User user = userService.getCurrentUser();</span>
+<span class="nc" id="L48">        Supplier supplier = supplierService.byUser(user);</span>
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        List&lt;Product&gt; products = supplier.getUser() == null</span>
+<span class="nc" id="L51">                ? List.of()</span>
+<span class="nc" id="L52">                : productRepository.findBySupplierId(supplier.getUser().getId());</span>
+<span class="nc" id="L53">        long pendingOrders = orderRepository.countPendingOrdersAll();</span>
+
+<span class="nc" id="L55">        model.addAttribute(&quot;supplier&quot;, supplier);</span>
+<span class="nc" id="L56">        model.addAttribute(&quot;products&quot;, products);</span>
+<span class="nc" id="L57">        model.addAttribute(&quot;productCount&quot;, products.size());</span>
+<span class="nc" id="L58">        model.addAttribute(&quot;pendingOrders&quot;, pendingOrders);</span>
+<span class="nc" id="L59">        return &quot;epic6/html/dashboard&quot;;</span>
+    }
+
+    /** Serves the binary image for a product owned by the current supplier. */
+    @GetMapping(&quot;/product/{id}/image&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;byte[]&gt; productImage(@PathVariable Long id) {
+<span class="nc" id="L66">        Supplier supplier = supplierService.byUser(userService.getCurrentUser());</span>
+<span class="nc" id="L67">        Product p = productRepository.findById(id)</span>
+<span class="nc" id="L68">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Product not found&quot;));</span>
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        if (p.getSupplierId() == null || !p.getSupplierId().equals(supplier.getUser().getId())) {</span>
+<span class="nc" id="L70">            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+        }
+<span class="nc bnc" id="L72" title="All 4 branches missed.">        if (p.getImage() == null || p.getImage().length == 0) {</span>
+<span class="nc" id="L73">            return ResponseEntity.notFound().build();</span>
+        }
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        String ct = p.getImageContentType() != null ? p.getImageContentType() : &quot;image/jpeg&quot;;</span>
+<span class="nc" id="L76">        return ResponseEntity.ok()</span>
+<span class="nc" id="L77">                .contentType(MediaType.parseMediaType(ct))</span>
+<span class="nc" id="L78">                .body(p.getImage());</span>
+    }
+
+    // -------- Add product --------
+    @GetMapping(&quot;/product/new&quot;)
+    public String newProduct(Model model) {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (!model.containsAttribute(&quot;form&quot;)) {</span>
+<span class="nc" id="L85">            model.addAttribute(&quot;form&quot;, new ProductForm());</span>
+        }
+<span class="nc" id="L87">        model.addAttribute(&quot;editing&quot;, false);</span>
+<span class="nc" id="L88">        model.addAttribute(&quot;categories&quot;, Product.Category.values());</span>
+<span class="nc" id="L89">        return &quot;epic6/html/product-form&quot;;</span>
+    }
+
+    // -------- Edit product --------
+    @GetMapping(&quot;/product/edit/{id}&quot;)
+    public String editProduct(@PathVariable Long id, Model model) {
+<span class="nc" id="L95">        Product p = productRepository.findById(id)</span>
+<span class="nc" id="L96">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Product not found&quot;));</span>
+
+<span class="nc" id="L98">        Supplier supplier = supplierService.byUser(userService.getCurrentUser());</span>
+<span class="nc bnc" id="L99" title="All 4 branches missed.">        if (p.getSupplierId() == null || !p.getSupplierId().equals(supplier.getUser().getId())) {</span>
+<span class="nc" id="L100">            throw new SecurityException(&quot;Not your product&quot;);</span>
+        }
+
+<span class="nc" id="L103">        ProductForm form = new ProductForm();</span>
+<span class="nc" id="L104">        form.setId(p.getId());</span>
+<span class="nc" id="L105">        form.setName(p.getName());</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        form.setCategory(p.getCategory() != null ? p.getCategory().name() : null);</span>
+<span class="nc" id="L107">        form.setPrice(p.getPrice());</span>
+<span class="nc" id="L108">        form.setStockQuantity(p.getStockQuantity());</span>
+<span class="nc" id="L109">        form.setDescription(p.getDescription());</span>
+
+<span class="nc" id="L111">        model.addAttribute(&quot;form&quot;, form);</span>
+<span class="nc" id="L112">        model.addAttribute(&quot;editing&quot;, true);</span>
+<span class="nc" id="L113">        model.addAttribute(&quot;categories&quot;, Product.Category.values());</span>
+<span class="nc" id="L114">        return &quot;epic6/html/product-form&quot;;</span>
+    }
+
+    // -------- Save (create / update) --------
+    @PostMapping(&quot;/product/save&quot;)
+    public String saveProduct(@Valid @ModelAttribute(&quot;form&quot;) ProductForm form,
+                              BindingResult br,
+                              RedirectAttributes ra,
+                              Model model) {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (br.hasErrors()) {</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            model.addAttribute(&quot;editing&quot;, form.getId() != null);</span>
+<span class="nc" id="L125">            model.addAttribute(&quot;categories&quot;, Product.Category.values());</span>
+<span class="nc" id="L126">            return &quot;epic6/html/product-form&quot;;</span>
+        }
+
+<span class="nc" id="L129">        Supplier supplier = supplierService.byUser(userService.getCurrentUser());</span>
+<span class="nc" id="L130">        final Product.Category category = parseCategory(form.getCategory());</span>
+
+        Product p;
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (form.getId() == null) {</span>
+<span class="nc" id="L134">            p = new Product();</span>
+<span class="nc" id="L135">            p.setSupplierId(supplier.getUser().getId());</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            p.setBrand(supplier.getCompanyName() != null ? supplier.getCompanyName() : &quot;Supplier&quot;);</span>
+<span class="nc" id="L137">            p.setLowStockThreshold(defaultLowThreshold(form.getStockQuantity()));</span>
+<span class="nc" id="L138">            p.setStatus(Product.ProductStatus.ACTIVE);</span>
+<span class="nc" id="L139">            p.setSupplierName(supplier.getCompanyName());</span>
+<span class="nc" id="L140">            p.setSupplierContact(supplier.getContactPerson());</span>
+<span class="nc" id="L141">            p.setSupplierEmail(supplier.getEmail());</span>
+<span class="nc" id="L142">            p.setSupplierAddress(supplier.getAddress());</span>
+        } else {
+<span class="nc" id="L144">            p = productRepository.findById(form.getId())</span>
+<span class="nc" id="L145">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Product not found&quot;));</span>
+<span class="nc bnc" id="L146" title="All 4 branches missed.">            if (p.getSupplierId() == null || !p.getSupplierId().equals(supplier.getUser().getId())) {</span>
+<span class="nc" id="L147">                throw new SecurityException(&quot;Not your product&quot;);</span>
+            }
+<span class="nc bnc" id="L149" title="All 4 branches missed.">            if (p.getBrand() == null || p.getBrand().isBlank()) {</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                p.setBrand(supplier.getCompanyName() != null ? supplier.getCompanyName() : &quot;Supplier&quot;);</span>
+            }
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            if (p.getLowStockThreshold() == null) {</span>
+<span class="nc" id="L153">                p.setLowStockThreshold(defaultLowThreshold(form.getStockQuantity()));</span>
+            }
+        }
+
+<span class="nc" id="L157">        p.setName(form.getName());</span>
+<span class="nc" id="L158">        p.setCategory(category);</span>
+<span class="nc" id="L159">        p.setPrice(form.getPrice());</span>
+<span class="nc" id="L160">        p.setStockQuantity(form.getStockQuantity());</span>
+<span class="nc" id="L161">        p.setDescription(form.getDescription());</span>
+
+<span class="nc bnc" id="L163" title="All 4 branches missed.">        if (form.getImage() != null &amp;&amp; !form.getImage().isEmpty()) {</span>
+            try {
+<span class="nc" id="L165">                p.setImage(form.getImage().getBytes());</span>
+<span class="nc" id="L166">                p.setImageContentType(form.getImage().getContentType());</span>
+<span class="nc" id="L167">            } catch (Exception e) {</span>
+                // ignore
+<span class="nc" id="L169">            }</span>
+        }
+
+<span class="nc" id="L172">        productRepository.save(p);</span>
+
+<span class="nc" id="L174">        ra.addFlashAttribute(&quot;toast&quot;,</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                form.getId() == null ? &quot;Product added&quot; : &quot;Product updated&quot;);</span>
+<span class="nc" id="L176">        return &quot;redirect:/supplier/dashboard&quot;;</span>
+    }
+
+    private static int defaultLowThreshold(Integer stock) {
+<span class="nc bnc" id="L180" title="All 4 branches missed.">        if (stock == null || stock &lt; 1) {</span>
+<span class="nc" id="L181">            return 5;</span>
+        }
+<span class="nc" id="L183">        return Math.max(1, Math.min(10, stock / 2));</span>
+    }
+
+    private static Product.Category parseCategory(String raw) {
+<span class="nc bnc" id="L187" title="All 4 branches missed.">        if (raw == null || raw.isBlank()) {</span>
+<span class="nc" id="L188">            throw new IllegalArgumentException(&quot;Category is required&quot;);</span>
+        }
+<span class="nc" id="L190">        String t = raw.trim();</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        for (Product.Category c : Product.Category.values()) {</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">            if (c.name().equalsIgnoreCase(t)) {</span>
+<span class="nc" id="L193">                return c;</span>
+            }
+        }
+<span class="nc bnc" id="L196" title="All 4 branches missed.">        if (&quot;Bath &amp; Body&quot;.equalsIgnoreCase(t) || &quot;Bath &amp;amp; Body&quot;.equalsIgnoreCase(t)) {</span>
+<span class="nc" id="L197">            return Product.Category.BODYCARE;</span>
+        }
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (&quot;MAKEUP&quot;.equalsIgnoreCase(t)) {</span>
+<span class="nc" id="L200">            return Product.Category.COSMETICS;</span>
+        }
+<span class="nc bnc" id="L202" title="All 4 branches missed.">        if (&quot;NAILCARE&quot;.equalsIgnoreCase(t) || &quot;SUNCARE&quot;.equalsIgnoreCase(t)</span>
+<span class="nc bnc" id="L203" title="All 4 branches missed.">                || &quot;MENCARE&quot;.equalsIgnoreCase(t) || &quot;BABYCARE&quot;.equalsIgnoreCase(t)</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">                || &quot;WELLNESS&quot;.equalsIgnoreCase(t)) {</span>
+<span class="nc" id="L205">            return Product.Category.BEAUTY_TOOLS;</span>
+        }
+<span class="nc" id="L207">        return Product.Category.valueOf(t.toUpperCase().replace(' ', '_').replace('-', '_'));</span>
+    }
+
+    // -------- Delete --------
+    @GetMapping(&quot;/product/delete/{id}&quot;)
+    public String deleteProduct(@PathVariable Long id, RedirectAttributes ra) {
+<span class="nc" id="L213">        Product p = productRepository.findById(id)</span>
+<span class="nc" id="L214">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Product not found&quot;));</span>
+<span class="nc" id="L215">        Supplier supplier = supplierService.byUser(userService.getCurrentUser());</span>
+<span class="nc bnc" id="L216" title="All 4 branches missed.">        if (p.getSupplierId() == null || !p.getSupplierId().equals(supplier.getUser().getId())) {</span>
+<span class="nc" id="L217">            throw new SecurityException(&quot;Not your product&quot;);</span>
+        }
+<span class="nc" id="L219">        productRepository.delete(p);</span>
+<span class="nc" id="L220">        ra.addFlashAttribute(&quot;toast&quot;, &quot;Product removed&quot;);</span>
+<span class="nc" id="L221">        return &quot;redirect:/supplier/dashboard&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

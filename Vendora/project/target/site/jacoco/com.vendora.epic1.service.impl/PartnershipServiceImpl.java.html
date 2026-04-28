@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PartnershipServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.service.impl</a> &gt; <span class="el_source">PartnershipServiceImpl.java</span></div><h1>PartnershipServiceImpl.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.service.impl;
+
+import com.vendora.epic1.dto.auth.AuthResponse;
+import com.vendora.epic1.dto.auth.MessageResponse;
+import com.vendora.epic1.dto.partnership.PartnershipApplicationRequest;
+import com.vendora.epic1.dto.partnership.PartnershipApplicationResponse;
+import com.vendora.epic1.dto.partnership.RejectPartnerRequest;
+import com.vendora.epic1.exception.BadRequestException;
+import com.vendora.epic1.exception.DuplicateResourceException;
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic1.model.PartnershipApplication;
+import com.vendora.epic1.model.PasswordResetToken;
+import com.vendora.epic1.model.User;
+import com.vendora.epic1.model.enums.ApplicantType;
+import com.vendora.epic1.model.enums.PartnershipStatus;
+import com.vendora.epic1.model.enums.RoleType;
+import com.vendora.epic1.model.enums.UserStatus;
+import com.vendora.epic1.repository.PartnershipApplicationRepository;
+import com.vendora.epic1.repository.PasswordResetTokenRepository;
+import com.vendora.epic1.repository.UserRepository;
+import com.vendora.epic1.service.EmailService;
+import com.vendora.epic1.service.PartnershipService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
+
+@Service(&quot;epic1PartnershipServiceImpl&quot;)
+<span class="fc" id="L38">@RequiredArgsConstructor</span>
+public class PartnershipServiceImpl implements PartnershipService {
+
+    private final PartnershipApplicationRepository partnershipApplicationRepository;
+    private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value(&quot;${app.base-url:http://localhost:8080}&quot;)
+    private String appBaseUrl;
+
+    @Override
+    @Transactional
+    public AuthResponse submitApplication(PartnershipApplicationRequest request) {
+<span class="nc bnc" id="L53" title="All 4 branches missed.">        if (request.getEmail() == null || request.getEmail().isBlank()) {</span>
+<span class="nc" id="L54">            throw new BadRequestException(&quot;Email is required.&quot;);</span>
+        }
+<span class="nc bnc" id="L56" title="All 4 branches missed.">        if (request.getFullName() == null || request.getFullName().isBlank()) {</span>
+<span class="nc" id="L57">            throw new BadRequestException(&quot;Full name is required.&quot;);</span>
+        }
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        if (request.getApplicantType() == null || request.getApplicantType().isBlank()) {</span>
+<span class="nc" id="L60">            throw new BadRequestException(&quot;Applicant type is required.&quot;);</span>
+        }
+
+<span class="nc" id="L63">        String email = request.getEmail().trim().toLowerCase();</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (partnershipApplicationRepository.existsByEmail(email)) {</span>
+<span class="nc" id="L66">            throw new DuplicateResourceException(&quot;An application with this email already exists.&quot;);</span>
+        }
+
+        final ApplicantType applicantType;
+        try {
+<span class="nc" id="L71">            applicantType = ApplicantType.valueOf(request.getApplicantType().trim().toUpperCase());</span>
+<span class="nc" id="L72">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L73">            throw new BadRequestException(&quot;Invalid applicant type. Use SUPPLIER or DELIVERY.&quot;);</span>
+<span class="nc" id="L74">        }</span>
+
+<span class="nc" id="L76">        PartnershipApplication application = new PartnershipApplication();</span>
+<span class="nc" id="L77">        application.setApplicantType(applicantType);</span>
+<span class="nc" id="L78">        application.setFullName(request.getFullName().trim());</span>
+<span class="nc" id="L79">        application.setContactPersonName(request.getFullName().trim());</span>
+<span class="nc" id="L80">        application.setEmail(email);</span>
+<span class="nc" id="L81">        application.setPhone(request.getPhone());</span>
+<span class="nc" id="L82">        application.setNic(request.getNic());</span>
+<span class="nc" id="L83">        application.setAddressLine1(request.getAddressLine1());</span>
+<span class="nc" id="L84">        application.setBusinessAddress(request.getAddressLine1());</span>
+<span class="nc" id="L85">        application.setProvince(request.getProvince());</span>
+<span class="nc" id="L86">        application.setDistrict(request.getDistrict());</span>
+<span class="nc" id="L87">        application.setCity(request.getCity());</span>
+<span class="nc" id="L88">        application.setPostalCode(request.getPostalCode());</span>
+        
+<span class="nc" id="L90">        application.setBusinessName(request.getBusinessName());</span>
+<span class="nc" id="L91">        application.setBusinessRegNumber(request.getBusinessRegNumber());</span>
+<span class="nc" id="L92">        application.setTinNumber(request.getTinNumber());</span>
+<span class="nc" id="L93">        application.setProductCategory(request.getProductCategory());</span>
+<span class="nc" id="L94">        application.setProductDetails(request.getProductDetails());</span>
+        
+<span class="nc" id="L96">        application.setStatus(PartnershipStatus.PENDING);</span>
+
+<span class="nc" id="L98">        partnershipApplicationRepository.save(application);</span>
+
+        try {
+<span class="nc" id="L101">            emailService.sendPartnershipAcknowledgementEmail(application.getEmail(), application.getFullName());</span>
+<span class="nc" id="L102">        } catch (Exception e) {</span>
+            // Log and continue, do not block the application submission
+<span class="nc" id="L104">        }</span>
+
+<span class="nc" id="L106">        AuthResponse response = new AuthResponse();</span>
+<span class="nc" id="L107">        response.setSuccess(true);</span>
+<span class="nc" id="L108">        response.setMessage(&quot;Application submitted successfully. We will review it within 3 business days.&quot;);</span>
+<span class="nc" id="L109">        return response;</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;PartnershipApplicationResponse&gt; getPendingApplications() {
+<span class="nc" id="L115">        return partnershipApplicationRepository.findByStatus(PartnershipStatus.PENDING).stream()</span>
+<span class="nc" id="L116">                .map(this::mapToResponse)</span>
+<span class="nc" id="L117">                .toList();</span>
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse approveApplication(Long id) {
+<span class="nc" id="L123">        PartnershipApplication application = partnershipApplicationRepository.findById(id)</span>
+<span class="nc" id="L124">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Application not found&quot;));</span>
+
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (application.getStatus() != PartnershipStatus.PENDING) {</span>
+<span class="nc" id="L127">            throw new BadRequestException(&quot;Application is not in PENDING state&quot;);</span>
+        }
+
+        // Update application status
+<span class="nc" id="L131">        application.setStatus(PartnershipStatus.APPROVED);</span>
+<span class="nc" id="L132">        application.setReviewedAt(LocalDateTime.now());</span>
+<span class="nc" id="L133">        partnershipApplicationRepository.save(application);</span>
+
+        // Create partner user if absent, or refresh the existing pending account (match email + phone when possible).
+<span class="nc" id="L136">        String appEmail = application.getEmail().trim().toLowerCase();</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        String appPhone = application.getPhone() != null ? application.getPhone().trim() : null;</span>
+        User user;
+<span class="nc bnc" id="L139" title="All 4 branches missed.">        if (appPhone != null &amp;&amp; !appPhone.isBlank()) {</span>
+<span class="nc" id="L140">            user = userRepository.findByEmailIgnoreCaseAndPhone(appEmail, appPhone).orElseGet(User::new);</span>
+        } else {
+<span class="nc" id="L142">            user = userRepository.findAllByEmailIgnoreCase(appEmail).stream().findFirst().orElseGet(User::new);</span>
+        }
+<span class="nc" id="L144">        user.setFullName(application.getFullName());</span>
+<span class="nc" id="L145">        user.setEmail(appEmail);</span>
+<span class="nc" id="L146">        user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        user.setRole(application.getApplicantType() == ApplicantType.SUPPLIER ? RoleType.ROLE_SUPPLIER : RoleType.ROLE_DELIVERY);</span>
+<span class="nc" id="L148">        user.setStatus(UserStatus.INACTIVE);</span>
+<span class="nc" id="L149">        user.setEmailVerified(false);</span>
+<span class="nc" id="L150">        user.setPhone(application.getPhone());</span>
+<span class="nc" id="L151">        userRepository.save(user);</span>
+
+        // Generate token for password setup
+<span class="nc" id="L154">        passwordResetTokenRepository.deleteByUser(user);</span>
+<span class="nc" id="L155">        PasswordResetToken token = new PasswordResetToken(</span>
+<span class="nc" id="L156">                UUID.randomUUID().toString(),</span>
+                user,
+<span class="nc" id="L158">                Instant.now().plus(72, ChronoUnit.HOURS)</span>
+        );
+<span class="nc" id="L160">        passwordResetTokenRepository.save(token);</span>
+
+        // Send approval email with URL
+        try {
+<span class="nc" id="L164">            String encodedEmail = URLEncoder.encode(application.getEmail(), StandardCharsets.UTF_8.toString());</span>
+<span class="nc" id="L165">            String completeRegistrationUrl = appBaseUrl + &quot;/complete-registration?token=&quot; + token.getToken() + &quot;&amp;email=&quot; + encodedEmail;</span>
+<span class="nc" id="L166">            emailService.sendPartnershipApprovalEmail(application.getEmail(), completeRegistrationUrl);</span>
+<span class="nc" id="L167">        } catch (Exception e) {</span>
+            // Log error
+<span class="nc" id="L169">        }</span>
+
+<span class="nc" id="L171">        return new MessageResponse(&quot;Application approved and email sent to the partner.&quot;);</span>
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse rejectApplication(RejectPartnerRequest request) {
+<span class="nc" id="L177">        PartnershipApplication application = partnershipApplicationRepository.findById(request.getApplicationId())</span>
+<span class="nc" id="L178">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Application not found&quot;));</span>
+
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (application.getStatus() != PartnershipStatus.PENDING) {</span>
+<span class="nc" id="L181">            throw new BadRequestException(&quot;Application is not in PENDING state&quot;);</span>
+        }
+
+<span class="nc" id="L184">        application.setStatus(PartnershipStatus.REJECTED);</span>
+<span class="nc" id="L185">        application.setReviewNote(request.getNote());</span>
+<span class="nc" id="L186">        application.setReviewedAt(LocalDateTime.now());</span>
+<span class="nc" id="L187">        partnershipApplicationRepository.save(application);</span>
+
+        try {
+<span class="nc" id="L190">            emailService.sendPartnershipRejectionEmail(application.getEmail(), application.getFullName(), request.getNote());</span>
+<span class="nc" id="L191">        } catch (Exception e) {</span>
+            // Log error
+<span class="nc" id="L193">        }</span>
+
+<span class="nc" id="L195">        return new MessageResponse(&quot;Application rejected and email sent.&quot;);</span>
+    }
+
+    private PartnershipApplicationResponse mapToResponse(PartnershipApplication app) {
+<span class="nc" id="L199">        PartnershipApplicationResponse res = new PartnershipApplicationResponse();</span>
+<span class="nc" id="L200">        res.setId(app.getId());</span>
+<span class="nc" id="L201">        res.setApplicantType(app.getApplicantType());</span>
+<span class="nc" id="L202">        res.setFullName(app.getFullName());</span>
+<span class="nc" id="L203">        res.setEmail(app.getEmail());</span>
+<span class="nc" id="L204">        res.setPhone(app.getPhone());</span>
+<span class="nc" id="L205">        res.setCity(app.getCity());</span>
+<span class="nc" id="L206">        res.setDistrict(app.getDistrict());</span>
+<span class="nc" id="L207">        res.setBusinessName(app.getBusinessName());</span>
+<span class="nc" id="L208">        res.setStatus(app.getStatus());</span>
+<span class="nc" id="L209">        res.setCreatedAt(app.getCreatedAt());</span>
+<span class="nc" id="L210">        res.setReviewNote(app.getReviewNote());</span>
+<span class="nc" id="L211">        return res;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.vendora.epic1.PublicPageSmokeTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.56 s -- in com.vendora.epic1.PublicPageSmokeTest

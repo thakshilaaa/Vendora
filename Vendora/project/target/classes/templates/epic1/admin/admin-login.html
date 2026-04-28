@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendora | Admin Portal</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body.form-bg {
+  background-image: url('/images/b2.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+}
+</style>
+</head>
+
+<body class="form-bg">
+<div class="page-wrapper">
+  <section class="form-container animate-fade-up">
+    <div class="text-center">
+      <h1 class="section-title">System Administration</h1>
+      <p class="text-black">Vendora Control Panel Login</p>
+    </div>
+
+    <form class="card" id="adminLoginForm">
+      <label for="adminId">Admin email or User ID</label>
+      <input type="text" id="adminId" name="email" placeholder="admin@vendora.com or U1234ABC" required autocomplete="username">
+
+      <label for="adminPhone" class="font-small">Phone (if this email is shared by several accounts)</label>
+      <input type="tel" id="adminPhone" name="phone" placeholder="Optional" autocomplete="tel" class="mb-sm">
+
+      <label for="adminPass">Password</label>
+      <input type="password" id="adminPass" name="password" placeholder="••••••••" required>
+
+      <p id="adminLoginError" class="text-red" style="display:none;" role="alert"></p>
+      <div><button type="submit" class="btn-primary">Authenticate</button></div>
+    </form>
+  </section>
+
+  <script>
+    document.getElementById('adminLoginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const err = document.getElementById('adminLoginError');
+      err.style.display = 'none';
+      const email = document.getElementById('adminId').value.trim();
+      const phone = document.getElementById('adminPhone').value.trim();
+      const password = document.getElementById('adminPass').value;
+      const pl = { usernameOrEmail: email, password: password };
+      if (phone) pl.phone = phone;
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pl)
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          err.textContent = result.message || 'Login failed.';
+          err.style.display = 'block';
+          return;
+        }
+        if (result.role && result.role !== 'ROLE_ADMIN') {
+          err.textContent = 'This portal is for administrator accounts only.';
+          err.style.display = 'block';
+          return;
+        }
+        if (result.accessToken) {
+          localStorage.setItem('token', result.accessToken);
+          localStorage.setItem('vendoraToken', result.accessToken);
+          document.cookie = 'vendoraToken=' + encodeURIComponent(result.accessToken)
+              + ';path=/;SameSite=Lax;max-age=' + (60 * 60 * 24);
+        }
+        if (result.userId != null) {
+          localStorage.setItem('vnd_user_id', String(result.userId));
+          localStorage.setItem('vnd_admin_id', String(result.userId));
+        }
+        if (result.userCode) {
+          localStorage.setItem('vendoraUserCode', result.userCode);
+        }
+        localStorage.setItem('vendoraUserEmail', email);
+        const next = result.dashboardPath || '/admin-dashboard';
+        window.location.href = next;
+      } catch {
+        err.textContent = 'Network error. Please try again.';
+        err.style.display = 'block';
+      }
+    });
+  </script>
+  <script th:src="@{/js/main.js}"></script>
+  <script th:src="@{/js/form.js}"></script>
+</div>
+</body>
+</html>

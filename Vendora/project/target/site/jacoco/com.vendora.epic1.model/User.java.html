@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.model;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import com.vendora.epic1.model.enums.District;
+import com.vendora.epic1.model.enums.Province;
+import com.vendora.epic1.model.enums.RoleType;
+import com.vendora.epic1.model.enums.UserStatus;
+import com.vendora.epic1.model.enums.VerificationMethod;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
+
+@Entity
+@Table(name = &quot;users&quot;)
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;user_id&quot;)
+    private Long id;
+
+    @Column(name = &quot;user_code&quot;, unique = true)
+    private String userCode;
+
+    @NotBlank
+    @Size(max = 150)
+    @Column(name = &quot;full_name&quot;)
+    private String fullName;
+
+    @Column(name = &quot;first_name&quot;)
+    private String firstNameLegacy;
+
+    @Column(name = &quot;last_name&quot;)
+    private String lastNameLegacy;
+
+    @NotBlank
+    @Email
+    @Size(max = 150)
+    private String email;
+
+    @NotBlank
+    @Size(max = 15)
+    private String phone;
+
+    @Column(name = &quot;phone_number&quot;)
+    private String phoneNumberLegacy;
+
+    @Size(max = 12)
+    private String nic;
+
+    @Column(name = &quot;address_line_1&quot;)
+    private String addressLine1;
+
+    @Column(name = &quot;address_line_2&quot;)
+    private String addressLine2;
+
+    private String city;
+
+    @Enumerated(EnumType.STRING)
+    private District district;
+
+    @Enumerated(EnumType.STRING)
+    private Province province;
+
+    @Column(name = &quot;postal_code&quot;)
+    private String postalCode;
+
+    @NotBlank
+    @Column(name = &quot;password_hash&quot;)
+    private String passwordHash;
+
+    @Column(name = &quot;password&quot;)
+    private String passwordLegacy;
+
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
+
+<span class="pc" id="L81">    @Enumerated(EnumType.STRING)</span>
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = &quot;profile_picture_url&quot;)
+    private String profilePictureUrl;
+
+<span class="pc" id="L87">    @Column(name = &quot;email_verified&quot;)</span>
+<span class="pc" id="L88">    private Boolean emailVerified = false;</span>
+
+<span class="pc" id="L90">    @Enumerated(EnumType.STRING)</span>
+    @Column(name = &quot;verification_method&quot;)
+    private VerificationMethod verificationMethod = VerificationMethod.EMAIL;
+
+    @Column(name = &quot;last_login_at&quot;)
+    private LocalDateTime lastLoginAt;
+
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = &quot;updated_at&quot;, nullable = false)
+    private LocalDateTime updatedAt;
+
+<span class="pc" id="L103">    @Column(nullable = false)</span>
+<span class="pc" id="L104">    private Integer failedLoginAttempts = 0;</span>
+
+    private LocalDateTime accountLockedUntil;
+
+    // ================= CONSTRUCTORS =================
+
+<span class="fc" id="L110">    public User() {}</span>
+
+<span class="nc" id="L112">    public User(String fullName, String email, String phone, String passwordHash, RoleType role) {</span>
+<span class="nc" id="L113">        this.fullName = fullName;</span>
+<span class="nc" id="L114">        this.email = email;</span>
+<span class="nc" id="L115">        this.phone = phone;</span>
+<span class="nc" id="L116">        this.passwordHash = passwordHash;</span>
+<span class="nc" id="L117">        this.role = role;</span>
+<span class="nc" id="L118">        this.status = UserStatus.ACTIVE;</span>
+<span class="nc" id="L119">        this.emailVerified = false;</span>
+<span class="nc" id="L120">    }</span>
+
+    // ================= GETTERS &amp; SETTERS =================
+
+<span class="nc" id="L124">    public Long getId() { return id; }</span>
+<span class="nc" id="L125">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="nc" id="L127">    public String getUserCode() { return userCode; }</span>
+<span class="nc" id="L128">    public void setUserCode(String userCode) { this.userCode = userCode; }</span>
+
+<span class="nc" id="L130">    public String getFullName() { return fullName; }</span>
+<span class="nc" id="L131">    public void setFullName(String fullName) { this.fullName = fullName; }</span>
+<span class="nc" id="L132">    public String getFirstNameLegacy() { return firstNameLegacy; }</span>
+<span class="nc" id="L133">    public void setFirstNameLegacy(String firstNameLegacy) { this.firstNameLegacy = firstNameLegacy; }</span>
+<span class="nc" id="L134">    public String getLastNameLegacy() { return lastNameLegacy; }</span>
+<span class="nc" id="L135">    public void setLastNameLegacy(String lastNameLegacy) { this.lastNameLegacy = lastNameLegacy; }</span>
+
+<span class="nc" id="L137">    public String getEmail() { return email; }</span>
+<span class="nc" id="L138">    public void setEmail(String email) { this.email = email; }</span>
+
+<span class="nc" id="L140">    public String getPhone() { return phone; }</span>
+<span class="nc" id="L141">    public void setPhone(String phone) { this.phone = phone; }</span>
+<span class="nc" id="L142">    public String getPhoneNumberLegacy() { return phoneNumberLegacy; }</span>
+<span class="nc" id="L143">    public void setPhoneNumberLegacy(String phoneNumberLegacy) { this.phoneNumberLegacy = phoneNumberLegacy; }</span>
+
+<span class="nc" id="L145">    public String getNic() { return nic; }</span>
+<span class="nc" id="L146">    public void setNic(String nic) { this.nic = nic; }</span>
+
+<span class="nc" id="L148">    public String getAddressLine1() { return addressLine1; }</span>
+<span class="nc" id="L149">    public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }</span>
+
+<span class="nc" id="L151">    public String getAddressLine2() { return addressLine2; }</span>
+<span class="nc" id="L152">    public void setAddressLine2(String addressLine2) { this.addressLine2 = addressLine2; }</span>
+
+<span class="nc" id="L154">    public String getCity() { return city; }</span>
+<span class="nc" id="L155">    public void setCity(String city) { this.city = city; }</span>
+
+<span class="nc" id="L157">    public District getDistrict() { return district; }</span>
+<span class="nc" id="L158">    public void setDistrict(District district) { this.district = district; }</span>
+
+<span class="nc" id="L160">    public Province getProvince() { return province; }</span>
+<span class="nc" id="L161">    public void setProvince(Province province) { this.province = province; }</span>
+
+<span class="nc" id="L163">    public String getPostalCode() { return postalCode; }</span>
+<span class="nc" id="L164">    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }</span>
+
+<span class="nc" id="L166">    public String getPasswordHash() { return passwordHash; }</span>
+<span class="nc" id="L167">    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }</span>
+<span class="nc" id="L168">    public String getPasswordLegacy() { return passwordLegacy; }</span>
+<span class="nc" id="L169">    public void setPasswordLegacy(String passwordLegacy) { this.passwordLegacy = passwordLegacy; }</span>
+
+<span class="nc" id="L171">    public RoleType getRole() { return role; }</span>
+<span class="nc" id="L172">    public void setRole(RoleType role) { this.role = role; }</span>
+
+<span class="nc" id="L174">    public UserStatus getStatus() { return status; }</span>
+<span class="nc" id="L175">    public void setStatus(UserStatus status) { this.status = status; }</span>
+
+<span class="nc" id="L177">    public String getProfilePictureUrl() { return profilePictureUrl; }</span>
+<span class="nc" id="L178">    public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }</span>
+
+<span class="nc" id="L180">    public Boolean getEmailVerified() { return emailVerified; }</span>
+<span class="nc" id="L181">    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }</span>
+
+<span class="nc" id="L183">    public VerificationMethod getVerificationMethod() { return verificationMethod; }</span>
+<span class="nc" id="L184">    public void setVerificationMethod(VerificationMethod verificationMethod) { this.verificationMethod = verificationMethod; }</span>
+
+<span class="nc" id="L186">    public LocalDateTime getLastLoginAt() { return lastLoginAt; }</span>
+<span class="nc" id="L187">    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }</span>
+
+<span class="nc" id="L189">    public LocalDateTime getCreatedAt() { return createdAt; }</span>
+<span class="nc" id="L190">    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }</span>
+
+<span class="nc" id="L192">    public LocalDateTime getUpdatedAt() { return updatedAt; }</span>
+<span class="nc" id="L193">    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }</span>
+
+<span class="nc" id="L195">    public Integer getFailedLoginAttempts() { return failedLoginAttempts; }</span>
+<span class="nc" id="L196">    public void setFailedLoginAttempts(Integer failedLoginAttempts) { this.failedLoginAttempts = failedLoginAttempts; }</span>
+
+<span class="nc" id="L198">    public LocalDateTime getAccountLockedUntil() { return accountLockedUntil; }</span>
+<span class="nc" id="L199">    public void setAccountLockedUntil(LocalDateTime accountLockedUntil) { this.accountLockedUntil = accountLockedUntil; }</span>
+
+    @PrePersist
+    protected void onCreate() {
+<span class="nc" id="L203">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc bnc" id="L204" title="All 4 branches missed.">        if (userCode == null || userCode.isBlank()) {</span>
+<span class="nc" id="L205">            userCode = &quot;U&quot; + java.util.UUID.randomUUID().toString().replace(&quot;-&quot;, &quot;&quot;).substring(0, 7).toUpperCase();</span>
+        }
+<span class="nc bnc" id="L207" title="All 2 branches missed.">        if (createdAt == null) createdAt = now;</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (updatedAt == null) updatedAt = now;</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (emailVerified == null) emailVerified = false;</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (status == null) status = UserStatus.PENDING_VERIFICATION;</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (verificationMethod == null) verificationMethod = VerificationMethod.EMAIL;</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (failedLoginAttempts == null) failedLoginAttempts = 0;</span>
+<span class="nc bnc" id="L213" title="All 4 branches missed.">        if (addressLine1 == null || addressLine1.isBlank()) {</span>
+<span class="nc" id="L214">            addressLine1 = &quot;N/A&quot;;</span>
+        }
+<span class="nc bnc" id="L216" title="All 4 branches missed.">        if (city == null || city.isBlank()) {</span>
+<span class="nc" id="L217">            city = &quot;Colombo&quot;;</span>
+        }
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (district == null) {</span>
+<span class="nc" id="L220">            district = District.COLOMBO;</span>
+        }
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (province == null) {</span>
+<span class="nc" id="L223">            province = Province.WESTERN;</span>
+        }
+<span class="nc bnc" id="L225" title="All 4 branches missed.">        if (nic == null || nic.isBlank()) {</span>
+            // Must be unique per row (DB often has UNIQUE on nic) — never derive only from email
+            // (shared inbox = multiple users with same email would collide).
+            // 12 digits matches typical validation / SQL CHECK for numeric NIC-style values.
+<span class="nc" id="L229">            long n12 = ThreadLocalRandom.current().nextLong(100_000_000_000L, 1_000_000_000_000L);</span>
+<span class="nc" id="L230">            nic = String.format(&quot;%012d&quot;, n12);</span>
+        }
+<span class="nc bnc" id="L232" title="All 6 branches missed.">        if ((firstNameLegacy == null || firstNameLegacy.isBlank()) &amp;&amp; fullName != null) {</span>
+<span class="nc" id="L233">            String[] parts = fullName.trim().split(&quot;\\s+&quot;, 2);</span>
+<span class="nc" id="L234">            firstNameLegacy = parts[0];</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            lastNameLegacy = parts.length &gt; 1 ? parts[1] : parts[0];</span>
+        }
+<span class="nc bnc" id="L237" title="All 6 branches missed.">        if ((phoneNumberLegacy == null || phoneNumberLegacy.isBlank()) &amp;&amp; phone != null) {</span>
+<span class="nc" id="L238">            phoneNumberLegacy = phone;</span>
+        }
+<span class="nc bnc" id="L240" title="All 6 branches missed.">        if ((passwordLegacy == null || passwordLegacy.isBlank()) &amp;&amp; passwordHash != null) {</span>
+<span class="nc" id="L241">            passwordLegacy = passwordHash;</span>
+        }
+<span class="nc" id="L243">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="nc" id="L247">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L248">    }</span>
+
+    // ================= COMPATIBILITY METHODS =================
+
+    public String getFirstName() {
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (this.fullName == null) return null;</span>
+<span class="nc" id="L254">        return this.fullName.split(&quot; &quot;)[0];</span>
+    }
+
+    public void setFirstName(String firstName) {
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        String lastName = getLastName() != null ? getLastName() : &quot;&quot;;</span>
+<span class="nc" id="L259">        this.fullName = firstName + &quot; &quot; + lastName;</span>
+<span class="nc" id="L260">    }</span>
+
+    public String getLastName() {
+<span class="nc bnc" id="L263" title="All 4 branches missed.">        if (this.fullName == null || !this.fullName.contains(&quot; &quot;)) return &quot;&quot;;</span>
+<span class="nc" id="L264">        return this.fullName.substring(this.fullName.indexOf(&quot; &quot;) + 1);</span>
+    }
+
+    public void setLastName(String lastName) {
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        String firstName = getFirstName() != null ? getFirstName() : &quot;&quot;;</span>
+<span class="nc" id="L269">        this.fullName = firstName + &quot; &quot; + lastName;</span>
+<span class="nc" id="L270">    }</span>
+
+    public String getPhoneNumber() {
+<span class="nc" id="L273">        return this.phone;</span>
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+<span class="nc" id="L277">        this.phone = phoneNumber;</span>
+<span class="nc" id="L278">    }</span>
+
+    public String getPassword() {
+<span class="nc" id="L281">        return this.passwordHash;</span>
+    }
+
+    public void setPassword(String password) {
+<span class="nc" id="L285">        this.passwordHash = password;</span>
+<span class="nc" id="L286">    }</span>
+
+    public Boolean getIsEmailVerified() {
+<span class="nc" id="L289">        return this.emailVerified;</span>
+    }
+
+    public void setIsEmailVerified(Boolean isEmailVerified) {
+<span class="nc" id="L293">        this.emailVerified = isEmailVerified;</span>
+<span class="nc" id="L294">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendora | Dashboard - Supplier</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/footer.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/tables.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body.dashboard-bg {
+      background-image: url('/images/b1.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+
+    .supplier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+    .inventory-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border-top: 4px solid #d4a373;
+    }
+    .stock-badge {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .low-stock { background: #fee2e2; color: #991b1b; }
+    .in-stock { background: #dcfce7; color: #166534; }
+
+    .product-list-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .product-list-table th, .product-list-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .product-list-table th { background: dimgray; font-weight: 600; }
+  </style>
+</head>
+
+<body class="dashboard-bg">
+<div class="page-wrapper">
+  <header class="header-grid">
+    <div class="logo"><img th:src="@{/images/Vendora.png}" alt="Vendora Logo"></div>
+
+    <nav class="navbar" id="navbarLinks">
+      <div class="auth-links" id="authLinks">
+        <a th:href="@{/about}">About</a>
+        <a th:href="@{/service}">Support</a>
+        <a th:href="@{/profile}">My Profile</a>
+      </div>
+
+      <div class="profile-menu" id="profileMenu">
+        <button class="profile-trigger" id="profileTrigger">
+          <img src="https://yourdomain.com/images/user1.jpg" alt="Profile" id="profileImg">
+          <span class="user-name" id="userName"></span>
+        </button>
+
+        <div class="dropdown hidden" id="dropdownMenu">
+          <a th:href="@{/profile}">View Profile</a><br>
+          <a th:href="@{/update-password}">Change Password</a><br>
+          <a th:href="@{/logout}">Logout</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <video id="heroVideo" autoplay muted loop playsinline><source th:src="@{/images/supplier-banner.mp4}" type="video/mp4"></video>
+  </section>
+
+  <main class="container container-padding-custom">
+    <header class="flex-header">
+      <div>
+        <h1>Welcome, Supplier</h1>
+        <p>Manage your business: <strong>GlowCare Pvt Ltd</strong></p>
+      </div>
+
+      <div class="card mb-3">
+        <h2 id="businessName">My Business</h2>
+        <p class="text-gray">Category: <span id="businessCategory">-</span></p>
+      </div>
+     <button class="btn-primary" onclick="window.location.href='/supplier-portal'"><i class="fas fa-plus"></i> Add New Product</button>
+    </header>
+
+    <h2 class="mt-4">Summerization</h2>
+    <section class="supplier-grid">
+      <div class="inventory-card">
+        <h3>My Categories</h3>
+        <p class="text-2xl">3</p>
+        <small class="text-gray">Cosmetics, Skincare, Haircare</small>
+      </div>
+
+      <div class="inventory-card">
+        <h3>Total Products</h3>
+        <p id="totalProducts" class="text-2xl">24</p>
+        <small class="text-gray">Active in Catalog</small>
+      </div>
+
+      <div class="inventory-card">
+        <h3>Total Sales</h3>
+        <p id="totalRevenue" class="text-2xl text-green">Rs. 125,400</p>
+        <small class="text-gray">on This Month</small>
+      </div>
+
+      <div class="inventory-card">
+        <h3>Low Stock Alerts</h3>
+        <p id="lowStockCount" class="text-2xl text-red">03</p>
+        <small class="text-gray">Need Admin Approval</small>
+      </div>
+
+      <div class="inventory-card">
+        <h3>Pending Admin Orders</h3>
+        <p id="pendingOrders" class="text-2xl text-color-gold">08</p>
+        <small class="text-gray">Admin Purchase Requests</small>
+      </div>
+    </section>
+
+    <h2 class="mt-4">My Product Catalog</h2>
+    <section class="card-overflow">
+      <table class="product-list-table">
+        <thead>
+        <tr>
+          <th>Code</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Available Qty</th>
+          <th>Promised Qty</th>
+          <th>Price (LKR)</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody id="productTable">
+        <tr>
+          <td>#PRD-COS-01</td>
+          <td>Organic Face Serum</td>
+          <td>Skincare</td>
+          <td>4<span class="stock-badge low-stock">Critical</span></td>
+          <td>50</td> <!-- Promised to admin -->
+          <td>4,500.00</td>
+          <td>ACTIVE</td>
+          <td>
+            <button class="btn-outline btn-sm">Edit</button>
+            <button class="btn-primary btn-sm">Request Approval</button>
+          </td>
+        </tr>
+
+        <tr>
+          <td>#PRD-COS-05</td>
+          <td>Matte Lipstick Set</td>
+          <td>Cosmetics</td>
+          <td>45<span class="stock-badge in-stock">Good</span></td>
+          <td>100</td>
+          <td>3,200.00</td>
+          <td>ACTIVE</td>
+          <td><button class="btn-outline btn-sm">Edit</button></td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h2 class="mt-4">Recent Orders</h2>
+    <section class="card-overflow">
+      <table class="product-list-table">
+        <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+        </thead>
+        <tbody id="ordersTable">
+        <!-- Dynamic Orders -->
+        </tbody>
+      </table>
+    </section>
+
+    <h2 class="mt-4">Admin Purchase Requests</h2>
+    <section class="card-overflow">
+      <table class="product-list-table">
+        <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Product</th>
+          <th>Requested Qty</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>#REQ-102</td>
+          <td>Organic Face Serum</td>
+          <td>50</td>
+          <td>PENDING</td>
+          <td>
+            <button class="btn-primary btn-sm">Accept</button>
+            <button class="btn-outline btn-sm">Reject</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-subscribe">
+        <h4>SUBSCRIBE</h4>
+        <p>Get beauty tips, product updates & exclusive offers straight to your inbox.</p>
+
+        <form id="subscribeForm" class="subscribe-input">
+          <div>
+            <label for="subscribeEmail" class="visually-hidden">Email Address</label>
+            <input type="email" id="subscribeEmail" name="email" placeholder="Email" required>
+          </div>
+          <div>
+            <label for="subscribePhone" class="subscribe-input">Phone Number</label>
+            <input type="tel" id="subscribePhone" name="phone" placeholder="Contact" required>
+          </div>
+          <div>
+            <button type="submit" class="btn-subscribe">➤SUBSCRIBE</button>
+            <p id="subscribeMessage" class="subscribe-message"></p>
+          </div>
+        </form>
+
+        <div class="social-icons">
+          <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://youtube.com" target="_blank" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <h4>PRODUCT NAVIGATOR</h4>
+        <a th:href="@{/shop}">Cosmetics</a>
+        <a th:href="@{/shop}">Skin Care</a>
+        <a th:href="@{/shop}">Hair Care</a>
+        <a th:href="@{/shop}">Body Care</a>
+        <a th:href="@{/shop}">Fragrance</a>
+        <a th:href="@{/shop}">Beauty Tools</a>
+      </div>
+
+      <div>
+        <h4>ABOUT US</h4>
+        <a th:href="@{/about}">Our Mission</a>
+        <a th:href="@{/service}">Contact Us</a>
+      </div>
+
+      <div>
+        <h4>ACCOUNT</h4>
+        <a th:href="@{/profile}">View Profile</a>
+        <a th:href="@{/service}">Support</a>
+        <a th:href="@{/order-history}">Track My Order</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Vendora | The Online Beauty Store</p>
+      <p><button><a th:href="@{/terms}">Terms & Conditions</a></button> | <button><a th:href="@{/privacy}">Privacy
+        Policy</a></button> | <button><a th:href="@{/cookie}">Cookie Policy</a></button> | Do Not Sell My
+        Personal Information | Vendora</p>
+      <p>If you are having problems using this website, please <button><a th:href="@{/service}">CLICK
+        HERE</a></button> for assistance.</p>
+    </div>
+  </footer>
+  <script>
+    window.onload = async () => {
+      console.log("Loading Supplier Dashboard...");
+      const supplierId = 1;
+      loadDashboard();
+    };
+
+    function loadDashboard() {
+      document.getElementById("totalProducts").innerText = 24;
+      document.getElementById("lowStockCount").innerText = 3;
+      document.getElementById("pendingOrders").innerText = 8;
+      document.getElementById("totalRevenue").innerText = "Rs. 125,400";
+
+      document.getElementById("businessName").innerText = "Glow Beauty Pvt Ltd";
+      document.getElementById("businessCategory").innerText = "Skincare";
+
+      loadProducts();
+      loadOrders();
+    }
+
+    function loadProducts() {
+      const table = document.getElementById("productTable");
+
+      table.innerHTML = `
+    <tr>
+      <td>#PRD-01</td>
+      <td>Organic Face Serum</td>
+      <td>Skincare</td>
+      <td>12 <span class="stock-badge low-stock">Low</span></td>
+      <td>4,500</td>
+      <td>ACTIVE</td>
+      <td><button class="btn-outline btn-sm">Edit</button></td>
+    </tr>
+  `;
+    }
+
+    function loadOrders() {
+      const table = document.getElementById("ordersTable");
+
+      table.innerHTML = `
+    <tr>
+      <td>#ORD-101</td>
+      <td>John Silva</td>
+      <td>Rs. 6,500</td>
+      <td>PENDING</td>
+      <td>2026-04-25</td>
+    </tr>
+  `;
+    }
+  </script>
+  <script th:src="@{/js/main.js}"></script>
+  <script th:src="@{/js/partnership.js}"></script>
+</div>
+</body>
+</html>

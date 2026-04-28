@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiErrorResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.common</a> &gt; <span class="el_source">ApiErrorResponse.java</span></div><h1>ApiErrorResponse.java</h1><pre class="source lang-java linenums">package com.vendora.common;
+
+import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class ApiErrorResponse {
+    private boolean success;
+    private String message;
+    private HttpStatus status;
+    private LocalDateTime timestamp;
+    private List&lt;String&gt; errors;
+
+<span class="nc" id="L15">    public ApiErrorResponse() {</span>
+<span class="nc" id="L16">        this.timestamp = LocalDateTime.now();</span>
+<span class="nc" id="L17">        this.success = false;</span>
+<span class="nc" id="L18">    }</span>
+
+    public ApiErrorResponse(String message) {
+<span class="nc" id="L21">        this();</span>
+<span class="nc" id="L22">        this.message = message;</span>
+<span class="nc" id="L23">    }</span>
+
+    public ApiErrorResponse(HttpStatus status, String message) {
+<span class="nc" id="L26">        this();</span>
+<span class="nc" id="L27">        this.status = status;</span>
+<span class="nc" id="L28">        this.message = message;</span>
+<span class="nc" id="L29">    }</span>
+
+    public ApiErrorResponse(HttpStatus status, String message, List&lt;String&gt; errors) {
+<span class="nc" id="L32">        this(status, message);</span>
+<span class="nc" id="L33">        this.errors = errors;</span>
+<span class="nc" id="L34">    }</span>
+
+    public boolean isSuccess() {
+<span class="nc" id="L37">        return success;</span>
+    }
+
+    public void setSuccess(boolean success) {
+<span class="nc" id="L41">        this.success = success;</span>
+<span class="nc" id="L42">    }</span>
+
+    public String getMessage() {
+<span class="nc" id="L45">        return message;</span>
+    }
+
+    public void setMessage(String message) {
+<span class="nc" id="L49">        this.message = message;</span>
+<span class="nc" id="L50">    }</span>
+
+    public HttpStatus getStatus() {
+<span class="nc" id="L53">        return status;</span>
+    }
+
+    public void setStatus(HttpStatus status) {
+<span class="nc" id="L57">        this.status = status;</span>
+<span class="nc" id="L58">    }</span>
+
+    public LocalDateTime getTimestamp() {
+<span class="nc" id="L61">        return timestamp;</span>
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+<span class="nc" id="L65">        this.timestamp = timestamp;</span>
+<span class="nc" id="L66">    }</span>
+
+    public List&lt;String&gt; getErrors() {
+<span class="nc" id="L69">        return errors;</span>
+    }
+
+    public void setErrors(List&lt;String&gt; errors) {
+<span class="nc" id="L73">        this.errors = errors;</span>
+<span class="nc" id="L74">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

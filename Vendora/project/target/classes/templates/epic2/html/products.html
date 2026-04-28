@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendora Inventory</title>
+  <link rel="stylesheet" th:href="@{/css/animations.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/media.css}">
+  <link rel="stylesheet" th:href="@{/css/misc.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+</head>
+<body>
+  <div id="navbar-root"></div>
+  
+<main class="page">
+  <section class="page-header">
+    <h1 class="page-title">Inventory</h1>
+    <p class="page-subtitle">Browse and manage all products without React.</p>
+  </section>
+  <section class="card pad">
+    <form id="products-filter-form" class="filter-bar">
+      <input class="input span-2" type="text" name="keyword" placeholder="Search by name, brand, sku, barcode..." />
+      <select class="select" name="category" id="filter-category"></select>
+      <select class="select" name="status" id="filter-status"></select>
+      <div class="toggle-group">
+        <button type="button" id="view-grid" class="active">Grid</button>
+        <button type="button" id="view-list">List</button>
+      </div>
+      <button class="btn btn-primary" type="submit">Apply</button>
+    </form>
+    <div class="flex-between gap-sm flex-wrap mb-1">
+      <div id="products-summary" class="muted"></div>
+      <div class="flex-gap-sm">
+        <a class="btn btn-secondary" th:href="@{/create-product}">Add Product</a>
+        <button class="btn btn-secondary" type="button" id="reset-filters">Reset</button>
+      </div>
+    </div>
+    <div id="products-grid" class="product-grid"></div>
+    <div id="products-table" class="table-wrap hidden">
+      <table class="table">
+        <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Availability</th><th>Status</th><th></th></tr></thead>
+        <tbody id="products-table-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+  <script type="module" th:src="@{/assets/js/pages/products.js}"></script>
+</body>
+</html>

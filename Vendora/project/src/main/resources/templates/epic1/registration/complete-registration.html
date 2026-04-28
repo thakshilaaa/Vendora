@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | Finalize Account</title>
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body.form-bg {
+            background-image: url('/images/b2.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="form-bg">
+    <div class="page-wrapper">
+        <section class="form-container">
+            <h1 class="section-title">Finalize Your Account</h1>
+            <p class="text-center-desc">Congratulations! Your partnership application has been approved. Please set your
+                password to activate your account.</p>
+
+            <form class="card" id="completeForm">
+                <h3>Set Your Password</h3>
+
+                <label for="email">Email Address</label>
+                <input id="email" type="email" name="email" th:value="${email}" readonly class="input-readonly">
+                <input type="hidden" id="token" name="token" th:value="${token}">
+
+                <label for="password">New Password</label>
+                <input id="password" type="password" name="password" placeholder="Enter password" required minlength="8"
+                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
+                    title="Password must be at least 8 characters long, include uppercase, lowercase, number, and special character">
+
+                <label for="confirmPassword">Confirm Password</label>
+                <input id="confirmPassword" type="password" name="confirm_password" placeholder="Confirm password"
+                    required minlength="8">
+
+                <button type="submit" class="btn-primary">Activate Account</button>
+            </form>
+
+            <p id="statusMsg" class="form-status"></p>
+        </section>
+
+        <script>
+            const form = document.getElementById("completeForm");
+            const statusEl = document.getElementById("statusMsg");
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const password = document.getElementById("password").value;
+                const confirmPassword = document.getElementById("confirmPassword").value;
+                const email = document.getElementById("email").value;
+                const token = document.getElementById("token").value;
+
+                if (!email || !token) {
+                    showError("Invalid registration link. Please use the email link sent by Vendora.");
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showError("Passwords do not match.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/auth/set-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, newPassword: password, email })
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert("Account activated successfully! You can now work with Vendora.");
+                        window.location.href = "/login";
+                    } else {
+                        showError(result.message || "Failed to set password. Link may be expired.");
+                    }
+                } catch (error) {
+                    showError("An error occurred. Please try again later.");
+                }
+            });
+
+            function showError(message) {
+                statusEl.textContent = message;
+                statusEl.style.display = "block";
+                statusEl.style.color = "red";
+            }
+        </script>
+        <script th:src="@{/js/main.js}"></script>
+        <script th:src="@{/js/partnership.js}"></script>
+    </div>
+</body>
+
+</html>

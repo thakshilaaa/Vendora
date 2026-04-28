@@ -1,0 +1,61 @@
+/* === MAIN.CSS - GLOBAL RESPONSIVE & SYSTEM OVERRIDES === */
+
+/* 1. TABLET & SMALL DESKTOP (1024px) */
+@media (max-width: 1024px) {
+    .nav-links {
+        gap: 25px;
+    }
+}
+
+/* 2. MOBILE LANDSCAPE & TABLETS (768px) */
+@media (max-width: 768px) {
+    .nav-content {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+
+    .nav-logo {
+        font-size: 1.8rem;
+    }
+
+    /* Core navigation toggle logic */
+    .nav-links {
+        display: none; /* Controlled via JS toggle */
+    }
+
+    .section {
+        padding: 50px 20px;
+    }
+}
+
+/* 3. MOBILE PORTRAIT (480px) */
+@media (max-width: 480px) {
+    .nav-logo {
+        font-size: 1.5rem;
+    }
+
+    /* Mobile Headings Scaling */
+    h1 { font-size: 2rem !important; }
+    h2 { font-size: 1.75rem !important; }
+
+    .nav-utilities {
+        gap: 1rem;
+        position: static;
+        transform: none;
+    }
+}
+
+/* 4. DESKTOP UTILITIES (769px and up) */
+@media (min-width: 769px) {
+
+    /* 5. ACCESSIBILITY: REDUCED MOTION */
+    /* This global override ensures a comfortable experience for sensitive users */
+    @media (prefers-reduced-motion: reduce) {
+        *, ::before, ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }

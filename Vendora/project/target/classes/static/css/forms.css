@@ -1,0 +1,189 @@
+/* === FORMS.CSS - DATA COLLECTION & VALIDATION === */
+
+/* 1. FORM GROUP & SPACING */
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Consistent spacing from Vendora design system */
+}
+
+.form-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    background: url('../images/b2.png') center / cover no-repeat;
+    background-attachment: fixed;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #000000; /* Black labels */
+    display: block;
+}
+
+/* 2. TEXT INPUTS & TEXTAREAS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+}
+
+/* Focus States - Black Glow */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #000000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* 3. CUSTOM CHECKBOXES & RADIOS */
+input[type="checkbox"],
+input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    transition: var(--transition);
+}
+
+input[type="radio"] {
+    border-radius: 50%;
+}
+
+/* Active state using Black */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: #000000;
+    border-color: #000000;
+}
+
+input[type="checkbox"]:checked::before {
+    content: "✓";
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 4. FILE UPLOAD (DRAG & DROP) */
+.file-upload-wrapper {
+    border: 2px dashed #ccc;
+    border-radius: var(--border-radius);
+    background: #fcfcfc;
+    transition: var(--transition);
+    text-align: center;
+    padding: 2rem;
+    cursor: pointer;
+}
+
+.file-upload-wrapper:hover {
+    border-color: #000000;
+    background: #F6D5DA; /* Using brand's softest pink on hover */
+}
+
+/* 5. VALIDATION & FEEDBACK */
+.note-danger {
+    margin: 15px 0;
+    padding: 10px 15px;
+    background: #ffe5e5;
+    color: #d8000c;
+    border-left: 4px solid #d8000c;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.is-invalid {
+    border-color: #d93025 !important;
+}
+
+.error-message {
+    font-size: 0.8rem;
+    color: #d93025;
+    margin-top: -5px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* Password Toggle - Uses Black */
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #000000;
+    font-weight: 600;
+}
+
+/* FEEDBACK FORM */
+.form-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-card h3 {
+    margin: 20px 0 10px;
+    font-size: 18px;
+}
+
+#loggedUser {
+    font-size: 13px;
+    color: #777;
+    background: #f8f8f8;
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+/* CHECKBOX GRID */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.checkbox-grid label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.checkbox-grid label:hover {
+    background: #f9f9f9;
+    border-color: #000000;
+}

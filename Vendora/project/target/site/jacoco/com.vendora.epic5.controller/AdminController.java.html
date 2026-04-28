@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic5.controller</a> &gt; <span class="el_source">AdminController.java</span></div><h1>AdminController.java</h1><pre class="source lang-java linenums">package com.vendora.epic5.controller;
+
+import com.vendora.epic5.dto.*;
+import com.vendora.epic5.model.DeliveryStatus;
+import com.vendora.epic5.service.DeliveryService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController(&quot;epic5AdminController&quot;)
+@CrossOrigin(origins = &quot;*&quot;)
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+public class AdminController {
+
+    private final DeliveryService deliveryService;
+
+<span class="fc" id="L18">    public AdminController(DeliveryService deliveryService) {</span>
+<span class="fc" id="L19">        this.deliveryService = deliveryService;</span>
+<span class="fc" id="L20">    }</span>
+
+    // ── Admin delivery management ─────────────────────────────
+
+    @PostMapping(&quot;/admin/deliveries&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; create(@RequestBody CreateDeliveryDTO dto) {
+<span class="nc" id="L26">        return ResponseEntity.ok(deliveryService.createDelivery(dto));</span>
+    }
+
+    @GetMapping(&quot;/admin/deliveries&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryDTO&gt;&gt; getAll() {
+<span class="nc" id="L31">        return ResponseEntity.ok(deliveryService.getAllDeliveries());</span>
+    }
+
+    @GetMapping(&quot;/admin/deliveries/{id}&quot;)
+    public ResponseEntity&lt;DeliveryDTO&gt; getOne(@PathVariable String id) {
+<span class="nc" id="L36">        return ResponseEntity.ok(deliveryService.getDelivery(id));</span>
+    }
+
+    @GetMapping(&quot;/admin/deliveries/status/{status}&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryDTO&gt;&gt; getByStatus(@PathVariable DeliveryStatus status) {
+<span class="nc" id="L41">        return ResponseEntity.ok(deliveryService.getDeliveriesByStatus(status));</span>
+    }
+
+    /**
+     * Assign an agent to a delivery.
+     * The request body must include agentServiceDistrict so the service can
+     * validate it matches the delivery's customerDistrict (sourced from the User module).
+     */
+    @PostMapping(&quot;/admin/deliveries/{id}/assign&quot;)
+    public ResponseEntity&lt;DeliveryAssignmentDTO&gt; assign(
+            @PathVariable String id,
+            @RequestBody AssignAgentDTO dto) {
+<span class="nc" id="L53">        return ResponseEntity.ok(deliveryService.assignAgent(id, dto));</span>
+    }
+
+    @GetMapping(&quot;/admin/deliveries/{id}/history&quot;)
+    public ResponseEntity&lt;List&lt;DeliveryStatusHistoryDTO&gt;&gt; getHistory(@PathVariable String id) {
+<span class="nc" id="L58">        return ResponseEntity.ok(deliveryService.getStatusHistory(id));</span>
+    }
+
+    // ── Agent lookup ──────────────────────────────────────────
+    // Returns agent IDs sourced from assignment history in this module.
+    // Full agent profiles (name, phone) live in the User Module.
+
+    @GetMapping(&quot;/admin/agents&quot;)
+    public ResponseEntity&lt;List&lt;Long&gt;&gt; getAgents() {
+<span class="nc" id="L67">        return ResponseEntity.ok(deliveryService.getAllAgentIds());</span>
+    }
+
+    @GetMapping(&quot;/admin/agents/by-district/{district}&quot;)
+    public ResponseEntity&lt;List&lt;Long&gt;&gt; getAgentsByDistrict(@PathVariable String district) {
+<span class="nc" id="L72">        return ResponseEntity.ok(deliveryService.getAgentIdsByDistrict(district));</span>
+    }
+
+    // ── Return requests ────────────────────────────────────────
+
+    @GetMapping(&quot;/admin/return-requests&quot;)
+    public ResponseEntity&lt;List&lt;ReturnRequestDTO&gt;&gt; getAllReturns() {
+<span class="nc" id="L79">        return ResponseEntity.ok(deliveryService.getAllReturnRequests());</span>
+    }
+
+    @PostMapping(&quot;/admin/return-requests/{id}/approve&quot;)
+    public ResponseEntity&lt;ReturnRequestDTO&gt; approveReturn(
+            @PathVariable String id,
+            @RequestParam(required = false) Long agentId,
+            @RequestParam Long adminId) {
+<span class="nc" id="L87">        return ResponseEntity.ok(deliveryService.approveReturn(id, agentId, adminId));</span>
+    }
+
+    @PostMapping(&quot;/admin/return-requests/{id}/reject&quot;)
+    public ResponseEntity&lt;ReturnRequestDTO&gt; rejectReturn(@PathVariable String id) {
+<span class="nc" id="L92">        return ResponseEntity.ok(deliveryService.rejectReturn(id));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

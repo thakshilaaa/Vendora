@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora · My Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/misc.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" th:href="@{/css/epic5.css}">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-left">
+        <div class="brand">Vendora</div>
+        <div class="brand-dot"></div>
+        <div class="topbar-title">My Orders</div>
+    </div>
+    <div class="topbar-right">
+        <span class="badge-role">Customer</span>
+        <button class="btn-logout" onclick="logout()">Sign out</button>
+    </div>
+</header>
+
+<div class="hero">
+    <div class="hero-title">Track Your Deliveries</div>
+    <div class="hero-sub">Stay updated on every shipment in real time</div>
+</div>
+
+<div class="stats-row">
+    <div class="stat"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">Total</div></div>
+    <div class="stat"><div class="stat-val" id="st-active">—</div><div class="stat-lbl">Active</div></div>
+    <div class="stat"><div class="stat-val" id="st-delivered">—</div><div class="stat-lbl">Delivered</div></div>
+    <div class="stat"><div class="stat-val" id="st-returns">—</div><div class="stat-lbl">Returns</div></div>
+</div>
+
+<div class="content">
+    <div class="tabs">
+        <button class="tab active" onclick="filter('ALL', this)">All</button>
+        <button class="tab" onclick="filter('PENDING', this)">Processing</button>
+        <button class="tab" onclick="filter('ASSIGNED', this)">Assigned</button>
+        <button class="tab" onclick="filter('OUT_FOR_DELIVERY', this)">In Transit</button>
+        <button class="tab" onclick="filter('DELIVERED', this)">Delivered</button>
+        <button class="tab" onclick="filter('FAILED', this)">Issues</button>
+        <button class="tab" onclick="filter('RETURNED', this)">Returns</button>
+    </div>
+    <div id="orderList"></div>
+</div>
+
+<!-- Return Request Modal -->
+<div class="overlay" id="returnModal">
+    <div class="modal">
+        <div class="modal-head">
+            <span class="modal-title">Request Return</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <p style="color:var(--muted);font-size:.875rem;margin-bottom:1.25rem;">Please tell us the reason for your return request.</p>
+        <div class="field" style="margin-bottom:.9rem;">
+            <label>Reason</label>
+            <select id="returnReasonCode" style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);background:var(--rose-50);outline:none;appearance:none;">
+                <option value="WRONG_ITEM">Wrong item received</option>
+                <option value="DAMAGED">Item arrived damaged</option>
+                <option value="NOT_AS_DESCRIBED">Not as described</option>
+                <option value="CHANGED_MIND">Changed my mind</option>
+                <option value="OTHER">Other</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Additional details (optional)</label>
+            <input id="returnDescription" placeholder="Any extra details…">
+        </div>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem;">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn-primary" id="returnConfirmBtn">Submit Return</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = '';
+    const token = localStorage.getItem('token') || localStorage.getItem('vendoraToken');
+    let customerId = localStorage.getItem('vnd_customer_id');
+
+    if (!token) window.location.href = '/login';
+
+    const authH = () => ({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+    });
+
+    let allDeliveries = [];
+    let returnTarget  = null;
+
+    function logout() { localStorage.clear(); window.location.href = '/login'; }
+
+    async function apiFetch(path, method = 'GET', body = null) {
+        const opts = { method, headers: authH(), credentials: 'include' };
+        if (body) opts.body = JSON.stringify(body);
+        const r = await fetch(API + path, opts);
+        if (!r.ok) {
+            let msg = 'Request failed';
+            try { const j = await r.json(); msg = j.message || msg; } catch {}
+            throw new Error(msg);
+        }
+        if (r.status === 204) return null;
+        return r.json();
+    }
+
+    async function ensureCustomerId() {
+        if (customerId) return;
+        const r = await fetch('/api/users/me', { headers: authH(), credentials: 'include' });
+        if (!r.ok) { window.location.href = '/login'; return; }
+        const p = await r.json();
+        customerId = String(p.id);
+        localStorage.setItem('vnd_customer_id', customerId);
+    }
+
+    async function load() {
+        try {
+            await ensureCustomerId();
+            allDeliveries = await apiFetch('/customer/deliveries/me');
+            renderStats();
+            renderOrders(allDeliveries);
+        } catch (e) { toast('Failed to load orders', 'error'); }
+    }
+
+    function toast(msg, type = '') {
+        const el = document.getElementById('toast');
+        el.textContent = msg; el.className = 'toast show ' + type;
+        setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function renderStats() {
+        const activeStatuses = ['PENDING', 'ASSIGNED', 'OUT_FOR_DELIVERY'];
+        document.getElementById('st-total').textContent     = allDeliveries.length;
+        document.getElementById('st-active').textContent    = allDeliveries.filter(d => activeStatuses.includes(d.status)).length;
+        document.getElementById('st-delivered').textContent = allDeliveries.filter(d => d.status === 'DELIVERED').length;
+        document.getElementById('st-returns').textContent   = allDeliveries.filter(d => d.status === 'RETURNED').length;
+    }
+
+    function filter(status, btn) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        renderOrders(status === 'ALL' ? allDeliveries : allDeliveries.filter(d => d.status === status));
+    }
+
+    function renderOrders(list) {
+        const el = document.getElementById('orderList');
+        if (!list.length) {
+            el.innerHTML = `<div class="empty"><div class="empty-icon">🌸</div>No orders found</div>`;
+            return;
+        }
+        el.innerHTML = list.map(d => orderCard(d)).join('');
+    }
+
+    // Status steps matching new DeliveryStatus enum
+    const TRACK_STEPS = [
+        { label: 'Order\nPlaced',     statuses: ['PENDING'] },
+        { label: 'Agent\nAssigned',   statuses: ['ASSIGNED'] },
+        { label: 'Out for\nDelivery', statuses: ['OUT_FOR_DELIVERY'] },
+        { label: 'Delivered',         statuses: ['DELIVERED', 'FAILED'] },
+    ];
+    const RETURN_STEPS = [
+        { label: 'Return\nInitiated', statuses: ['RETURNED'] },
+    ];
+
+    function orderCard(d) {
+        const safeId = d.id;                                    // UUID string
+        const isReturn = d.status === 'RETURNED';
+        const steps    = isReturn ? RETURN_STEPS : TRACK_STEPS;
+        const curIdx   = steps.findIndex(s => s.statuses.includes(d.status));
+
+        const trackHtml = `
+      <div class="track-bar">
+        ${steps.map((s, i) => {
+            const done = curIdx === -1 ? false : i < curIdx;
+            const cur  = i === curIdx;
+            const cls  = done ? 'done' : (cur ? 'cur' : '');
+            const icon = done ? '✓' : (cur ? '●' : (i + 1));
+            return `
+            ${i > 0 ? `<div class="track-line ${done ? 'done' : ''}"></div>` : ''}
+            <div class="track-step">
+              <div class="track-dot ${cls}">${icon}</div>
+              <div class="track-lbl ${cls}">${s.label.replace('\n','<br>')}</div>
+            </div>`;
+        }).join('')}
+      </div>`;
+
+        // notes field carries delivery-level notes from the new schema
+        const noteHtml = d.notes
+            ? `<div class="note-box"><strong>Note:</strong> ${d.notes}</div>`
+            : '';
+
+        const actionHtml = d.status === 'DELIVERED'
+            ? `<div class="order-actions"><button class="btn btn-outline" onclick="openReturn('${safeId}')">Request Return</button></div>`
+            : '';
+
+        // "Last update" — use the most recent meaningful timestamp
+        const lastUpdate = d.deliveredAt || d.pickedUpAt || d.createdAt;
+
+        return `
+    <div class="order-card" id="card-${safeId}">
+      <div class="order-head" onclick="toggleCard('${safeId}')">
+        <div>
+          <div class="order-code">${d.trackingNumber || 'TRK-' + safeId.substring(0,8).toUpperCase()}</div>
+          <div class="order-id">Order ref: ${d.orderId}</div>
+        </div>
+        <div class="order-head-right">
+          ${badge(d.status)}
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="order-body">
+        ${trackHtml}
+        <div class="info-grid">
+          <div class="info-item"><div class="info-lbl">Delivery Address</div><div class="info-val">${d.deliveryAddress}</div></div>
+          <div class="info-item"><div class="info-lbl">Tracking No.</div><div class="info-val">${d.trackingNumber}</div></div>
+          <div class="info-item"><div class="info-lbl">Created</div><div class="info-val">${fmtDate(d.createdAt)}</div></div>
+          <div class="info-item"><div class="info-lbl">Last Update</div><div class="info-val">${fmtDate(lastUpdate)}</div></div>
+          ${d.pickedUpAt  ? `<div class="info-item"><div class="info-lbl">Picked Up</div><div class="info-val">${fmtDate(d.pickedUpAt)}</div></div>` : ''}
+          ${d.deliveredAt ? `<div class="info-item"><div class="info-lbl">Delivered</div><div class="info-val">${fmtDate(d.deliveredAt)}</div></div>` : ''}
+        </div>
+        ${noteHtml}
+        ${actionHtml}
+      </div>
+    </div>`;
+    }
+
+    function toggleCard(id) {
+        document.getElementById('card-' + id).classList.toggle('open');
+    }
+
+    function openReturn(id) {
+        returnTarget = id;
+        document.getElementById('returnReasonCode').selectedIndex  = 0;
+        document.getElementById('returnDescription').value = '';
+        document.getElementById('returnConfirmBtn').onclick = submitReturn;
+        document.getElementById('returnModal').classList.add('open');
+    }
+
+    async function submitReturn() {
+        const reasonCode  = document.getElementById('returnReasonCode').value;
+        const description = document.getElementById('returnDescription').value.trim();
+        closeModal();
+        try {
+            await ensureCustomerId();
+            await apiFetch(`/customer/deliveries/${returnTarget}/return-requests`, 'POST', {
+                customerId:  Number(customerId),
+                reasonCode:  reasonCode,
+                description: description || null
+            });
+            toast('Return request submitted!', 'success');
+            load();
+        } catch (e) { toast('Failed to submit return', 'error'); }
+    }
+
+    function closeModal() { document.getElementById('returnModal').classList.remove('open'); }
+
+    function badge(status) {
+        const labels = {
+            PENDING:          'Processing',
+            ASSIGNED:         'Agent Assigned',
+            OUT_FOR_DELIVERY: 'Out for Delivery',
+            DELIVERED:        'Delivered',
+            FAILED:           'Delivery Failed',
+            RETURNED:         'Return Requested'
+        };
+        const label = labels[status] || status.replace(/_/g, ' ');
+        return `<span class="badge badge-${status.toLowerCase()}">${label}</span>`;
+    }
+
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    load();
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Cart — Vendora</title>
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" th:href="@{/}">Vendora</a>
+    <nav>
+        <a th:href="@{/products}">Shop</a>
+        <a class="active" th:href="@{/cart}"><i class="fa-solid fa-bag-shopping"></i> Cart</a>
+    </nav>
+</header>
+
+<main class="cart-wrapper">
+
+    <section class="cart-main">
+        <div class="cart-header">
+            <h1>Your Beauty Bag</h1>
+            <div class="cart-tools">
+                <input type="search" id="cartSearch" placeholder="Search items in cart…">
+                <label class="select-all">
+                    <input type="checkbox" id="selectAll"> Select All
+                </label>
+                <form th:action="@{/cart/remove-selected}" method="post" id="bulkRemoveForm">
+                    <button type="submit" class="btn ghost"
+                            onclick="return confirm('Remove selected items from your cart?')">
+                        <i class="fa-regular fa-trash-can"></i> Remove selected
+                    </button>
+                    <button type="button" class="btn primary" id="buySelectedBtn">
+                        <i class="fa-solid fa-credit-card"></i> Buy selected
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${toast}" class="toast" th:text="${toast}"></div>
+
+        <div th:if="${#lists.isEmpty(items)}" class="empty-state">
+            <i class="fa-regular fa-face-smile"></i>
+            <h3>Your beauty bag is waiting…</h3>
+            <p>Discover something you'll love.</p>
+            <a th:href="@{/products}" class="btn primary">Browse the shop</a>
+        </div>
+
+        <div class="cart-grid" th:unless="${#lists.isEmpty(items)}">
+            <article th:each="i : ${items}" class="cart-card"
+                     th:classappend="${i.stock == 0} ? 'oos' : ''"
+                     th:data-id="${i.id}"
+                     th:data-price="${i.price}">
+
+                <div th:if="${i.stock == 0}" class="oos-overlay">Out of Stock</div>
+
+                <label class="check-pill">
+                    <input type="checkbox" class="item-check" name="itemIds" th:value="${i.id}"
+                           th:disabled="${i.stock == 0}">
+                </label>
+
+                <img th:src="${i.imageUrl}" th:alt="${i.name}" class="thumb"
+                     onerror="this.src='/images/Vendora.png'">
+
+                <div class="info">
+                    <h4 th:text="${i.name}">Product</h4>
+
+                    <div class="price-row">
+                        <span class="price">Rs. <span th:text="${#numbers.formatDecimal(i.price,1,'COMMA',2,'POINT')}">0.00</span></span>
+                        <span th:if="${i.stock > 0 and i.stock <= 5}" class="badge limited">
+                            Only <span th:text="${i.stock}"></span> left
+                        </span>
+                    </div>
+
+                    <div class="qty">
+                        <button type="button" class="qty-btn dec" aria-label="Decrease">−</button>
+                        <input type="number" class="qty-input" min="1"
+                               th:value="${i.quantity}" th:max="${i.stock}">
+                        <button type="button" class="qty-btn inc" aria-label="Increase">+</button>
+                    </div>
+
+                    <div class="actions">
+                        <a class="btn ghost"
+                           th:href="@{'/cart/remove/' + ${i.id}}"
+                           onclick="return confirm('Remove this item?')">
+                            <i class="fa-regular fa-trash-can"></i> Remove
+                        </a>
+                        <button type="button" class="btn primary buy-now-btn"
+                                th:data-id="${i.id}" th:disabled="${i.stock == 0}">
+                            <i class="fa-solid fa-bolt"></i> Buy now
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <aside class="summary" th:unless="${#lists.isEmpty(items)}">
+        <h3>Order summary</h3>
+        <div class="line">
+            <span>Subtotal</span>
+            <strong>Rs. <span id="subtotal" th:text="${#numbers.formatDecimal(subtotal,1,'COMMA',2,'POINT')}">0.00</span></strong>
+        </div>
+        <div class="line">
+            <span>Delivery (estimated)</span>
+            <strong>Rs. <span id="deliveryFee" th:text="${#numbers.formatDecimal(defaultDeliveryFee,1,'COMMA',2,'POINT')}">500.00</span></strong>
+        </div>
+        <div class="line total">
+            <span>Total</span>
+            <strong>Rs. <span id="total">—</span></strong>
+        </div>
+        <p class="hint">Final delivery fee depends on your location at checkout.</p>
+    </aside>
+</main>
+
+<!-- Confirm modal (single + bulk) -->
+<div id="confirmModal" class="modal" hidden>
+    <div class="modal-card">
+        <h3>Confirm your purchase</h3>
+        <div id="modalLines" class="modal-lines"></div>
+        <div class="line"><span>Subtotal</span><strong>Rs. <span id="modalSubtotal">0.00</span></strong></div>
+        <div class="line"><span>Delivery (est.)</span><strong>Rs. 500.00</strong></div>
+        <div class="line total"><span>Total</span><strong>Rs. <span id="modalTotal">0.00</span></strong></div>
+        <div class="modal-actions">
+            <button type="button" class="btn ghost" id="modalCancel">Cancel</button>
+            <a id="modalConfirm" class="btn primary" th:href="@{/order-payment}">Continue to checkout</a>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/cart.js}"></script>
+</body>
+</html>

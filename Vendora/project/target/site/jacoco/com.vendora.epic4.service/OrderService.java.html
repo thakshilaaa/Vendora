@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic4.service</a> &gt; <span class="el_source">OrderService.java</span></div><h1>OrderService.java</h1><pre class="source lang-java linenums">package com.vendora.epic4.service;
+
+import com.vendora.epic3.dto.CheckoutRequest;
+import com.vendora.epic3.model.CartItem;
+import com.vendora.epic3.repository.CartItemRepository;
+import com.vendora.epic3.service.DeliveryChargeService;
+import com.vendora.epic4.model.Order;
+import com.vendora.epic4.repository.OrderRepository;
+import com.vendora.epic1.exception.ResourceNotFoundException;
+import com.vendora.epic2.model.Product;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+<span class="fc" id="L18">public class OrderService {</span>
+
+    @Autowired
+    private com.vendora.epic1.repository.UserRepository userRepo;
+
+    @Autowired
+    private CartItemRepository cartRepo;
+
+    @Autowired
+    private OrderRepository orderRepo;
+
+    @Autowired
+    private DeliveryChargeService deliveryService;
+
+    @Transactional
+    public Order checkout(CheckoutRequest request, Long userId) {
+<span class="nc" id="L34">        com.vendora.epic1.model.User user = userRepo.findById(userId)</span>
+<span class="nc" id="L35">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User not found&quot;));</span>
+
+<span class="nc" id="L37">        List&lt;CartItem&gt; items = cartRepo.findAllById(request.getItemIds());</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        for (CartItem item : items) {</span>
+<span class="nc bnc" id="L39" title="All 4 branches missed.">            if (item.getCart() == null || item.getCart().getUser() == null</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">                    || !item.getCart().getUser().getId().equals(userId)) {</span>
+<span class="nc" id="L41">                throw new com.vendora.epic1.exception.ForbiddenException(&quot;Invalid cart items for this user&quot;);</span>
+            }
+<span class="nc" id="L43">        }</span>
+
+<span class="nc" id="L45">        StringBuilder productSummary = new StringBuilder();</span>
+<span class="nc" id="L46">        productSummary.append(&quot;[Address: &quot;).append(request.getAddress()).append(&quot;, &quot;)</span>
+<span class="nc" id="L47">                      .append(request.getLocationType().name()).append(&quot;] &quot;);</span>
+
+<span class="nc" id="L49">        double total = 0;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (CartItem item : items) {</span>
+<span class="nc" id="L51">            String name = item.getProduct().getName();</span>
+<span class="nc" id="L52">            int qty = item.getQuantity();</span>
+<span class="nc" id="L53">            double price = item.getProduct().getPrice().doubleValue();</span>
+
+<span class="nc" id="L55">            productSummary.append(name)</span>
+<span class="nc" id="L56">                          .append(&quot;(x&quot;).append(qty).append(&quot;)-&quot;)</span>
+<span class="nc" id="L57">                          .append(price * qty)</span>
+<span class="nc" id="L58">                          .append(&quot;, &quot;);</span>
+
+<span class="nc" id="L60">            total += price * qty;</span>
+
+            // reduce stock
+<span class="nc" id="L63">            Product p = item.getProduct();</span>
+<span class="nc" id="L64">            p.setStockQuantity(p.getStockQuantity() - qty);</span>
+<span class="nc" id="L65">        }</span>
+
+<span class="nc" id="L67">        double deliveryFee = deliveryService.calculate(request.getLocationType()).doubleValue();</span>
+<span class="nc" id="L68">        total += deliveryFee;</span>
+
+<span class="nc" id="L70">        Order order = new Order();</span>
+<span class="nc" id="L71">        String fullName = user.getFullName();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        String[] nameParts = fullName != null ? fullName.trim().split(&quot;\\s+&quot;, 2) : new String[]{&quot;&quot;, &quot;&quot;};</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        order.setFirstName(nameParts.length &gt; 0 ? nameParts[0] : &quot;&quot;);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        order.setLastName(nameParts.length &gt; 1 ? nameParts[1] : &quot;&quot;);</span>
+<span class="nc" id="L75">        order.setProduct(productSummary.toString());</span>
+<span class="nc" id="L76">        order.setAmount(total);</span>
+<span class="nc" id="L77">        order.setStatus(&quot;PENDING&quot;);</span>
+<span class="nc" id="L78">        order.setPaymentStatus(&quot;UNPAID&quot;);</span>
+<span class="nc" id="L79">        order.setPaymentMethod(request.getPaymentMethod());</span>
+<span class="nc" id="L80">        order.setPhone(user.getPhone());</span>
+<span class="nc" id="L81">        order.setUserId(userId);</span>
+
+<span class="nc" id="L83">        Order savedOrder = orderRepo.save(order);</span>
+
+        // clear cart
+<span class="nc" id="L86">        cartRepo.deleteAll(items);</span>
+        
+<span class="nc" id="L88">        return savedOrder;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

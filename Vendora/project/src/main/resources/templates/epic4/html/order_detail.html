@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order #<span th:text="${order.id}">0</span> — Vendora</title>
+    <link rel="stylesheet" th:href="@{/css/ecommerce.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <style>
+        body { background: #fff5f8; }
+        .wrap { max-width: 640px; margin: 40px auto; padding: 24px; }
+        .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        h1 { color: #be185d; margin: 0 0 8px; font-size: 1.5rem; }
+        .sub { color: #64748b; margin-bottom: 20px; }
+        dl { margin: 0; }
+        dt { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; margin-top: 14px; }
+        dd { margin: 4px 0 0; font-size: 1rem; }
+        a.back { display: inline-block; margin-top: 24px; color: #be185d; font-weight: 600; text-decoration: none; }
+        a.back:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card" th:if="${order != null}">
+        <h1>Order #<span th:text="${order.id}">0</span></h1>
+        <p class="sub">Placed for
+            <span th:text="${#strings.defaultString(order.firstName, '') + ' ' + #strings.defaultString(order.lastName, '')}">Name</span>
+        </p>
+        <dl>
+            <dt>Product / summary</dt>
+            <dd th:text="${order.product}">—</dd>
+            <dt>Amount</dt>
+            <dd th:text="${'Rs. ' + #numbers.formatDecimal(order.amount, 1, 2)}">—</dd>
+            <dt>Order status</dt>
+            <dd th:text="${order.status}">—</dd>
+            <dt>Payment</dt>
+            <dd th:text="${order.paymentStatus}">—</dd>
+            <dt>Method</dt>
+            <dd th:text="${order.paymentMethod}">—</dd>
+        </dl>
+        <a class="back" href="/order-history">← Back to order history</a>
+    </div>
+</div>
+</body>
+</html>

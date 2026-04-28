@@ -1,0 +1,120 @@
+/* === TYPOGRAPHY.CSS - ADVANCED TEXT STYLING === */
+
+/* 1. FONT PAIRING & BASE SCALING */
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    color: #000000; /* Black headings */
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+}
+
+/* 2. HEADLINE SCALE (Luxury Hierarchy) */
+.display-1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.display-2 {
+    font-size: 2.75rem;
+    font-weight: 800;
+}
+
+.section-title {
+    font-size: 2.25rem;
+    text-align: center;
+    position: relative;
+    padding-bottom: 15px;
+    margin-bottom: 40px;
+}
+
+/* 3. DECORATIVE TYPOGRAPHY (Branding Accents) */
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: #EAACB3; /* Brand Rose divider */
+}
+
+/* FEEDBACK HEADER */
+.feedback-header h2 {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
+.text-gradient {
+    background: linear-gradient(45deg, #000000, #333333);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* 4. PARAGRAPH & LEAD TEXT */
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.text-muted {
+    color: #777;
+    font-size: 0.9rem;
+}
+
+/* 5. BLOCKQUOTES (Testimonials & Reviews) */
+blockquote {
+    padding: 25px 35px;
+    margin: 30px 0;
+    border-left: 5px solid #000000; /* Black border */
+    background-color: #F6D5DA; /* Soft Pink background */
+    font-style: italic;
+    font-size: 1.1rem;
+    border-radius: 0 12px 12px 0;
+    color: #000000;
+}
+
+/* 6. LIST STYLES (Ingredients/Features) */
+.list-unstyled {
+    list-style: none;
+    padding-left: 0;
+}
+
+.list-check li {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 12px;
+}
+
+.list-check li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #000000;
+    font-weight: 900;
+}
+
+/* 7. ACCESSIBILITY & MOBILE SCALING */
+@media (max-width: 768px) {
+    .display-1 { font-size: 2.5rem; }
+    .display-2 { font-size: 2rem; }
+    .section-title { font-size: 1.8rem; }
+
+    p {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+}

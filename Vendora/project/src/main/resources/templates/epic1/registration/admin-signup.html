@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendora | Admin Signup</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/typography.css}">
+  <link rel="stylesheet" th:href="@{/css/layout.css}">
+  <link rel="stylesheet" th:href="@{/css/footer.css}">
+  <link rel="stylesheet" th:href="@{/css/buttons.css}">
+  <link rel="stylesheet" th:href="@{/css/cards.css}">
+  <link rel="stylesheet" th:href="@{/css/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body.form-bg {
+      background-image: url('/images/b2.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+  </style>
+</head>
+
+<body class="form-bg">
+  <div class="page-wrapper">
+    <section class="form-container">
+      <h1 class="section-title">Admin Sign Up</h1>
+      <p class="text-center-desc">Register as an admin to manage the Vendora platform.</p>
+
+      <form id="adminSignupForm" class="card" autocomplete="off">
+        <h3>Personal Information</h3>
+
+        <label for="username">Username</label>
+        <input id="username" type="text" name="username" placeholder="Admin Username" required pattern="[a-zA-Z\s]+"
+          title="Name should contain only letters and spaces">
+
+        <label for="email">Official Email</label>
+        <input id="email" type="email" name="email" placeholder="admin@vendora.com" required
+          pattern="[a-z0-9._%+-]+@gmail.com$" title="Please enter a valid official email address">
+
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" name="phone" placeholder="0712345678" required maxlength="15"
+          pattern="^(\+94|0)(7[0-9]{8}|[12345689][0-9]{8})$"
+          title="Sri Lankan number, e.g. 0712345678 or +94712345678">
+
+        <label for="nic">NIC Number</label>
+        <input id="nic" type="text" name="nic" placeholder="19XXXXXXXXXX or XXXXXXXXXV" required
+          pattern="^([0-9]{9}[VvXx]|[0-9]{12})$" title="Please enter a valid NIC number">
+
+        <hr class="divider-light">
+        <h3>Address Information</h3>
+
+        <label for="addressLine1">Address</label>
+        <input id="addressLine1" type="text" name="address_line_1" placeholder="No 123" required>
+
+        <label for="city">City</label>
+        <input id="city" type="text" name="city" placeholder="Colombo" required>
+
+        <label for="province">Province</label>
+        <select id="province" name="province" required>
+          <option value="">Select Province</option>
+          <option value="central">Central Province</option>
+          <option value="eastern">Eastern Province</option>
+          <option value="northCentral">North Central Province</option>
+          <option value="northern">Northern Province</option>
+          <option value="northWestern">North Western Province</option>
+          <option value="sabaragamuwa">Sabaragamuwa Province</option>
+          <option value="southern">Southern Province</option>
+          <option value="uva">Uva Province</option>
+          <option value="western">Western Province</option>
+        </select>
+
+        <label for="district">District</label>
+        <select id="district" name="district" required>
+          <option value="">Select District</option>
+        </select>
+
+        <label for="postalCode">Postal Code (Optional)</label>
+        <input id="postalCode" type="text" name="postal_code" placeholder="12345">
+
+        <hr class="divider-light">
+        <h3>For Security</h3>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="Enter password" required minlength="8">
+
+        <label for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword" type="password" name="confirm_password" placeholder="Confirm password" required
+          minlength="8">
+
+        <button type="submit" class="btn-primary">Submit</button>
+
+        <div class="text-center-mt">
+          <p>Already an admin? <a th:href="@{/admin-login}">Login here</a></p>
+        </div>
+      </form>
+      <p id="statusMsg" class="form-status"></p>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-bottom">
+        <p>© 2026 Vendora | The Online Beauty Store</p>
+        <p><button><a th:href="@{/terms}">Terms & Conditions</a></button> | <button><a th:href="@{/privacy}">Privacy
+              Policy</a></button> | <button><a th:href="@{/cookie}">Cookie Policy</a></button> | Do Not Sell My
+          Personal Information | Vendora</p>
+        <p>If you are having problems using this website, please <button><a th:href="@{/service}">CLICK
+              HERE</a></button> for assistance.</p>
+      </div>
+    </footer>
+
+    <script>
+      const form = document.getElementById("adminSignupForm");
+      const statusEl = document.getElementById("statusMsg");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        statusEl.style.display = "none";
+
+        if (data.password !== data.confirm_password) {
+          showError("Passwords do not match.");
+          return;
+        }
+
+        delete data.confirm_password;
+
+        const requestData = {
+          username: data.username,
+          email: data.email,
+          phone: data.phone,
+          nic: data.nic,
+          password: data.password
+        };
+
+        try {
+          const response = await fetch('/api/auth/register/admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            localStorage.setItem("pendingVerificationEmail", data.email);
+            if (data.phone) {
+              localStorage.setItem("pendingVerificationPhone", data.phone);
+            } else {
+              localStorage.removeItem("pendingVerificationPhone");
+            }
+            if (result.userCode) {
+              localStorage.setItem("vendoraUserCode", result.userCode);
+            }
+            localStorage.setItem("pendingVerificationNext", "/admin-dashboard");
+            alert('Admin registration successful! Your User ID: ' + (result.userCode || 'check email') + '. Redirecting to verification...');
+            window.location.href = `/verify-email?next=${encodeURIComponent('/admin-dashboard')}`;
+          } else {
+            showError(result.message || "Registration failed.");
+          }
+
+        } catch (err) {
+          showError("Network error. Please try again later.");
+        }
+      });
+
+      function showError(message) {
+        statusEl.textContent = message;
+        statusEl.style.display = "block";
+        statusEl.style.color = "red";
+      }
+    </script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/form.js}"></script>
+    <script th:src="@{/js/form2.js}"></script>
+  </div>
+</body>
+
+</html>

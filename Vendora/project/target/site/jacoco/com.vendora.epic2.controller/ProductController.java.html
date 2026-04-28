@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic2.controller</a> &gt; <span class="el_source">ProductController.java</span></div><h1>ProductController.java</h1><pre class="source lang-java linenums">package com.vendora.epic2.controller;
+
+import com.vendora.epic2.dto.ProductDto;
+import com.vendora.epic2.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/products&quot;)
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
+@CrossOrigin(origins = &quot;${app.cors.allowed-origins}&quot;)
+public class ProductController {
+
+    private final ProductService productService;
+
+    // ==================== GET ALL (with filters) ====================
+    @GetMapping
+    public ResponseEntity&lt;List&lt;ProductDto.Summary&gt;&gt; getAllProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String status) {
+<span class="nc" id="L28">        return ResponseEntity.ok(productService.getAllProducts(keyword, category, status));</span>
+    }
+
+    // ==================== GET ONE ====================
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ProductDto.Response&gt; getProduct(@PathVariable Long id) {
+<span class="nc" id="L34">        return ResponseEntity.ok(productService.getProductById(id));</span>
+    }
+
+    // ==================== CREATE ====================
+    @PostMapping(consumes = &quot;multipart/form-data&quot;)
+    public ResponseEntity&lt;ProductDto.Response&gt; createProduct(
+            @RequestParam Long supplierId,
+            @RequestParam String name,
+            @RequestParam String brand,
+            @RequestParam(required = false) String sku,
+            @RequestParam(required = false) String barcode,
+            @RequestParam String category,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String ingredients,
+            @RequestParam(required = false) String usageInstructions,
+            @RequestParam BigDecimal price,
+            @RequestParam(required = false) BigDecimal costPrice,
+            @RequestParam Integer stockQuantity,
+            @RequestParam(defaultValue = &quot;10&quot;) Integer lowStockThreshold,
+            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) String shade,
+            @RequestParam(required = false) String skinType,
+            @RequestParam(required = false) String volume,
+            @RequestParam(required = false) String supplierName,
+            @RequestParam(required = false) String supplierContact,
+            @RequestParam(required = false) String supplierEmail,
+            @RequestParam(required = false) String supplierAddress,
+            @RequestParam(required = false) String manufactureDate,
+            @RequestParam(required = false) String expiryDate,
+            @RequestParam(defaultValue = &quot;ACTIVE&quot;) String status,
+            @RequestParam(required = false) String countryOfOrigin,
+            @RequestParam(required = false) String tags,
+            @RequestParam(required = false) MultipartFile image) throws IOException {
+
+<span class="nc" id="L68">        return ResponseEntity.status(201).body(productService.createProduct(</span>
+            supplierId,
+            name, brand, sku, barcode, category, description, ingredients, usageInstructions,
+            price, costPrice, stockQuantity, lowStockThreshold, unit, shade, skinType, volume,
+            supplierName, supplierContact, supplierEmail, supplierAddress,
+            manufactureDate, expiryDate, status, countryOfOrigin, tags, image
+        ));
+    }
+
+    // ==================== UPDATE ====================
+    @PutMapping(value = &quot;/{id}&quot;, consumes = &quot;multipart/form-data&quot;)
+    public ResponseEntity&lt;ProductDto.Response&gt; updateProduct(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long supplierId,
+            @RequestParam String name,
+            @RequestParam String brand,
+            @RequestParam(required = false) String sku,
+            @RequestParam(required = false) String barcode,
+            @RequestParam String category,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String ingredients,
+            @RequestParam(required = false) String usageInstructions,
+            @RequestParam BigDecimal price,
+            @RequestParam(required = false) BigDecimal costPrice,
+            @RequestParam Integer stockQuantity,
+            @RequestParam(defaultValue = &quot;10&quot;) Integer lowStockThreshold,
+            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) String shade,
+            @RequestParam(required = false) String skinType,
+            @RequestParam(required = false) String volume,
+            @RequestParam(required = false) String supplierName,
+            @RequestParam(required = false) String supplierContact,
+            @RequestParam(required = false) String supplierEmail,
+            @RequestParam(required = false) String supplierAddress,
+            @RequestParam(required = false) String manufactureDate,
+            @RequestParam(required = false) String expiryDate,
+            @RequestParam(defaultValue = &quot;ACTIVE&quot;) String status,
+            @RequestParam(required = false) String countryOfOrigin,
+            @RequestParam(required = false) String tags,
+            @RequestParam(required = false) MultipartFile image,
+            @RequestParam(defaultValue = &quot;false&quot;) boolean removeImage) throws IOException {
+
+<span class="nc" id="L110">        return ResponseEntity.ok(productService.updateProduct(</span>
+            id, supplierId, name, brand, sku, barcode, category, description, ingredients, usageInstructions,
+            price, costPrice, stockQuantity, lowStockThreshold, unit, shade, skinType, volume,
+            supplierName, supplierContact, supplierEmail, supplierAddress,
+            manufactureDate, expiryDate, status, countryOfOrigin, tags, image, removeImage
+        ));
+    }
+
+    // ==================== DELETE ====================
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteProduct(@PathVariable Long id) {
+<span class="nc" id="L121">        productService.deleteProduct(id);</span>
+<span class="nc" id="L122">        return ResponseEntity.noContent().build();</span>
+    }
+
+    // ==================== STOCK ====================
+    @PatchMapping(&quot;/{id}/stock&quot;)
+    public ResponseEntity&lt;ProductDto.Response&gt; updateStock(
+            @PathVariable Long id,
+            @RequestBody ProductDto.StockUpdate stockUpdate) {
+<span class="nc" id="L130">        return ResponseEntity.ok(productService.updateStock(id, stockUpdate));</span>
+    }
+
+    @GetMapping(&quot;/low-stock&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto.Summary&gt;&gt; getLowStockProducts() {
+<span class="nc" id="L135">        return ResponseEntity.ok(productService.getLowStockProducts());</span>
+    }
+
+    // ==================== DASHBOARD STATS ====================
+    @GetMapping(&quot;/stats/dashboard&quot;)
+    public ResponseEntity&lt;ProductDto.DashboardStats&gt; getDashboardStats() {
+<span class="nc" id="L141">        return ResponseEntity.ok(productService.getDashboardStats());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

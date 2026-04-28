@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminPartnershipController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.statics.controller</a> &gt; <span class="el_source">AdminPartnershipController.java</span></div><h1>AdminPartnershipController.java</h1><pre class="source lang-java linenums">package com.vendora.statics.controller;
+
+import com.vendora.common.ApiResponse;
+import com.vendora.statics.dto.partnership.PartnershipApplicationResponse;
+import com.vendora.statics.dto.partnership.ReviewPartnershipRequest;
+import com.vendora.statics.service.AdminPartnershipService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/v1/admin/partnerships&quot;)
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
+public class AdminPartnershipController {
+
+    private final AdminPartnershipService adminPartnershipService;
+
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;PartnershipApplicationResponse&gt;&gt;&gt; getAllApplications() {
+<span class="nc" id="L23">        List&lt;PartnershipApplicationResponse&gt; response = adminPartnershipService.getAllApplications();</span>
+<span class="nc" id="L24">        return ResponseEntity.ok(ApiResponse.success(&quot;All partnership applications retrieved successfully&quot;, response));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PartnershipApplicationResponse&gt;&gt; getApplicationById(
+            @PathVariable Long id
+    ) {
+<span class="nc" id="L31">        PartnershipApplicationResponse response = adminPartnershipService.getApplicationById(id);</span>
+<span class="nc" id="L32">        return ResponseEntity.ok(ApiResponse.success(&quot;Partnership application retrieved successfully&quot;, response));</span>
+    }
+
+    @PutMapping(&quot;/{id}/review&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PartnershipApplicationResponse&gt;&gt; reviewApplication(
+            @PathVariable Long id,
+            @Valid @RequestBody ReviewPartnershipRequest request
+    ) {
+<span class="nc" id="L40">        PartnershipApplicationResponse response = adminPartnershipService.reviewApplication(id, request);</span>
+<span class="nc" id="L41">        return ResponseEntity.ok(ApiResponse.success(&quot;Partnership application reviewed successfully&quot;, response));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

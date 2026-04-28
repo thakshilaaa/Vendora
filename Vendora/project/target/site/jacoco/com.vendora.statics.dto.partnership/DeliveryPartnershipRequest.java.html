@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeliveryPartnershipRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.statics.dto.partnership</a> &gt; <span class="el_source">DeliveryPartnershipRequest.java</span></div><h1>DeliveryPartnershipRequest.java</h1><pre class="source lang-java linenums">package com.vendora.statics.dto.partnership;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+<span class="nc bnc" id="L12" title="All 70 branches missed.">@Data</span>
+<span class="nc" id="L13">@Builder</span>
+<span class="nc" id="L14">@NoArgsConstructor</span>
+<span class="nc" id="L15">@AllArgsConstructor</span>
+public class DeliveryPartnershipRequest {
+
+    @NotBlank(message = &quot;Company name is required&quot;)
+    @Size(min = 2, max = 150, message = &quot;Company name must be between 2 and 150 characters&quot;)
+<span class="nc" id="L20">    private String companyName;</span>
+
+    @NotBlank(message = &quot;Contact person name is required&quot;)
+    @Size(min = 2, max = 100, message = &quot;Contact person name must be between 2 and 100 characters&quot;)
+<span class="nc" id="L24">    private String contactPersonName;</span>
+
+    @NotBlank(message = &quot;Email is required&quot;)
+    @Email(message = &quot;Invalid email format&quot;)
+<span class="nc" id="L28">    private String email;</span>
+
+    @NotBlank(message = &quot;Phone number is required&quot;)
+    @Pattern(regexp = &quot;^(\\+94|0)?[0-9]{9,10}$&quot;, message = &quot;Invalid phone number&quot;)
+<span class="nc" id="L32">    private String phoneNumber;</span>
+
+    @NotBlank(message = &quot;Business address is required&quot;)
+    @Size(max = 255, message = &quot;Business address cannot exceed 255 characters&quot;)
+<span class="nc" id="L36">    private String businessAddress;</span>
+
+    @NotBlank(message = &quot;Service areas are required&quot;)
+    @Size(max = 255, message = &quot;Service areas cannot exceed 255 characters&quot;)
+<span class="nc" id="L40">    private String serviceAreas;</span>
+
+    @NotBlank(message = &quot;Fleet size is required&quot;)
+    @Size(max = 50, message = &quot;Fleet size cannot exceed 50 characters&quot;)
+<span class="nc" id="L44">    private String fleetSize;</span>
+
+    @Size(max = 1000, message = &quot;Description cannot exceed 1000 characters&quot;)
+<span class="nc" id="L47">    private String description;</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

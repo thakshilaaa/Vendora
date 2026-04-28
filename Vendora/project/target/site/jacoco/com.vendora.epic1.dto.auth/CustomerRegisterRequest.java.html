@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerRegisterRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.dto.auth</a> &gt; <span class="el_source">CustomerRegisterRequest.java</span></div><h1>CustomerRegisterRequest.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.dto.auth;
+
+
+
+import com.vendora.epic1.model.enums.District;
+
+import com.vendora.epic1.model.enums.Province;
+
+import jakarta.validation.constraints.Email;
+
+import jakarta.validation.constraints.NotBlank;
+
+import jakarta.validation.constraints.NotNull;
+
+import jakarta.validation.constraints.Pattern;
+
+import jakarta.validation.constraints.Size;
+
+import lombok.Getter;
+
+import lombok.Setter;
+
+
+
+@Getter
+
+<span class="nc" id="L27">@Setter</span>
+
+<span class="nc" id="L29">public class CustomerRegisterRequest {</span>
+
+    @NotBlank
+
+<span class="nc" id="L33">    private String fullName;</span>
+
+
+
+    @NotBlank
+
+    @Email
+
+<span class="nc" id="L41">    private String email;</span>
+
+
+
+    /**
+
+     * Sri Lankan mobile/landline after normalizing; matches common DB check constraints.
+
+     */
+
+    @NotBlank
+
+    @Size(max = 15)
+
+    @Pattern(regexp = &quot;^(\\+94|0)(7[0-9]{8}|[12345689][0-9]{8})$&quot;,
+
+            message = &quot;Enter a valid Sri Lankan phone number (e.g. 0712345678)&quot;)
+
+<span class="nc" id="L59">    private String phone;</span>
+
+
+
+    @NotBlank
+
+    @Size(min = 6, max = 20)
+
+<span class="nc" id="L67">    private String password;</span>
+
+
+
+    @NotBlank
+
+    @Size(max = 12)
+
+    @Pattern(regexp = &quot;^([0-9]{9}[VvXx]|[0-9]{12})$&quot;, message = &quot;Invalid NIC format&quot;)
+
+<span class="nc" id="L77">    private String nic;</span>
+
+
+
+    @NotBlank
+
+    @Size(max = 255)
+
+<span class="nc" id="L85">    private String addressLine1;</span>
+
+
+
+    @Size(max = 255)
+
+<span class="nc" id="L91">    private String addressLine2;</span>
+
+
+
+    @NotBlank
+
+    @Size(max = 100)
+
+<span class="nc" id="L99">    private String city;</span>
+
+
+
+    @NotNull
+
+<span class="nc" id="L105">    private District district;</span>
+
+
+
+    @NotNull
+
+<span class="nc" id="L111">    private Province province;</span>
+
+
+
+    @Size(max = 10)
+
+<span class="nc" id="L117">    private String postalCode;</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PageController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic1.controller</a> &gt; <span class="el_source">PageController.java</span></div><h1>PageController.java</h1><pre class="source lang-java linenums">package com.vendora.epic1.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+<span class="fc" id="L7">public class PageController {</span>
+
+    @GetMapping(&quot;/&quot;)
+    public String index() {
+<span class="nc" id="L11">        return &quot;redirect:/customer-dashboard&quot;;</span>
+    }
+
+    // ── Static HTML pages ──────────────────────────────────────────────
+    @GetMapping(&quot;/about&quot;)
+<span class="nc" id="L16">    public String about() { return &quot;forward:/html/about.html&quot;; }</span>
+
+    @GetMapping(&quot;/cookie&quot;)
+<span class="nc" id="L19">    public String cookie() { return &quot;forward:/html/cookie.html&quot;; }</span>
+
+    @GetMapping(&quot;/faq&quot;)
+<span class="nc" id="L22">    public String faq() { return &quot;forward:/html/faq.html&quot;; }</span>
+
+    @GetMapping(&quot;/feedback&quot;)
+<span class="nc" id="L25">    public String feedback() { return &quot;forward:/html/feedback.html&quot;; }</span>
+
+    @GetMapping(&quot;/privacy&quot;)
+<span class="nc" id="L28">    public String privacy() { return &quot;forward:/html/privacy.html&quot;; }</span>
+
+    @GetMapping(&quot;/routine&quot;)
+<span class="nc" id="L31">    public String routine() { return &quot;forward:/html/routine.html&quot;; }</span>
+
+    @GetMapping(&quot;/service&quot;)
+<span class="nc" id="L34">    public String service() { return &quot;forward:/html/service.html&quot;; }</span>
+
+    @GetMapping(&quot;/terms&quot;)
+<span class="nc" id="L37">    public String terms() { return &quot;forward:/html/terms.html&quot;; }</span>
+
+    // ── Epic 1 – Auth / Admin / Registration ───────────────────────────
+    @GetMapping(&quot;/admin-login&quot;)
+<span class="nc" id="L41">    public String adminLogin() { return &quot;epic1/admin/admin-login&quot;; }</span>
+
+    @GetMapping(&quot;/pending-registrations&quot;)
+<span class="nc" id="L44">    public String pendingRegistrations() { return &quot;epic1/admin/pending-registrations&quot;; }</span>
+
+    @GetMapping(&quot;/users&quot;)
+<span class="nc" id="L47">    public String users() { return &quot;epic1/admin/users&quot;; }</span>
+
+    @GetMapping(&quot;/forget-password&quot;)
+<span class="nc" id="L50">    public String forgotPassword() { return &quot;epic1/auth/forget-password&quot;; }</span>
+
+    @GetMapping(&quot;/login&quot;)
+<span class="nc" id="L53">    public String login() { return &quot;epic1/auth/login&quot;; }</span>
+
+    @GetMapping(&quot;/logout&quot;)
+<span class="nc" id="L56">    public String logout() { return &quot;epic1/auth/logout&quot;; }</span>
+
+    @GetMapping(&quot;/profile&quot;)
+<span class="nc" id="L59">    public String profile() { return &quot;epic1/auth/profile&quot;; }</span>
+
+    @GetMapping(&quot;/update-password&quot;)
+<span class="nc" id="L62">    public String updatePassword() { return &quot;epic1/auth/update-password&quot;; }</span>
+
+    @GetMapping(&quot;/verify-email&quot;)
+<span class="nc" id="L65">    public String verifyEmail() { return &quot;epic1/auth/verify-email&quot;; }</span>
+
+    @GetMapping(&quot;/admin-dashboard&quot;)
+<span class="nc" id="L68">    public String adminDashboard() { return &quot;epic1/dashboard/admin-dashboard&quot;; }</span>
+
+    @GetMapping(&quot;/customer-dashboard&quot;)
+<span class="nc" id="L71">    public String customerDashboard() { return &quot;epic1/dashboard/customer-dashboard&quot;; }</span>
+
+    @GetMapping(&quot;/delivery-dashboard&quot;)
+<span class="nc" id="L74">    public String deliveryDashboard() { return &quot;epic1/dashboard/delivery-dashboard&quot;; }</span>
+
+    @GetMapping(&quot;/supplier-dashboard&quot;)
+<span class="nc" id="L77">    public String supplierDashboard() { return &quot;epic1/dashboard/supplier-dashboard&quot;; }</span>
+
+    @GetMapping(&quot;/admin-signup&quot;)
+<span class="fc" id="L80">    public String adminSignup() { return &quot;epic1/registration/admin-signup&quot;; }</span>
+
+    @GetMapping(&quot;/complete-registration&quot;)
+    public String completeRegistration(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String token,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String email,
+            org.springframework.ui.Model model) {
+<span class="nc" id="L87">        model.addAttribute(&quot;token&quot;, token);</span>
+<span class="nc" id="L88">        model.addAttribute(&quot;email&quot;, email);</span>
+<span class="nc" id="L89">        return &quot;epic1/registration/complete-registration&quot;;</span>
+    }
+
+    @GetMapping(&quot;/customer-signup&quot;)
+<span class="nc" id="L93">    public String customerSignup() { return &quot;epic1/registration/customer-signup&quot;; }</span>
+
+    @GetMapping(&quot;/delivery-register&quot;)
+<span class="nc" id="L96">    public String deliveryRegister() { return &quot;epic1/registration/delivery-register&quot;; }</span>
+
+    @GetMapping(&quot;/supplier-register&quot;)
+<span class="nc" id="L99">    public String supplierRegister() { return &quot;epic1/registration/supplier-register&quot;; }</span>
+
+    // ── Epic 2 – Products ──────────────────────────────────────────────
+    @GetMapping(&quot;/products-admin&quot;)
+<span class="nc" id="L103">    public String productsAdmin() { return &quot;epic2/html/index&quot;; }</span>
+
+    @GetMapping(&quot;/products&quot;)
+<span class="nc" id="L106">    public String products() { return &quot;epic2/html/products&quot;; }</span>
+
+    @GetMapping(&quot;/create-product&quot;)
+<span class="nc" id="L109">    public String createProduct() { return &quot;epic2/html/create-product&quot;; }</span>
+
+    @GetMapping(&quot;/edit-product&quot;)
+<span class="nc" id="L112">    public String editProduct() { return &quot;epic2/html/edit-product&quot;; }</span>
+
+    @GetMapping(&quot;/low-stock&quot;)
+<span class="nc" id="L115">    public String lowStock() { return &quot;epic2/html/low-stock&quot;; }</span>
+
+    @GetMapping(&quot;/product-detail&quot;)
+<span class="nc" id="L118">    public String productDetail() { return &quot;epic2/html/product-detail&quot;; }</span>
+
+    @GetMapping(&quot;/shop&quot;)
+<span class="nc" id="L121">    public String shop() { return &quot;epic2/html/user-products&quot;; }</span>
+
+    @GetMapping(&quot;/product-view&quot;)
+<span class="nc" id="L124">    public String productView() { return &quot;epic2/html/user-product-detail&quot;; }</span>
+
+    // ── Epic 4 – Orders &amp; Payments ─────────────────────────────────────
+    @GetMapping(&quot;/order-admin&quot;)
+<span class="nc" id="L128">    public String orderAdmin() { return &quot;epic4/html/order_and_payment_admin&quot;; }</span>
+
+    @GetMapping(&quot;/order-payment&quot;)
+<span class="nc" id="L131">    public String orderPayment() { return &quot;epic4/html/order_and_payment_index&quot;; }</span>
+
+    @GetMapping(&quot;/order-history&quot;)
+<span class="nc" id="L134">    public String orderHistory() { return &quot;epic4/html/order_history&quot;; }</span>
+
+    // ── Epic 5 – Delivery ──────────────────────────────────────────────
+    @GetMapping(&quot;/delivery-admin&quot;)
+<span class="nc" id="L138">    public String deliveryAdmin() { return &quot;epic5/html/Admin&quot;; }</span>
+
+    @GetMapping(&quot;/delivery-agent&quot;)
+<span class="nc" id="L141">    public String deliveryAgent() { return &quot;epic5/html/Agent&quot;; }</span>
+
+    @GetMapping(&quot;/delivery-customer&quot;)
+<span class="nc" id="L144">    public String deliveryCustomer() { return &quot;epic5/html/Customer&quot;; }</span>
+
+    // ── Epic 6 – Supplier Management ───────────────────────────────────
+    @GetMapping(&quot;/supplier-portal&quot;)
+<span class="nc" id="L148">    public String supplierPortal() { return &quot;epic1/dashboard/supplier-dashboard&quot;; }</span>
+
+    @GetMapping(&quot;/supplier-approvals&quot;)
+<span class="nc" id="L151">    public String supplierApprovals() { return &quot;redirect:/admin/suppliers/pending&quot;; }</span>
+
+    @GetMapping(&quot;/supplier-list&quot;)
+<span class="nc" id="L154">    public String supplierList() { return &quot;redirect:/admin/suppliers&quot;; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

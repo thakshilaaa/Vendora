@@ -1,0 +1,246 @@
+/* === BUTTONS.CSS - ACTION ELEMENTS === */
+
+/* 1. BASE BUTTON STYLE */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    border-radius: var(--border-radius);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition);
+    user-select: none;
+    white-space: nowrap;
+    margin: 10px 0;
+    max-width: 100%;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    border-color: transparent;
+}
+
+.btn-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 2. PRIMARY BUTTON */
+.btn-primary {
+    background: var(--brand-color);
+    color: white;
+    font-weight: 600;
+    padding: 8px 12px;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background-color: transparent;
+    color: #000;
+    border-color: #000;
+    opacity: 0.9;
+}
+
+/* 3. SECONDARY BUTTON */
+.btn-secondary {
+    background-color: transparent;
+    border-color: #ddd;
+    color: var(--text-main);
+    padding: 8px 12px;
+}
+
+.btn-secondary:hover {
+    background-color: #f8f8f8;
+    border-color: #000;
+    color: #000;
+}
+
+/* 4. CANCEL BUTTON */
+.btn-cancel {
+    background-color: transparent;
+    border-color: #ccc;
+    color: #666;
+    padding: 8px 12px;
+}
+
+.btn-cancel:hover {
+    background-color: #f8f8f8;
+    border-color: #999;
+    color: #333;
+}
+
+/* CTA BUTTON */
+.btn-cta {
+    background-color: #000;
+    color: #fff;
+    padding: 1rem 2.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 6. ICON BUTTON */
+.btn-icon {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: #f1f1f1;
+    color: var(--text-main);
+}
+
+.btn-icon:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* 7. FORM BUTTON GROUP */
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 16px 0;
+}
+
+/* 8. FORM ACTION ROW */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 1.5rem;
+}
+
+/* 9. TOGGLE SWITCH */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+input:checked + .slider {
+    background-color: #000;
+}
+
+/* 10. FEEDBACK BUTTONS */
+.feedback-filters {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.feedback-filters button {
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: #f1f1f1;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.feedback-filters button:hover {
+    background: #ddd;
+}
+
+.feedback-filters button.active {
+    background: #000;
+    color: #fff;
+}
+
+/* 11. DELETE BUTTON */
+.delete-feedback-btn {
+    margin-top: auto;
+    align-self: flex-end;
+    background: #fff2f2;
+    color: #d93025;
+    border: 1px solid #ffd6d6;
+    padding: 7px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.delete-feedback-btn:hover {
+    background: #ffe2e2;
+}
+
+/* 12. FLOATING BUTTON */
+.floating-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #000;
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+}
+
+.floating-btn:hover {
+    transform: scale(1.08);
+}
+
+/* 13. CLOSE BUTTON */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+.close:hover {
+    color: red;
+}
+
+/* 14. MOBILE RESPONSIVE */
+@media (max-width: 480px) {
+    .btn {
+        width: 100%;
+        padding: 0.7rem 1.2rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}

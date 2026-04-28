@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | Custom Routine</title>
+
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/cards.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/typography.css">
+    <link rel="stylesheet" href="../css/utils.css">
+    <link rel="stylesheet" href="../css/footer.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="home-bg">
+<div class="page-wrapper">
+    <section class="form-container">
+        <h2>Find Your Personal Routine</h2>
+
+        <form class="card" id="concernForm">
+            <h3>Personal Information</h3>
+
+            <label for="name">Name</label>
+            <input id="name" name="name" placeholder="Enter your name" required>
+
+            <label for="age">Age</label>
+            <input type="number" id="age" name="age" min="16" max="75" placeholder="Enter age (16-75)" required>
+
+            <h3 id="categoryTitle"></h3>
+            <div id="concernsContainer" class="checkbox-grid"></div>
+            <button type="submit">Get My Routine</button>
+        </form>
+
+        <div id="result" class="card" style="display:none;"></div>
+        <div id="feedbackSection" class="card" style="display:none;">
+            <h3>We Value Your Feedback</h3>
+            <p>How was your routine?</p>
+
+            <label for="feedbackRating">Rating:</label>
+            <select id="feedbackRating">
+                <option value="">Select rating</option>
+                <option value="5">😍 Very Satisfied</option>
+                <option value="4">🙂 Satisfied</option>
+                <option value="3">😐 Neutral</option>
+                <option value="2">😕 Dissatisfied</option>
+                <option value="1">😠 Very Dissatisfied</option>
+            </select>
+
+            <label for="feedbackMessage">Your Feedback:</label>
+            <textarea id="feedbackMessage" placeholder="Write your feedback here..." rows="3"></textarea>
+
+            <div class="form-actions">
+                <button type="button" id="submitFeedback" class="btn-primary">Send Feedback</button>
+                <button type="button" class="btn-cancel" onclick="cancelForm()">Cancel</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<footer class="footer">
+    <div class="footer-bottom">
+        <p>© 2026 Vendora | The Online Beauty Store</p>
+        <p><button><a href="terms.html">Terms & Conditions</a></button> | <button><a href="privacy.html">Privacy
+            Policy</a></button> | <button><a href="cookie.html">Cookie Policy</a></button> | Do Not Sell My
+            Personal Information | Vendora</p>
+        <p>If you are having problems using this website, please <button><a href="service.html">CLICK
+            HERE</a></button> for assistance.</p>
+    </div>
+</footer>
+<script src="../js/feedback.js"></script>
+<script src="../js/form.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/routine.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminSupplierController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Vendora - Online Beauty Store</a> &gt; <a href="index.source.html" class="el_package">com.vendora.epic6.controller</a> &gt; <span class="el_source">AdminSupplierController.java</span></div><h1>AdminSupplierController.java</h1><pre class="source lang-java linenums">package com.vendora.epic6.controller;
+
+import com.vendora.epic6.model.Supplier;
+import com.vendora.epic6.model.SupplierStatus;
+import com.vendora.epic6.service.SupplierService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+@Controller
+@RequestMapping(&quot;/admin/suppliers&quot;)
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+public class AdminSupplierController {
+
+    private final SupplierService supplierService;
+
+<span class="fc" id="L21">    public AdminSupplierController(SupplierService supplierService) {</span>
+<span class="fc" id="L22">        this.supplierService = supplierService;</span>
+<span class="fc" id="L23">    }</span>
+
+    /** Pending suppliers awaiting approval. */
+    @GetMapping(&quot;/pending&quot;)
+    public String pending(Model model) {
+<span class="nc" id="L28">        model.addAttribute(&quot;suppliers&quot;, supplierService.pending());</span>
+<span class="nc" id="L29">        return &quot;epic6/html/supplier-approvals&quot;;</span>
+    }
+
+    @PostMapping(&quot;/{id}/approve&quot;)
+    public String approve(@PathVariable Long id, RedirectAttributes ra) {
+<span class="nc" id="L34">        Supplier s = supplierService.approve(id);</span>
+<span class="nc" id="L35">        ra.addFlashAttribute(&quot;toast&quot;,</span>
+<span class="nc" id="L36">                &quot;Approved &quot; + s.getCompanyName() + &quot; — credentials emailed.&quot;);</span>
+<span class="nc" id="L37">        return &quot;redirect:/admin/suppliers/pending&quot;;</span>
+    }
+
+    @PostMapping(&quot;/{id}/reject&quot;)
+    public String reject(@PathVariable Long id, RedirectAttributes ra) {
+<span class="nc" id="L42">        supplierService.reject(id);</span>
+<span class="nc" id="L43">        ra.addFlashAttribute(&quot;toast&quot;, &quot;Supplier rejected.&quot;);</span>
+<span class="nc" id="L44">        return &quot;redirect:/admin/suppliers/pending&quot;;</span>
+    }
+
+    /** All suppliers, with search + status filter. */
+    @GetMapping
+    public String all(@RequestParam(required = false) String q,
+                      @RequestParam(required = false) SupplierStatus status,
+                      Model model) {
+<span class="nc" id="L52">        List&lt;Supplier&gt; suppliers = supplierService.search(q);</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (status != null) {</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            suppliers = suppliers.stream().filter(s -&gt; s.getStatus() == status).toList();</span>
+        }
+<span class="nc" id="L56">        model.addAttribute(&quot;suppliers&quot;, suppliers);</span>
+<span class="nc" id="L57">        model.addAttribute(&quot;q&quot;, q);</span>
+<span class="nc" id="L58">        model.addAttribute(&quot;statuses&quot;, SupplierStatus.values());</span>
+<span class="nc" id="L59">        model.addAttribute(&quot;selectedStatus&quot;, status);</span>
+<span class="nc" id="L60">        return &quot;epic6/html/supplier-list&quot;;</span>
+    }
+
+    @GetMapping(&quot;/{id}/delete&quot;)
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+<span class="nc" id="L65">        supplierService.delete(id);</span>
+<span class="nc" id="L66">        ra.addFlashAttribute(&quot;toast&quot;, &quot;Supplier removed.&quot;);</span>
+<span class="nc" id="L67">        return &quot;redirect:/admin/suppliers&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

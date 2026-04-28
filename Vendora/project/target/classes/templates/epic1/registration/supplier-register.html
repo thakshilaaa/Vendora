@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendora | Supplier Registration</title>
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/typography.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/cards.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/utils.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body.form-bg {
+            background-image: url('/images/b2.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="form-bg">
+<div class="page-wrapper">
+<section class="form-container">
+    <h1 class="section-title">Supplier Registration</h1>
+    <p class="text-center-desc">Partner with Vendora to reach thousands of beauty enthusiasts.</p>
+
+    <form class="card" id="supplierForm" autocomplete="off">
+
+        <h3>1. Personal Information</h3>
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" name="full_name" placeholder="Avishka Fernando" required pattern="[a-zA-Z\s]+">
+
+        <label for="email">Business Email Address</label>
+        <input id="email" type="email" name="email" placeholder="vendor@beautyco.com" required>
+
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" name="phone" placeholder="0771234567" required
+               pattern="^(\+94|0)(7[0-9]{8}|1[0-9]{8}|2[0-9]{8}|3[0-9]{8}|4[0-9]{8}|5[0-9]{8}|6[0-9]{8}|8[0-9]{8}|9[0-9]{8})$">
+
+        <label for="nic">NIC Number</label>
+        <input id="nic" type="text" name="nic" placeholder="19XXXXXXXXXX or XXXXXXXXXV" required
+               pattern="^([0-9]{9}[VvXx]|[0-9]{12})$">
+
+        <label for="profilePicture">Profile Picture</label>
+        <input id="profilePicture" type="file" name="profile_picture_url" accept="image/*" required>
+
+        <hr class="divider-subtle">
+        <h3>2. Address Information</h3>
+        <label for="addressLine1">Business Address Line </label>
+        <input id="addressLine1" type="text" name="address_line_1" placeholder="No 123, Industrial Zone" required>
+
+        <label for="province">Province</label>
+        <select id="province" name="province" required>
+            <option value="">Select Province</option>
+            <option value="central">Central Province</option>
+            <option value="eastern">Eastern Province</option>
+            <option value="northCentral">North Central Province</option>
+            <option value="northern">Northern Province</option>
+            <option value="northWestern">North Western Province</option>
+            <option value="sabaragamuwa">Sabaragamuwa Province</option>
+            <option value="southern">Southern Province</option>
+            <option value="uva">Uva Province</option>
+            <option value="western">Western Province</option>
+        </select>
+
+        <label for="district">District</label>
+        <select id="district" name="district" required>
+            <option value="">Select District</option>
+        </select>
+
+        <label for="city">City</label>
+        <input id="city" type="text" name="city" placeholder="Colombo" required>
+
+        <label for="postalCode">Postal Code</label>
+        <input id="postalCode" type="text" name="postal_code" placeholder="12345">
+
+        <hr class="divider-subtle">
+        <h3>3. Company Details</h3>
+        <label for="businessName">Registered Business Name</label>
+        <input id="businessName" type="text" name="business_name" placeholder="BeautyCo Pvt Ltd" required>
+
+        <label for="businessRegNumber">Business Registration Number (BRN)</label>
+        <input id="businessRegNumber" type="text" name="business_registration_number" placeholder="PV-123456" required>
+
+        <label for="taxNumber">Tax Identification Number (TIN)</label>
+        <input id="taxNumber" type="text" name="tin_number" placeholder="123456789">
+
+        <hr class="divider-subtle">
+        <h3>4. Product Categories & Details</h3>
+        <label for="productCategory">Primary Product Category</label>
+        <select id="productCategory" name="product_category" required>
+            <option value="">Select Category</option>
+            <option value="Cosmetics">Cosmetics</option>
+            <option value="Skincare">Skin Care</option>
+            <option value="Haircare">Hair Care</option>
+            <option value="Bodycare">Body Care</option>
+            <option value="Fragrance">Fragrance</option>
+            <option value="BeautyTools">Beauty Tools</option>
+        </select>
+
+        <label for="productDetails">Product Details</label>
+        <textarea id="productDetails" name="product_details" placeholder="Briefly describe your products..." rows="4"></textarea>
+
+        <hr class="divider-subtle">
+        <h3>5. Upload Documents</h3>
+        <label for="businessCert">Business Registration Certificate</label>
+        <input id="businessCert" type="file" name="businessCert" accept=".pdf,.jpg,.png" required>
+
+        <label for="productPdf">Product Catalog / Images (PDF)</label>
+        <input id="productPdf" type="file" name="productPdf" accept=".pdf" required>
+
+        <label for="certifications">Regulatory / Compliance Certificates (Optional)</label>
+        <input id="certifications" type="file" name="certifications" accept=".pdf,.jpg,.png">
+
+        <hr class="divider-subtle">
+        <h3>6. Policies</h3>
+        <p>Please review our policies before submitting your delivery registration.</p>
+        <div class="policy-buttons">
+            <a th:href="@{/terms}" class="btn-secondary" target="_blank">View Terms & Conditions</a>
+            <a th:href="@{/privacy}" class="btn-secondary" target="_blank">View Privacy Policies</a>
+        </div>
+
+        <hr class="divider-subtle">
+        <h3>7. Agreement</h3>
+        <label class="form-label-flex">
+            <input type="checkbox" name="agreement" required class="checkbox-auto">
+            <span class="text-small">I confirm that all information provided is accurate, and I agree to Vendora Terms and Privacy Policy.</span>
+        </label>
+
+        <div class="form-actions mb-3">
+            <button type="submit" class="btn-primary">Submit Application</button>
+            <button type="button" class="btn-cancel" onclick="cancelForm()">Cancel</button>
+        </div>
+    </form>
+
+    <p id="errorMessage" class="error-message"></p>
+</section>
+
+<footer class="footer">
+        <div class="footer-bottom">
+            <p>© 2026 Vendora | The Online Beauty Store</p>
+            <p><button><a th:href="@{/terms}">Terms & Conditions</a></button> | <button><a th:href="@{/privacy}">Privacy
+                Policy</a></button> | <button><a th:href="@{/cookie}">Cookie Policy</a></button> | Do Not Sell My
+                Personal Information | Vendora</p>
+            <p>If you are having problems using this website, please <button><a th:href="@{/service}">CLICK
+                HERE</a></button> for assistance.</p>
+        </div>
+    </footer>
+<script>
+        const form = document.getElementById('supplierForm');
+        const statusEl = document.getElementById('errorMessage');
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.applicantType = 'SUPPLIER';
+
+            statusEl.style.display = 'none';
+            if (!data.email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
+                showError('Invalid email format.');
+                return;
+            }
+            if (!data.phone.match(/^(\+94|0)(7[0-9]{8}|1[0-9]{8}|2[0-9]{8}|3[0-9]{8}|4[0-9]{8}|5[0-9]{8}|6[0-9]{8}|8[0-9]{8}|9[0-9]{8})$/)) {
+                showError('Invalid phone number format.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/partnership/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        applicantType: data.applicantType,
+                        fullName: data.full_name,
+                        email: data.email,
+                        phone: data.phone,
+                        nic: data.nic,
+                        addressLine1: data.address_line_1,
+                        province: data.province,
+                        district: data.district,
+                        city: data.city,
+                        postalCode: data.postal_code,
+                        businessName: data.business_name,
+                        businessRegNumber: data.business_registration_number,
+                        tinNumber: data.tin_number,
+                        productCategory: data.product_category,
+                        productDetails: data.product_details
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Your application has been submitted successfully! Vendora Admin will review your documents. Once approved, you will receive an email with a link to finalize your account and set your password.');
+                    window.location.href = "/customer-dashboard";
+                } else {
+                    showError(result.message || 'Registration failed. Please try again.');
+                }
+            } catch (err) {
+                console.error(err);
+                showError('An error occurred during registration.');
+            }
+        });
+
+        function showError(message) {
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+        }
+    </script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/form.js}"></script>
+<script th:src="@{/js/form2.js}"></script>
+<script th:src="@{/js/partnership.js}"></script>
+</div>
+</body>
+</html>
+
